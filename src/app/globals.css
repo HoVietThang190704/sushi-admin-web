@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Typography Scale Tokens */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-watermark: 11.25rem; /* 180px */
+
+  /* Brand Primary Colors */
+  --color-sushi-primary: #e53935;
+  --color-sushi-primary-hover: #ef4444;
+  --color-sushi-primary-dark: #b71c1c;
+
+  /* Surfaces & Backgrounds (Nâng độ sáng & chiều sâu tương phản, không bị đen kịt) */
+  --color-sushi-bg: #141416;
+  --color-sushi-surface: #1e1e22;
+  --color-sushi-card: #25252a;
+  --color-sushi-card-hover: #2e2e34;
+
+  /* Borders */
+  --color-sushi-border: #36363d;
+  --color-sushi-border-subtle: #25252a;
+
+  /* Typography Colors */
+  --color-sushi-text: #f8fafc;
+  --color-sushi-text-muted: #cbd5e1;
+  --color-sushi-text-dim: #94a3b8;
+
+  /* Accents */
+  --color-sushi-gold: #f59e0b;
+  --color-sushi-emerald: #10b981;
+}
+
+:root {
+  --background: var(--color-sushi-bg);
+  --foreground: var(--color-sushi-text);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Đảm bảo text gợi ý (placeholder) sáng rõ, tương phản tốt, không bị chìm tối */
+input::placeholder,
+textarea::placeholder,
+.ant-input::placeholder,
+.ant-input-password input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
