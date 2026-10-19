@@ -12,6 +12,7 @@ import {
   Typography,
   ChartBar,
   ForkKnife,
+  SquaresFour,
   Package,
   SignOut,
   User,
@@ -31,12 +32,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
 
   const getSelectedKey = () => {
-    if (pathname.includes('/categories') || pathname.includes('/products')) {
-      return 'catalog';
-    }
-    if (pathname.includes('/orders')) {
-      return 'orders';
-    }
+    if (pathname.includes('/categories')) return 'categories';
+    if (pathname.includes('/products')) return 'products';
+    if (pathname.includes('/orders')) return 'orders';
     return 'overview';
   };
 
@@ -45,8 +43,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       case 'overview':
         router.push('/dashboard');
         break;
-      case 'catalog':
+      case 'categories':
         router.push('/dashboard/categories');
+        break;
+      case 'products':
+        router.push('/dashboard/products');
         break;
       case 'orders':
         router.push('/dashboard/orders');
@@ -105,9 +106,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               label: t('dashboard.overview'),
             },
             {
-              key: 'catalog',
+              key: 'categories',
+              icon: <SquaresFour size={18} />,
+              label: t('dashboard.menuCategories'),
+            },
+            {
+              key: 'products',
               icon: <ForkKnife size={18} />,
-              label: t('dashboard.catalog'),
+              label: t('dashboard.menuProducts'),
             },
             {
               key: 'orders',
