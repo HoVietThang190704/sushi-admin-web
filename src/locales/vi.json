@@ -53,9 +53,12 @@
   },
   "dashboard": {
     "headerTitle": "Hệ Thống Vận Hành",
+    "breadcrumbHome": "Trang Chủ",
+    "accountProfile": "Hồ Sơ Quản Trị",
+    "accountSettings": "Cài Đặt Hệ Thống",
     "overview": "Tổng Quan",
-    "catalog": "Thực Đơn (Catalog)",
-    "orders": "Đơn Hàng (Orders)",
+    "catalog": "Thực Đơn",
+    "orders": "Đơn Hàng",
     "roleLabel": "Vai trò",
     "overviewTitle": "Bảng Điều Khiển Tổng Quan",
     "overviewSubtitle": "Giám sát trạng thái vận hành, hạ tầng microservices và danh mục chuỗi nhà hàng",
@@ -105,8 +108,11 @@
     "productTableStatus": "Trạng Thái",
     "filterByCategory": "Lọc theo danh mục:",
     "allCategoriesFilter": "Tất cả danh mục",
-    "menuProducts": "Món Ăn (Products)",
-    "menuCategories": "Danh Mục (Categories)"
+    "menuProducts": "Món Ăn & Combo",
+    "menuCategories": "Danh Mục Món",
+    "sidebarSubtitle": "Cổng Quản Trị Chuỗi",
+    "collapseSidebar": "Thu gọn menu",
+    "expandSidebar": "Mở rộng menu"
   },
   "errors": {
     "title": "Đã Xảy Ra Sự Cố",

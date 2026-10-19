@@ -72,3 +72,85 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0 1000px #1e1e22 inset !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
+
+/* =============================================================================
+   Sushi Admin Sidebar Custom Styling (Dark Luxury Theme)
+   ============================================================================= */
+.sushi-admin-menu.ant-menu {
+  background: transparent !important;
+  border-inline-end: none !important;
+}
+
+.sushi-admin-menu .ant-menu-item {
+  height: 46px !important;
+  line-height: 46px !important;
+  border-radius: 10px !important;
+  margin-inline: 10px !important;
+  margin-block: 6px !important;
+  padding-inline: 14px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sushi-admin-menu .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.sushi-admin-menu .ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(229, 57, 53, 0.18) 0%, rgba(229, 57, 53, 0.06) 100%) !important;
+  border-color: rgba(229, 57, 53, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(229, 57, 53, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.sushi-admin-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #ef4444 !important;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.4));
+}
+
+.sushi-admin-menu .ant-menu-item:not(.ant-menu-item-selected) .ant-menu-item-icon {
+  color: #94a3b8 !important;
+  transition: color 0.2s ease;
+}
+
+.sushi-admin-menu .ant-menu-item:hover:not(.ant-menu-item-selected) .ant-menu-item-icon {
+  color: #cbd5e1 !important;
+}
+
+/* =============================================================================
+   Sushi Admin Profile Dropdown Custom Styling
+   ============================================================================= */
+.sushi-dropdown .ant-dropdown-menu {
+  background-color: #25252a !important;
+  border: 1px solid #36363d !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 6px !important;
+  min-width: 220px !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item {
+  border-radius: 8px !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  transition: all 0.15s ease !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-danger {
+  color: #f87171 !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-danger:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+}
+
+.sushi-dropdown .ant-dropdown-menu-item-divider {
+  background-color: #36363d !important;
+  margin: 6px 4px !important;
+}

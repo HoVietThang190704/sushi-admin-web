@@ -35,15 +35,23 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('vi');
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
-    if (saved && (saved === 'vi' || saved === 'en')) {
-      setLocaleState(saved);
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
+      if (saved && (saved === 'vi' || saved === 'en')) {
+        setLocaleState((prev) => (prev !== saved ? saved : prev));
+      }
+    } catch {
+      // Ignore storage access errors
     }
   }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem(STORAGE_KEY, newLocale);
+    try {
+      localStorage.setItem(STORAGE_KEY, newLocale);
+    } catch {
+      // Ignore storage write errors
+    }
   }, []);
 
   const t = useCallback(
@@ -84,22 +92,50 @@ export function useTranslation() {
 }
 
 /**
- * Component chuyển đổi ngôn ngữ chuẩn Ant Design
+ * Component chuyển đổi ngôn ngữ 1-Click Toggle [VI | EN] (Linear / Vercel dark style)
  */
-export function LanguageSwitcher({ size = 'middle' }: { size?: 'small' | 'middle' | 'large' }) {
+export function LanguageSwitcher({
+  className,
+}: {
+  size?: 'small' | 'middle' | 'large';
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   const { locale, setLocale } = useTranslation();
 
   return (
-    <Select
-      value={locale}
-      onChange={(val) => setLocale(val as Locale)}
-      size={size}
-      style={{ width: 130 }}
-      suffixIcon={<Globe size={16} className="text-sushi-text-muted" />}
-      options={[
-        { value: 'vi', label: 'Tiếng Việt' },
-        { value: 'en', label: 'English' },
-      ]}
-    />
+    <div
+      className={`inline-flex items-center p-1 rounded-xl bg-sushi-surface/90 border border-sushi-border/80 shadow-sm ${className || ''}`}
+      role="group"
+      aria-label="Language selector"
+    >
+      <Globe size={14} className="text-sushi-text-dim ml-1.5 mr-1 hidden sm:inline" />
+      <button
+        type="button"
+        onClick={() => setLocale('vi')}
+        className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
+          locale === 'vi'
+            ? 'bg-gradient-to-r from-sushi-primary to-sushi-primary-dark text-white shadow-sm'
+            : 'text-sushi-text-muted hover:text-white hover:bg-white/5'
+        }`}
+        aria-pressed={locale === 'vi'}
+        title="Tiếng Việt"
+      >
+        VI
+      </button>
+      <button
+        type="button"
+        onClick={() => setLocale('en')}
+        className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
+          locale === 'en'
+            ? 'bg-gradient-to-r from-sushi-primary to-sushi-primary-dark text-white shadow-sm'
+            : 'text-sushi-text-muted hover:text-white hover:bg-white/5'
+        }`}
+        aria-pressed={locale === 'en'}
+        title="English"
+      >
+        EN
+      </button>
+    </div>
   );
 }

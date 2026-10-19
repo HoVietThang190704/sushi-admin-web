@@ -26,7 +26,7 @@ export default function DashboardOverviewPage() {
             <Statistic
               title={<span className="text-sushi-text-muted">{t('dashboard.totalCategories')}</span>}
               value={categories.length}
-              valueStyle={{ color: SUSHICOLORS.primary, fontWeight: 'bold' }}
+              styles={{ content: { color: SUSHICOLORS.primary, fontWeight: 'bold' } }}
               prefix={<ForkKnife size={22} className="text-sushi-primary mr-2" />}
             />
           </Card>
@@ -36,7 +36,7 @@ export default function DashboardOverviewPage() {
             <Statistic
               title={<span className="text-sushi-text-muted">{t('dashboard.currentRole')}</span>}
               value={user?.role}
-              valueStyle={{ color: SUSHICOLORS.gold, fontSize: SUSHITYPO.fontSize.xl }}
+              styles={{ content: { color: SUSHICOLORS.gold, fontSize: SUSHITYPO.fontSize.xl } }}
               prefix={<CheckCircle size={22} className="text-sushi-gold mr-2" />}
             />
           </Card>
@@ -46,7 +46,7 @@ export default function DashboardOverviewPage() {
             <Statistic
               title={<span className="text-sushi-text-muted">{t('dashboard.database')}</span>}
               value={t('dashboard.databaseValue')}
-              valueStyle={{ color: SUSHICOLORS.emerald, fontSize: SUSHITYPO.fontSize.xl }}
+              styles={{ content: { color: SUSHICOLORS.emerald, fontSize: SUSHITYPO.fontSize.xl } }}
               prefix={<Database size={22} className="text-sushi-emerald mr-2" />}
             />
           </Card>

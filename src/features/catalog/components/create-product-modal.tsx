@@ -59,7 +59,7 @@ export function CreateProductModal({
       open={open}
       onCancel={onClose}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
       width={540}
     >
       <Form

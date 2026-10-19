@@ -53,8 +53,11 @@
   },
   "dashboard": {
     "headerTitle": "Operations System",
+    "breadcrumbHome": "Home",
+    "accountProfile": "Admin Profile",
+    "accountSettings": "System Settings",
     "overview": "Overview",
-    "catalog": "Catalog (Menu)",
+    "catalog": "Catalog",
     "orders": "Orders",
     "roleLabel": "Role",
     "overviewTitle": "Operations Overview",
@@ -105,8 +108,11 @@
     "productTableStatus": "Status",
     "filterByCategory": "Filter by category:",
     "allCategoriesFilter": "All categories",
-    "menuProducts": "Dishes (Products)",
-    "menuCategories": "Categories"
+    "menuProducts": "Dishes & Combos",
+    "menuCategories": "Menu Categories",
+    "sidebarSubtitle": "Chain Operations",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "errors": {
     "title": "Something Went Wrong",
