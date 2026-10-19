@@ -58,9 +58,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-sushi-bg text-sushi-text">
-        <Space direction="vertical" align="center">
-          <div className="text-4xl animate-bounce">🍣</div>
-          <Text className="text-sushi-text-muted">{t('common.loading')}</Text>
+        <Space direction="vertical" align="center" size="middle">
+          <div className="w-12 h-12 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center shadow-lg">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="object-contain animate-pulse"
+            />
+          </div>
+          <Text className="text-sushi-text-muted text-xs font-mono">{t('common.loading')}</Text>
         </Space>
       </div>
     );

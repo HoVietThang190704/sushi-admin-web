@@ -7,7 +7,7 @@ import {
   CreateProductModal,
   useProducts,
   useCreateProduct,
-  useCategories,
+  useCategoryOptions,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
@@ -17,7 +17,7 @@ export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // TanStack Query Hooks
-  const { data: categories = [] } = useCategories();
+  const { options: categoryOptions } = useCategoryOptions();
   const { data: products = [], isLoading } = useProducts(selectedCategoryId);
   const createProductMutation = useCreateProduct();
 
@@ -41,7 +41,7 @@ export default function ProductsPage() {
       <div className="mb-6 flex items-center justify-between">
         <Space>
           <span className="text-xs text-sushi-text-muted font-medium">
-            Lọc theo danh mục:
+            {t('dashboard.filterByCategory')}
           </span>
           <Select
             style={{ width: 220 }}
@@ -51,10 +51,7 @@ export default function ProductsPage() {
             onChange={(val) => setSelectedCategoryId(val)}
             options={[
               { value: '', label: t('dashboard.allCategoriesFilter') },
-              ...categories.map((c) => ({
-                value: c.id,
-                label: c.name,
-              })),
+              ...categoryOptions,
             ]}
           />
         </Space>

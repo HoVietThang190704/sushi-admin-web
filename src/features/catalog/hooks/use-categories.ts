@@ -25,6 +25,18 @@ export function useCategories() {
 }
 
 /**
+ * Hook trích xuất danh sách options cho thẻ Select danh mục (DRY)
+ */
+export function useCategoryOptions() {
+  const { data: categories = [], isLoading } = useCategories();
+  const options = categories.map((c) => ({
+    value: c.id,
+    label: c.name,
+  }));
+  return { options, categories, isLoading };
+}
+
+/**
  * Hook tạo danh mục với tự động làm mới Cache toàn hệ thống
  */
 export function useCreateCategory() {

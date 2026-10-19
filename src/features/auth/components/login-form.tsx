@@ -82,24 +82,24 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setLocale('vi')}
-                className={`w-[58px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
+                className={`w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
                   locale === 'vi'
                     ? 'bg-sushi-primary text-sushi-text shadow-sm'
                     : 'text-sushi-text-muted hover:text-sushi-text'
                 }`}
               >
-                🇻🇳 VI
+                VI
               </button>
               <button
                 type="button"
                 onClick={() => setLocale('en')}
-                className={`w-[58px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
+                className={`w-[48px] py-1 rounded-full font-medium text-xs text-center transition-all cursor-pointer ${
                   locale === 'en'
                     ? 'bg-sushi-primary text-sushi-text shadow-sm'
                     : 'text-sushi-text-muted hover:text-sushi-text'
                 }`}
               >
-                🇬🇧 EN
+                EN
               </button>
             </div>
           </div>

@@ -15,7 +15,7 @@ import { CreateProductInput } from '../types';
 import { createProductSchema } from '../schemas/catalog.schema';
 import { createZodRule } from '@/lib/zod-validator';
 import { useTranslation } from '@/lib/i18n';
-import { useCategories } from '../hooks/use-categories';
+import { useCategoryOptions } from '../hooks/use-categories';
 
 interface CreateProductModalProps {
   open: boolean;
@@ -31,7 +31,7 @@ export function CreateProductModal({
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const { data: categories = [] } = useCategories();
+  const { options: categoryOptions } = useCategoryOptions();
 
   const handleSubmit = async (values: unknown) => {
     setSubmitting(true);
@@ -95,10 +95,7 @@ export function CreateProductModal({
             <Select
               placeholder={t('dashboard.productCategoryPlaceholder')}
               allowClear
-              options={categories.map((c) => ({
-                value: c.id,
-                label: c.name,
-              }))}
+              options={categoryOptions}
             />
           </Form.Item>
         </div>

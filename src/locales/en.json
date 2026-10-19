@@ -10,6 +10,8 @@
     "actions": "Actions",
     "loading": "Loading...",
     "itemsCount": "items",
+    "uncategorized": "Uncategorized",
+    "inactive": "Inactive",
     "superAdmin": "SUPER_ADMIN",
     "branchManager": "BRANCH_MANAGER",
     "cashier": "CASHIER",
@@ -101,8 +103,14 @@
     "productTableType": "Type",
     "productTablePrice": "Price",
     "productTableStatus": "Status",
+    "filterByCategory": "Filter by category:",
     "allCategoriesFilter": "All categories",
     "menuProducts": "Dishes (Products)",
     "menuCategories": "Categories"
+  },
+  "errors": {
+    "title": "Something Went Wrong",
+    "defaultMessage": "Unable to load page data. Please check your API Gateway connection.",
+    "retry": "Try Reloading Page"
   }
 }

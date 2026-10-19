@@ -97,8 +97,8 @@ export function LanguageSwitcher({ size = 'middle' }: { size?: 'small' | 'middle
       style={{ width: 130 }}
       suffixIcon={<Globe size={16} className="text-sushi-text-muted" />}
       options={[
-        { value: 'vi', label: '🇻🇳 Tiếng Việt' },
-        { value: 'en', label: '🇬🇧 English' },
+        { value: 'vi', label: 'Tiếng Việt' },
+        { value: 'en', label: 'English' },
       ]}
     />
   );

@@ -10,6 +10,8 @@
     "actions": "Thao tác",
     "loading": "Đang tải...",
     "itemsCount": "món",
+    "uncategorized": "Chưa phân loại",
+    "inactive": "Tạm ngừng",
     "superAdmin": "SUPER_ADMIN",
     "branchManager": "BRANCH_MANAGER",
     "cashier": "CASHIER",
@@ -101,8 +103,14 @@
     "productTableType": "Phân Loại",
     "productTablePrice": "Giá Bán",
     "productTableStatus": "Trạng Thái",
+    "filterByCategory": "Lọc theo danh mục:",
     "allCategoriesFilter": "Tất cả danh mục",
     "menuProducts": "Món Ăn (Products)",
     "menuCategories": "Danh Mục (Categories)"
+  },
+  "errors": {
+    "title": "Đã Xảy Ra Sự Cố",
+    "defaultMessage": "Không thể tải dữ liệu trang. Vui lòng kiểm tra lại kết nối API Gateway.",
+    "retry": "Thử Tải Lại Trang"
   }
 }

@@ -106,6 +106,7 @@ export {
   CookingPot,
   Receipt,
   ArrowsClockwise,
+  ImageSquare,
 } from '@phosphor-icons/react';
 
 // 4. Các Components được bọc phong cách Sushi Platform cao cấp (Bespoke Wrappers)

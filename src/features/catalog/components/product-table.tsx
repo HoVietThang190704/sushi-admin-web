@@ -1,8 +1,9 @@
 'use client';
 
-import { Table, Tag, Space, Typography } from '@/components/ui';
+import { Table, Tag, Space, Typography, ImageSquare } from '@/components/ui';
 import { Product } from '../types';
 import { useTranslation } from '@/lib/i18n';
+import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import Image from 'next/image';
 
 const { Text } = Typography;
@@ -14,14 +15,7 @@ interface ProductTableProps {
 
 export function ProductTable({ products, loading }: ProductTableProps) {
   const { t } = useTranslation();
-
-  const formatPrice = (price: number | string) => {
-    const num = typeof price === 'string' ? parseFloat(price) : price;
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(num);
-  };
+  const { formatCurrency } = useFormatCurrency();
 
   const columns = [
     {
@@ -41,7 +35,7 @@ export function ProductTable({ products, loading }: ProductTableProps) {
               unoptimized
             />
           ) : (
-            <span className="text-xl">🍣</span>
+            <ImageSquare size={24} className="text-sushi-text-dim" />
           )}
         </div>
       ),
@@ -79,7 +73,7 @@ export function ProductTable({ products, loading }: ProductTableProps) {
       key: 'category',
       render: (_: unknown, record: Product) => (
         <Tag color="cyan">
-          {record.category?.name || 'Chưa phân loại'}
+          {record.category?.name || t('common.uncategorized')}
         </Tag>
       ),
     },
@@ -101,7 +95,7 @@ export function ProductTable({ products, loading }: ProductTableProps) {
       width: 150,
       render: (price: number | string) => (
         <Text strong className="text-sushi-primary font-mono text-sm">
-          {formatPrice(price)}
+          {formatCurrency(price)}
         </Text>
       ),
     },
@@ -112,7 +106,7 @@ export function ProductTable({ products, loading }: ProductTableProps) {
       width: 120,
       render: (isActive: boolean) => (
         <Tag color={isActive ? 'success' : 'default'}>
-          {isActive ? t('common.active') : 'Tạm ngừng'}
+          {isActive ? t('common.active') : t('common.inactive')}
         </Tag>
       ),
     },

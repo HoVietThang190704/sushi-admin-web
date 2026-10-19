@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Tag, Space, Typography } from '@/components/ui';
+import { Table, Tag, Space, Typography, SquaresFour } from '@/components/ui';
 import { Category } from '../types';
 import { useTranslation } from '@/lib/i18n';
 
@@ -21,8 +21,8 @@ export function CategoryTable({ categories, loading }: CategoryTableProps) {
       key: 'name',
       render: (text: string) => (
         <Space>
-          <span className="w-7 h-7 rounded-lg bg-red-950/50 border border-red-800/40 text-sushi-primary flex items-center justify-center text-xs font-serif font-bold">
-            鮨
+          <span className="w-7 h-7 rounded-lg bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-sm">
+            <SquaresFour size={15} />
           </span>
           <Text strong className="text-sushi-text">
             {text}
