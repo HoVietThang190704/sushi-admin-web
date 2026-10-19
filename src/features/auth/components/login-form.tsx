@@ -6,11 +6,11 @@ import Image from 'next/image';
 import {
   Form,
   Input,
-  Alert,
   SushiButton,
   EnvelopeSimple,
   LockSimple,
   ShieldCheck,
+  message,
 } from '@/components/ui';
 import { authApi } from '../api/auth.api';
 import { useTranslation } from '@/lib/i18n';
@@ -20,17 +20,16 @@ import { createZodRule } from '@/lib/zod-validator';
 export function LoginForm() {
   const { t, locale, setLocale } = useTranslation();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values: unknown) => {
-    setError(null);
     setLoading(true);
 
     const result = loginSchema.safeParse(values);
     if (!result.success) {
-      setError(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
+      messageApi.error(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
       setLoading(false);
       return;
     }
@@ -40,9 +39,8 @@ export function LoginForm() {
       router.push('/dashboard');
       router.refresh();
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : t('auth.loginError');
-      setError(msg);
+      const msg = err instanceof Error ? err.message : t('auth.loginError');
+      messageApi.error(msg);
     } finally {
       setLoading(false);
     }
@@ -50,14 +48,15 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-[430px] sm:w-[430px] mx-auto">
-      {/* Container kế thừa token theme bg-sushi-card và border-sushi-border */}
-      <div className="relative rounded-3xl bg-sushi-card/95 border border-sushi-border shadow-2xl backdrop-blur-2xl p-8 sm:p-9 ring-1 ring-white/5 min-h-[500px] flex flex-col justify-between">
-        
+      {contextHolder}
+
+      {/* Card Container dùng 100% token theme */}
+      <div className="relative rounded-3xl bg-sushi-card border border-sushi-border shadow-2xl backdrop-blur-xl p-8 sm:p-9 min-h-[500px] flex flex-col justify-between">
         <div>
           {/* Top Header Bar */}
           <div className="flex items-center justify-between mb-8 pb-5 border-b border-sushi-border h-14">
             <div className="flex items-center space-x-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-red-500/30 flex items-center justify-center bg-sushi-surface shadow-md shrink-0">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-sushi-border flex items-center justify-center bg-sushi-surface shadow-md shrink-0">
                 <Image
                   src="/logo.png"
                   alt="Sushi Platform Logo"
@@ -112,18 +111,6 @@ export function LoginForm() {
             </h2>
           </div>
 
-          {/* Error Banner */}
-          {error && (
-            <div className="mb-6">
-              <Alert
-                message={error}
-                type="error"
-                showIcon
-                className="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300"
-              />
-            </div>
-          )}
-
           {/* Form */}
           <Form
             form={form}
@@ -147,7 +134,7 @@ export function LoginForm() {
               <Input
                 prefix={<EnvelopeSimple size={18} className="text-sushi-text-dim mr-2 shrink-0" />}
                 placeholder={t('auth.emailPlaceholder')}
-                style={{ height: 48, borderRadius: 12 }}
+                className="h-12 rounded-xl"
               />
             </Form.Item>
 
@@ -167,7 +154,7 @@ export function LoginForm() {
               <Input.Password
                 prefix={<LockSimple size={18} className="text-sushi-text-dim mr-2 shrink-0" />}
                 placeholder={t('auth.passwordPlaceholder')}
-                style={{ height: 48, borderRadius: 12 }}
+                className="h-12 rounded-xl"
               />
             </Form.Item>
 
@@ -178,7 +165,7 @@ export function LoginForm() {
                 htmlType="submit"
                 loading={loading}
                 block
-                style={{ height: 48, borderRadius: 12, fontSize: 14 }}
+                className="h-12 rounded-xl"
               >
                 {loading ? t('auth.authenticating') : t('auth.loginButton')}
               </SushiButton>

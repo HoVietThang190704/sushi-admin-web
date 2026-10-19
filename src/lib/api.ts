@@ -23,9 +23,17 @@ export async function fetchApi<T = unknown>(
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
+    // Trích xuất thông báo lỗi chuẩn từ BaseResponse hoặc lỗi mặc định
     const errorMessage =
-      data?.message || (Array.isArray(data?.message) ? data.message.join(', ') : 'Something went wrong');
+      data?.error?.message ||
+      data?.message ||
+      (Array.isArray(data?.message) ? data.message.join(', ') : 'Something went wrong');
     throw new Error(errorMessage);
+  }
+
+  // Tự động bóc tách trường data từ BaseResponse nếu có
+  if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+    return data.data as T;
   }
 
   return data as T;

@@ -61,3 +61,14 @@ textarea::placeholder,
   color: #94a3b8 !important;
   opacity: 1 !important;
 }
+
+/* Khắc phục lỗi trình duyệt tự động điền (Autofill) làm trắng ô input trên nền tối */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0 1000px #1e1e22 inset !important;
+  box-shadow: 0 0 0 1000px #1e1e22 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
