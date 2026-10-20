@@ -1,8 +1,26 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(null);
+    }
+  });
+  failedQueue = [];
+};
+
 export async function fetchApi<T = unknown>(
   endpoint: string,
   options: RequestInit = {},
+  isRetry: boolean = false,
 ): Promise<T> {
   const url = `${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
@@ -19,6 +37,41 @@ export async function fetchApi<T = unknown>(
       ...options.headers,
     },
   });
+
+  // Tự động làm mới phiên đăng nhập (Silent Token Refresh) khi token 15 phút hết hạn
+  if (
+    response.status === 401 &&
+    !isRetry &&
+    !endpoint.includes('/auth/login') &&
+    !endpoint.includes('/auth/refresh')
+  ) {
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(() => fetchApi<T>(endpoint, options, true));
+    }
+
+    isRefreshing = true;
+
+    try {
+      const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (refreshRes.ok) {
+        processQueue(null);
+        return fetchApi<T>(endpoint, options, true);
+      } else {
+        processQueue(new Error('Phiên đăng nhập đã hết hạn'));
+      }
+    } catch (err) {
+      processQueue(err);
+    } finally {
+      isRefreshing = false;
+    }
+  }
 
   const data = await response.json().catch(() => null);
 
