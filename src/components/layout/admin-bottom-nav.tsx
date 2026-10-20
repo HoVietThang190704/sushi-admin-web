@@ -30,6 +30,7 @@ export function AdminBottomNav() {
             <Link
               key={item.key}
               href={item.path}
+              prefetch={true}
               className="flex flex-col items-center justify-center h-full py-1 transition-all duration-150 cursor-pointer group relative"
             >
               {/* Vạch chỉ báo active phía trên tab */}

@@ -268,6 +268,7 @@ export default function InventoryPage() {
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
+          animated={{ inkBar: true, tabPane: true }}
           items={[
             {
               key: 'balance',

@@ -221,3 +221,54 @@ input:-webkit-autofill:active {
   padding: 0 !important;
   background-color: #25252a !important;
 }
+
+/* =============================================================================
+   Mobile Slide Animations (Direction-aware page transitions)
+   ============================================================================= */
+@keyframes mobileSlideInRight {
+  from {
+    opacity: 0.3;
+    transform: translate3d(40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mobileSlideInLeft {
+  from {
+    opacity: 0.3;
+    transform: translate3d(-40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes desktopFadeIn {
+  from {
+    opacity: 0.6;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-right {
+  animation: mobileSlideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-left {
+  animation: mobileSlideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (min-width: 768px) {
+  .slide-right,
+  .slide-left {
+    animation: desktopFadeIn 0.15s ease-out both !important;
+  }
+}

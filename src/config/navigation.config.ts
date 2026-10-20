@@ -77,3 +77,12 @@ export function getActiveNavKey(pathname: string): string {
 
   return NAV_ITEMS[0]?.key ?? 'overview';
 }
+
+/**
+ * Lấy số thứ tự (index) của trang hiện tại để xác định hướng trượt (slide direction)
+ */
+export function getNavIndex(pathname: string): number {
+  const activeKey = getActiveNavKey(pathname);
+  const idx = NAV_ITEMS.findIndex((item) => item.key === activeKey);
+  return idx >= 0 ? idx : 0;
+}
