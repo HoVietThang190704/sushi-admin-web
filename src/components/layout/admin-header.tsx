@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Layout,
@@ -113,23 +114,40 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
       }}
     >
       {/* =========================================================================
-          1. Left: Mobile Hamburger & Dynamic Breadcrumbs
+          1. Left: Mobile Brand / Desktop Breadcrumbs
          ========================================================================= */}
-      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-        {/* Nút mở menu trượt trên mobile */}
+      <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+        {/* Mobile: Hamburger Button */}
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface border border-sushi-border/70 shrink-0 cursor-pointer"
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface border border-sushi-border/70 shrink-0 cursor-pointer transition-colors"
           aria-label="Open mobile menu"
         >
           <ListIcon size={18} />
         </button>
 
-        <nav aria-label="Breadcrumb" className="flex items-center space-x-1.5 sm:space-x-2 text-sm truncate">
+        {/* Mobile: Logo & Brand Name */}
+        <div className="flex md:hidden items-center space-x-2">
+          <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-sushi-border flex items-center justify-center shrink-0 bg-sushi-surface shadow-sm">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={22}
+              height={22}
+              className="object-contain"
+            />
+          </div>
+          <span className="font-bold text-sushi-text tracking-wider text-xs font-sans">
+            SUSHI ADMIN
+          </span>
+        </div>
+
+        {/* Desktop: Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="hidden md:flex items-center space-x-2 text-sm truncate">
           <Link
             href="/dashboard"
-            className="hidden sm:flex items-center text-sushi-text-dim hover:text-sushi-text transition-colors"
+            className="flex items-center text-sushi-text-dim hover:text-sushi-text transition-colors"
             title={t('dashboard.breadcrumbHome')}
           >
             <House size={16} />
@@ -137,8 +155,8 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
           {currentNav && currentNav.path !== '/dashboard' && (
             <>
-              <span className="text-sushi-text-dim/40 text-xs hidden sm:inline">/</span>
-              <span className="font-semibold text-sushi-text truncate text-xs sm:text-sm">
+              <span className="text-sushi-text-dim/40 text-xs">/</span>
+              <span className="font-semibold text-sushi-text truncate text-sm">
                 {t(currentNav.labelKey)}
               </span>
             </>
@@ -146,8 +164,8 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
           {(!currentNav || currentNav.path === '/dashboard') && (
             <>
-              <span className="text-sushi-text-dim/40 text-xs hidden sm:inline">/</span>
-              <span className="font-semibold text-sushi-text truncate text-xs sm:text-sm">
+              <span className="text-sushi-text-dim/40 text-xs">/</span>
+              <span className="font-semibold text-sushi-text truncate text-sm">
                 {t('dashboard.overview')}
               </span>
             </>
@@ -158,12 +176,14 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
       {/* =========================================================================
           2. Right: Language & User Profile Dropdown
          ========================================================================= */}
-      <div className="flex items-center space-x-3 sm:space-x-4">
-        {/* Language Switcher 1-Click Toggle */}
-        <LanguageSwitcher />
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        {/* Language Switcher 1-Click Toggle (Chỉ hiện trên Desktop, Mobile đưa vào Drawer) */}
+        <div className="hidden md:inline-flex">
+          <LanguageSwitcher />
+        </div>
 
         {/* Vertical Separator */}
-        <div className="h-5 w-[1px] bg-sushi-border" />
+        <div className="hidden md:block h-5 w-[1px] bg-sushi-border" />
 
         {/* User Profile Pill with Dropdown Menu */}
         <Dropdown
@@ -174,26 +194,26 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
         >
           <button
             type="button"
-            className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-sushi-surface/70 border border-sushi-border/70 hover:bg-sushi-surface hover:border-sushi-border transition-all duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-1 focus:ring-sushi-primary/40"
+            className="flex items-center space-x-2 sm:space-x-2.5 p-1 sm:px-3 sm:py-1.5 rounded-xl bg-sushi-surface/70 border border-sushi-border/70 hover:bg-sushi-surface hover:border-sushi-border transition-all duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-1 focus:ring-sushi-primary/40"
             aria-label="User menu"
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1px] shadow-sm flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1px] shadow-sm flex items-center justify-center shrink-0">
               <div className="w-full h-full rounded-full bg-sushi-surface flex items-center justify-center text-xs font-bold text-sushi-text">
                 {userInitial}
               </div>
             </div>
 
-            <span className="text-xs font-medium text-sushi-text max-w-[120px] truncate hidden sm:inline">
+            <span className="text-xs font-medium text-sushi-text max-w-[120px] truncate hidden md:inline">
               {displayName}
             </span>
 
             {user?.role && (
-              <span className="px-1.5 py-0.5 rounded-md text-2xs font-semibold font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/25 text-amber-400 hidden md:inline">
+              <span className="px-1.5 py-0.5 rounded-md text-2xs font-semibold font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/25 text-amber-400 hidden lg:inline">
                 {user.role}
               </span>
             )}
 
-            <CaretDown size={14} className="text-sushi-text-dim group-hover:text-sushi-text transition-colors" />
+            <CaretDown size={13} className="text-sushi-text-dim group-hover:text-sushi-text transition-colors hidden sm:inline" />
           </button>
         </Dropdown>
       </div>

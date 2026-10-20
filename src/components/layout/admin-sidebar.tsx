@@ -12,7 +12,7 @@ import {
   CaretRight,
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
 import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
 
 const { Sider } = Layout;
@@ -121,7 +121,20 @@ export function AdminSidebar({
           3. Sidebar Footer (Collapse Toggle & Status)
          ========================================================================= */}
       <div className="p-3 border-t border-sushi-border/80 bg-sushi-surface/40 shrink-0">
-        {!collapsed || isDrawer ? (
+        {isDrawer ? (
+          <div className="flex items-center justify-between px-2 gap-2">
+            <div className="flex items-center space-x-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-2xs text-sushi-text-dim font-mono">
+                Online · v1.0
+              </span>
+            </div>
+            <LanguageSwitcher />
+          </div>
+        ) : !collapsed ? (
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-2 w-2">
@@ -133,18 +146,16 @@ export function AdminSidebar({
               </span>
             </div>
 
-            {!isDrawer && (
-              <Tooltip title={t('dashboard.collapseSidebar')} placement="right">
-                <button
-                  type="button"
-                  onClick={() => onCollapse(true)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
-                  aria-label={t('dashboard.collapseSidebar')}
-                >
-                  <CaretLeft size={16} weight="bold" />
-                </button>
-              </Tooltip>
-            )}
+            <Tooltip title={t('dashboard.collapseSidebar')} placement="right">
+              <button
+                type="button"
+                onClick={() => onCollapse(true)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
+                aria-label={t('dashboard.collapseSidebar')}
+              >
+                <CaretLeft size={16} weight="bold" />
+              </button>
+            </Tooltip>
           </div>
         ) : (
           <div className="flex justify-center">
