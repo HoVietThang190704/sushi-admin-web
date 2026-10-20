@@ -225,10 +225,11 @@ input:-webkit-autofill:active {
 /* =============================================================================
    Mobile Slide Animations (Direction-aware page transitions)
    ============================================================================= */
+
 @keyframes mobileSlideInRight {
   from {
-    opacity: 0.3;
-    transform: translate3d(40px, 0, 0);
+    opacity: 0.35;
+    transform: translate3d(80px, 0, 0);
   }
   to {
     opacity: 1;
@@ -238,8 +239,8 @@ input:-webkit-autofill:active {
 
 @keyframes mobileSlideInLeft {
   from {
-    opacity: 0.3;
-    transform: translate3d(-40px, 0, 0);
+    opacity: 0.35;
+    transform: translate3d(-80px, 0, 0);
   }
   to {
     opacity: 1;
@@ -249,7 +250,7 @@ input:-webkit-autofill:active {
 
 @keyframes desktopFadeIn {
   from {
-    opacity: 0.6;
+    opacity: 0.7;
     transform: translateY(2px);
   }
   to {
@@ -258,17 +259,43 @@ input:-webkit-autofill:active {
   }
 }
 
+.mobile-slide-in-right {
+  animation: mobileSlideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mobile-slide-in-left {
+  animation: mobileSlideInLeft 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Giữ class tương thích cũ */
 .slide-right {
-  animation: mobileSlideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: mobileSlideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .slide-left {
-  animation: mobileSlideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: mobileSlideInLeft 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (min-width: 768px) {
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
   .slide-right,
   .slide-left {
     animation: desktopFadeIn 0.15s ease-out both !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-slide-in-right,
+  .mobile-slide-in-left,
+  .slide-right,
+  .slide-left {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  nav[aria-label="Mobile navigation"],
+  nav[aria-label="Mobile navigation"] * {
+    transition: none !important;
   }
 }
