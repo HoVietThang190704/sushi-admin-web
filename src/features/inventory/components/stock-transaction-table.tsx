@@ -140,6 +140,7 @@ export function StockTransactionTable({
         showSizeChanger: false,
         className: 'py-3 px-4',
       }}
+      scroll={{ x: 'max-content' }}
       className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
       locale={{
         emptyText: (

@@ -11,6 +11,7 @@ import {
   Gear,
   CaretDown,
   Dropdown,
+  ListIcon,
 } from '@/components/ui';
 import type { MenuProps } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
@@ -21,10 +22,11 @@ import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
 const { Header } = Layout;
 
 export interface AdminHeaderProps {
+  onOpenMobileMenu?: () => void;
   className?: string;
 }
 
-export function AdminHeader({ className }: AdminHeaderProps) {
+export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -103,7 +105,7 @@ export function AdminHeader({ className }: AdminHeaderProps) {
 
   return (
     <Header
-      className={`border-b border-sushi-border/80 px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
+      className={`border-b border-sushi-border/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
       style={{
         background: SUSHICOLORS.card,
         height: 64,
@@ -111,13 +113,23 @@ export function AdminHeader({ className }: AdminHeaderProps) {
       }}
     >
       {/* =========================================================================
-          1. Left: Dynamic Breadcrumbs
+          1. Left: Mobile Hamburger & Dynamic Breadcrumbs
          ========================================================================= */}
-      <div className="flex items-center space-x-3 min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm">
+      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+        {/* Nút mở menu trượt trên mobile */}
+        <button
+          type="button"
+          onClick={onOpenMobileMenu}
+          className="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface border border-sushi-border/70 shrink-0 cursor-pointer"
+          aria-label="Open mobile menu"
+        >
+          <ListIcon size={18} />
+        </button>
+
+        <nav aria-label="Breadcrumb" className="flex items-center space-x-1.5 sm:space-x-2 text-sm truncate">
           <Link
             href="/dashboard"
-            className="flex items-center text-sushi-text-dim hover:text-sushi-text transition-colors"
+            className="hidden sm:flex items-center text-sushi-text-dim hover:text-sushi-text transition-colors"
             title={t('dashboard.breadcrumbHome')}
           >
             <House size={16} />
@@ -125,8 +137,8 @@ export function AdminHeader({ className }: AdminHeaderProps) {
 
           {currentNav && currentNav.path !== '/dashboard' && (
             <>
-              <span className="text-sushi-text-dim/40 text-xs">/</span>
-              <span className="font-semibold text-sushi-text truncate">
+              <span className="text-sushi-text-dim/40 text-xs hidden sm:inline">/</span>
+              <span className="font-semibold text-sushi-text truncate text-xs sm:text-sm">
                 {t(currentNav.labelKey)}
               </span>
             </>
@@ -134,8 +146,8 @@ export function AdminHeader({ className }: AdminHeaderProps) {
 
           {(!currentNav || currentNav.path === '/dashboard') && (
             <>
-              <span className="text-sushi-text-dim/40 text-xs">/</span>
-              <span className="font-semibold text-sushi-text truncate">
+              <span className="text-sushi-text-dim/40 text-xs hidden sm:inline">/</span>
+              <span className="font-semibold text-sushi-text truncate text-xs sm:text-sm">
                 {t('dashboard.overview')}
               </span>
             </>

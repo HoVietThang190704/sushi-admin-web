@@ -19,6 +19,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const { loading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (loading) {
     return (
@@ -41,16 +42,21 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout className="min-h-screen bg-sushi-bg">
-      {/* Sidebar Menu tách biệt component, dùng navigation config tập trung */}
-      <AdminSidebar collapsed={collapsed} onCollapse={setCollapsed} />
+      {/* Sidebar Menu tách biệt component, hỗ trợ Desktop Sider và Mobile Drawer */}
+      <AdminSidebar
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
 
       {/* Main Layout Area */}
       <Layout className="bg-sushi-bg flex flex-col min-w-0" style={{ background: SUSHICOLORS.bg }}>
-        {/* Header điều hướng chuẩn mực, breadcrumb động và profile badge */}
-        <AdminHeader />
+        {/* Header điều hướng chuẩn mực, breadcrumb động và mobile hamburger */}
+        <AdminHeader onOpenMobileMenu={() => setMobileOpen(true)} />
 
         {/* Content Area */}
-        <Content className="m-6 min-h-[320px]">
+        <Content className="m-3 sm:m-6 min-h-[320px]">
           {children}
         </Content>
       </Layout>

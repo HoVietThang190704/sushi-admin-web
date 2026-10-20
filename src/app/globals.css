@@ -209,3 +209,15 @@ input:-webkit-autofill:active {
   border-color: rgba(229, 57, 53, 0.6) !important;
   box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.16) !important;
 }
+
+/* =============================================================================
+   Sushi Mobile Drawer Custom Styling
+   ============================================================================= */
+.sushi-mobile-drawer .ant-drawer-content {
+  background-color: #25252a !important;
+}
+
+.sushi-mobile-drawer .ant-drawer-body {
+  padding: 0 !important;
+  background-color: #25252a !important;
+}

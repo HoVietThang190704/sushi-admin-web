@@ -135,6 +135,7 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
       expandable={{
         childrenColumnName: 'none', // Tắt hoàn toàn icon (+) mở rộng cây thừa thãi
       }}
+      scroll={{ x: 'max-content' }}
       className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
       locale={{
         emptyText: (
