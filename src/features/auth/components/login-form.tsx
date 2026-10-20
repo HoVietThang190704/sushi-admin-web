@@ -39,8 +39,7 @@ export function LoginForm() {
 
     try {
       await authApi.login(result.data);
-      router.push('/dashboard');
-      router.refresh();
+      window.location.href = '/dashboard';
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('auth.loginError');
       messageApi.error(msg);
