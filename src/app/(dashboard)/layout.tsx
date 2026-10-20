@@ -10,7 +10,7 @@ import {
 import { SUSHICOLORS } from '@/lib/theme';
 import { AuthProvider, useAuth } from '@/features/auth';
 import { useTranslation } from '@/lib/i18n';
-import { AdminSidebar, AdminHeader } from '@/components/layout';
+import { AdminSidebar, AdminHeader, AdminBottomNav } from '@/components/layout';
 
 const { Content } = Layout;
 const { Text } = Typography;
@@ -56,9 +56,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <AdminHeader onOpenMobileMenu={() => setMobileOpen(true)} />
 
         {/* Content Area */}
-        <Content className="m-3 sm:m-6 min-h-[320px]">
+        <Content className="m-3 sm:m-6 pb-20 md:pb-6 min-h-[320px]">
           {children}
         </Content>
+
+        {/* Thanh Điều Hướng Đáy Màn Hình Cho Mobile (1-Click Bottom Bar) */}
+        <AdminBottomNav />
       </Layout>
     </Layout>
   );
