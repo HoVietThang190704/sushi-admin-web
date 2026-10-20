@@ -44,4 +44,25 @@ export const catalogApi = {
       body: JSON.stringify(dto),
     });
   },
+
+  /**
+   * Tải ảnh lên Cloudinary qua Catalog Service
+   */
+  uploadImage: async (file: File): Promise<{ url: string; publicId: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.CATALOG.UPLOAD}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(data?.error?.message || data?.message || 'Tải ảnh lên Cloudinary thất bại');
+    }
+    return (data?.data || data) as { url: string; publicId: string };
+  },
 };

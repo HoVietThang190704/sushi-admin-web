@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     CATEGORY_BY_ID: (id: string) => `/api/catalog/categories/${id}`,
     PRODUCTS: '/api/catalog/products',
     PRODUCT_BY_ID: (id: string) => `/api/catalog/products/${id}`,
+    UPLOAD: '/api/catalog/upload',
   },
   ORDERS: {
     ROOT: '/api/orders',
