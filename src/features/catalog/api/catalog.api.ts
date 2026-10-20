@@ -1,4 +1,4 @@
-import { fetchApi } from '@/lib/api';
+import { fetchApi, getApiBaseUrl } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
 import { Category, CreateCategoryInput, Product, CreateProductInput } from '../types';
 
@@ -52,8 +52,8 @@ export const catalogApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${API_URL}${API_ENDPOINTS.CATALOG.UPLOAD}`, {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}${API_ENDPOINTS.CATALOG.UPLOAD}`, {
       method: 'POST',
       body: formData,
       credentials: 'include',

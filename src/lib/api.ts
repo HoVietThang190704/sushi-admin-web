@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `${window.location.protocol}//${hostname}:3000`;
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+}
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -22,7 +30,8 @@ export async function fetchApi<T = unknown>(
   options: RequestInit = {},
   isRetry: boolean = false,
 ): Promise<T> {
-  const url = `${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -54,7 +63,7 @@ export async function fetchApi<T = unknown>(
     isRefreshing = true;
 
     try {
-      const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
+      const refreshRes = await fetch(`${baseUrl}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

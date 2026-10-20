@@ -82,6 +82,8 @@ export {
   SignOut,
   LockSimple,
   EnvelopeSimple,
+  Eye,
+  EyeSlash,
   User,
   House,
   Storefront,

@@ -10,6 +10,8 @@ import {
   EnvelopeSimple,
   LockSimple,
   ShieldCheck,
+  Eye,
+  EyeSlash,
   message,
 } from '@/components/ui';
 import { authApi } from '../api/auth.api';
@@ -21,6 +23,7 @@ export function LoginForm() {
   const { t, locale, setLocale } = useTranslation();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -155,6 +158,28 @@ export function LoginForm() {
                 prefix={<LockSimple size={18} className="text-sushi-text-dim mr-2 shrink-0" />}
                 placeholder={t('auth.passwordPlaceholder')}
                 className="h-12 rounded-xl"
+                visibilityToggle={{
+                  visible: showPassword,
+                  onVisibleChange: setShowPassword,
+                }}
+                iconRender={(visible) => (
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      setShowPassword(!showPassword);
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    className="p-1.5 flex items-center justify-center text-sushi-text-dim hover:text-sushi-text active:text-sushi-primary cursor-pointer touch-manipulation focus:outline-none"
+                    aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {visible ? <Eye size={18} /> : <EyeSlash size={18} />}
+                  </button>
+                )}
               />
             </Form.Item>
 
