@@ -201,7 +201,7 @@ export function AdminSidebar({
         open={mobileOpen}
         onClose={onMobileClose}
         placement="left"
-        width={270}
+        size={270}
         closable={false}
         className="md:hidden sushi-mobile-drawer"
         styles={{
