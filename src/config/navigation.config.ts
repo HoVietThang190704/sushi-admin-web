@@ -4,6 +4,7 @@ import {
   ForkKnife,
   SquaresFour,
   Package,
+  CookingPot,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -43,6 +44,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: '/dashboard/products',
     labelKey: 'dashboard.menuProducts',
     icon: ForkKnife,
+  },
+  {
+    key: 'inventory',
+    path: '/dashboard/inventory',
+    labelKey: 'dashboard.menuInventory',
+    icon: CookingPot,
   },
   {
     key: 'orders',
