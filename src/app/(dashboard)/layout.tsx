@@ -10,6 +10,7 @@ import {
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
 import { AuthProvider, useAuth } from '@/features/auth';
+import { RealtimeProvider } from '@/providers/realtime-provider';
 import { useTranslation } from '@/lib/i18n';
 import {
   AdminSidebar,
@@ -94,7 +95,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <RealtimeProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </RealtimeProvider>
     </AuthProvider>
   );
 }
