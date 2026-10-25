@@ -206,7 +206,7 @@ export function AdminSidebar({
         className="md:hidden sushi-mobile-drawer"
         styles={{
           body: { padding: 0, backgroundColor: SUSHICOLORS.card },
-          content: { backgroundColor: SUSHICOLORS.card },
+          section: { backgroundColor: SUSHICOLORS.card },
         }}
       >
         {renderSidebarContent(true)}

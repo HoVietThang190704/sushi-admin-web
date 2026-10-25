@@ -106,7 +106,7 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
   return (
     <Header
-      className={`border-b border-sushi-border/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
+      className={`border-b border-sushi-border/80 !px-4 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
       style={{
         background: SUSHICOLORS.card,
         height: 64,

@@ -11,6 +11,10 @@ import {
   Copy,
   Tooltip,
   message,
+  SushiMobileCardList,
+  SushiCardItem,
+  SushiCardActions,
+  SushiEmptyState,
 } from '@/components/ui';
 import { Category } from '../types';
 import { useTranslation } from '@/lib/i18n';
@@ -122,36 +126,96 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
   ];
 
   return (
-    <Table
-      loading={loading}
-      dataSource={categories}
-      columns={columns}
-      rowKey="id"
-      pagination={{
-        pageSize: 8,
-        showSizeChanger: false,
-        className: 'py-3 px-4',
-      }}
-      expandable={{
-        childrenColumnName: 'none', // Tắt hoàn toàn icon (+) mở rộng cây thừa thãi
-      }}
-      scroll={{ x: 'max-content' }}
-      className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
-      locale={{
-        emptyText: (
-          <div className="py-12 flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-3">
-              <SquaresFour size={24} />
-            </div>
-            <p className="text-sm font-semibold text-sushi-text">
-              {t('dashboard.noDataTitle')}
-            </p>
-            <p className="text-xs text-sushi-text-dim mt-1 max-w-sm">
-              {t('dashboard.noCategoriesDesc')}
-            </p>
-          </div>
-        ),
-      }}
-    />
+    <>
+      {/* 1. Giao diện Mobile Card List (< md) */}
+      <SushiMobileCardList
+        items={categories}
+        loading={loading}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<SquaresFour size={24} />}
+            title={t('dashboard.noDataTitle')}
+            description={t('dashboard.noCategoriesDesc')}
+          />
+        }
+        renderItem={(category) => {
+          const count = category._count?.products || 0;
+          return (
+            <SushiCardItem>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-inner">
+                    <SquaresFour size={19} weight="fill" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-bold text-sushi-text truncate">
+                      {category.name}
+                    </h4>
+                    <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                      <span>ID: {category.id.slice(0, 8)}...</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopyId(category.id, e)}
+                        className="hover:text-sushi-text transition-colors p-0.5 cursor-pointer"
+                        aria-label="Copy UUID"
+                      >
+                        <Copy size={11} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <SushiCardActions
+                  onEdit={onEdit ? () => onEdit(category) : undefined}
+                  onDelete={onDelete ? () => onDelete(category) : undefined}
+                  editLabel={t('dashboard.edit')}
+                  deleteLabel={t('dashboard.delete')}
+                />
+              </div>
+
+              <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md font-semibold font-mono bg-blue-500/10 border border-blue-500/25 text-blue-400">
+                  {count} {t('common.itemsCount')}
+                </span>
+                <span className="inline-flex items-center space-x-1.5 text-emerald-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>{t('common.active')}</span>
+                </span>
+              </div>
+            </SushiCardItem>
+          );
+        }}
+      />
+
+      {/* 2. Giao diện Desktop Table (>= md) */}
+      <div className="hidden md:block">
+        <Table
+          loading={loading}
+          dataSource={categories}
+          columns={columns}
+          rowKey="id"
+          pagination={{
+            pageSize: 8,
+            showSizeChanger: false,
+            className: 'py-3 px-4',
+          }}
+          expandable={{
+            childrenColumnName: 'none', // Tắt hoàn toàn icon (+) mở rộng cây thừa thãi
+          }}
+          scroll={{ x: 'max-content' }}
+          className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
+          locale={{
+            emptyText: (
+              <SushiEmptyState
+                icon={<SquaresFour size={24} />}
+                title={t('dashboard.noDataTitle')}
+                description={t('dashboard.noCategoriesDesc')}
+              />
+            ),
+          }}
+        />
+      </div>
+    </>
   );
 }

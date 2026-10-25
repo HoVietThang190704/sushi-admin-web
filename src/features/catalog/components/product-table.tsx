@@ -10,6 +10,10 @@ import {
   PencilSimple,
   Trash,
   Tooltip,
+  SushiMobileCardList,
+  SushiCardItem,
+  SushiCardActions,
+  SushiEmptyState,
 } from '@/components/ui';
 import { Product } from '../types';
 import { useTranslation } from '@/lib/i18n';
@@ -163,33 +167,116 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
   ];
 
   return (
-    <Table
-      loading={loading}
-      dataSource={products}
-      columns={columns}
-      rowKey="id"
-      pagination={{
-        pageSize: 8,
-        showSizeChanger: false,
-        className: 'py-3 px-4',
-      }}
-      scroll={{ x: 'max-content' }}
-      className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
-      locale={{
-        emptyText: (
-          <div className="py-14 flex flex-col items-center justify-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-3 shadow-inner">
-              <ForkKnife size={26} />
+    <>
+      {/* 1. Giao diện Mobile Card List (< md) */}
+      <SushiMobileCardList
+        items={products}
+        loading={loading}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<ForkKnife size={26} />}
+            title={t('dashboard.noDataTitle')}
+            description={t('dashboard.noProductsDesc')}
+          />
+        }
+        renderItem={(product) => (
+          <SushiCardItem>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start space-x-3 min-w-0">
+                <div className="w-12 h-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                  {product.imageUrl ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.name}
+                      width={48}
+                      height={48}
+                      className="object-cover w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <ForkKnife size={20} className="text-sushi-text-dim" />
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <h4 className="text-sm font-bold text-sushi-text truncate">
+                    {product.name}
+                  </h4>
+                  <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                    <span>SKU: {product.sku}</span>
+                    {product.category?.name && (
+                      <span className="text-sushi-text-muted truncate">
+                        · {product.category.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <SushiCardActions
+                onEdit={onEdit ? () => onEdit(product) : undefined}
+                onDelete={onDelete ? () => onDelete(product) : undefined}
+                editLabel={t('dashboard.edit')}
+                deleteLabel={t('dashboard.delete')}
+              />
             </div>
-            <p className="text-sm font-semibold text-sushi-text">
-              {t('dashboard.noDataTitle')}
-            </p>
-            <p className="text-xs text-sushi-text-dim mt-1 max-w-sm leading-relaxed">
-              {t('dashboard.noProductsDesc')}
-            </p>
-          </div>
-        ),
-      }}
-    />
+
+            <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+              <div className="flex items-center space-x-2">
+                <Tag
+                  color={product.type === 'COMBO' ? 'gold' : 'blue'}
+                  className="text-3xs font-mono font-semibold !px-1.5 !py-0 !leading-none mr-0"
+                >
+                  {product.type}
+                </Tag>
+                <span
+                  className={`inline-flex items-center space-x-1 text-2xs ${
+                    product.isActive ? 'text-emerald-400' : 'text-zinc-400'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      product.isActive ? 'bg-emerald-500' : 'bg-zinc-500'
+                    }`}
+                  />
+                  <span>{product.isActive ? t('common.active') : t('common.inactive')}</span>
+                </span>
+              </div>
+
+              <span className="text-sm font-bold text-sushi-text font-sans">
+                {formatCurrency(product.sellingPrice)}
+              </span>
+            </div>
+          </SushiCardItem>
+        )}
+      />
+
+      {/* 2. Giao diện Desktop Table (>= md) */}
+      <div className="hidden md:block">
+        <Table
+          loading={loading}
+          dataSource={products}
+          columns={columns}
+          rowKey="id"
+          pagination={{
+            pageSize: 8,
+            showSizeChanger: false,
+            className: 'py-3 px-4',
+          }}
+          scroll={{ x: 'max-content' }}
+          className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
+          locale={{
+            emptyText: (
+              <SushiEmptyState
+                icon={<ForkKnife size={26} />}
+                title={t('dashboard.noDataTitle')}
+                description={t('dashboard.noProductsDesc')}
+              />
+            ),
+          }}
+        />
+      </div>
+    </>
   );
 }

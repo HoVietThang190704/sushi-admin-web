@@ -32,6 +32,7 @@ export default function DashboardOverviewPage() {
       <SushiPageHeader
         title={t('dashboard.overviewTitle')}
         subtitle={t('dashboard.overviewSubtitle')}
+        subtitleClassName="hidden md:block"
       />
 
       {/* =========================================================================
@@ -78,8 +79,8 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 3: Đơn Hàng & Bếp (Take Away) */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 3: Đơn Hàng & Bếp (Take Away) - Chỉ hiện trên tablet/desktop */}
+        <div className="hidden md:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
               {t('dashboard.orderSystemStatus')}
@@ -99,8 +100,8 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 4: Cơ Sở Dữ Liệu & Hạ Tầng */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 4: Cơ Sở Dữ Liệu & Hạ Tầng - Chỉ hiện trên tablet/desktop */}
+        <div className="hidden md:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
               {t('dashboard.infraStatus')}
@@ -122,7 +123,7 @@ export default function DashboardOverviewPage() {
       </div>
 
       {/* =========================================================================
-          3. Lối Tắt Vận Hành (Action Hub Cards)
+          3. Lối Tắt Vận Hành (Action Hub: Danh sách gọn trên Mobile, Bento Card trên Desktop)
          ========================================================================= */}
       <div>
         <div className="mb-3">
@@ -134,7 +135,62 @@ export default function DashboardOverviewPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 3.1 Giao diện dạng thẻ/chip theo chiều ngang trên Mobile (< md) */}
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+          {/* Action 1: Đơn Hàng & Bếp (Ưu tiên vận hành) */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/orders')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <Package size={17} weight="fill" />
+            </div>
+            <span className="text-xs font-semibold text-sushi-text truncate w-full">
+              {t('dashboard.ordersTitle')}
+            </span>
+            <span className="text-3xs text-blue-400/90 font-mono mt-0.5 truncate w-full">
+              Take Away
+            </span>
+          </button>
+
+          {/* Action 2: Món Ăn & Combo */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/products')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-500 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <ForkKnife size={17} weight="fill" />
+            </div>
+            <span className="text-xs font-semibold text-sushi-text truncate w-full">
+              {t('dashboard.productsTitle')}
+            </span>
+            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
+              {products.length} món
+            </span>
+          </button>
+
+          {/* Action 3: Danh Mục Món */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/categories')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/25 flex items-center justify-center text-sushi-primary mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <SquaresFour size={17} weight="fill" />
+            </div>
+            <span className="text-xs font-semibold text-sushi-text truncate w-full">
+              {t('dashboard.categoriesTitle')}
+            </span>
+            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
+              {categories.length} nhóm
+            </span>
+          </button>
+        </div>
+
+        {/* 3.2 Giao diện dạng Bento Cards lớn trên Desktop (>= md) */}
+        <div className="hidden md:grid md:grid-cols-3 gap-4">
           {/* Action 1: Danh Mục Món */}
           <button
             type="button"
@@ -242,34 +298,59 @@ export default function DashboardOverviewPage() {
                 {t('common.uncategorized')}
               </div>
             ) : (
-              <div className="divide-y divide-sushi-border/50">
-                {categories.slice(0, 5).map((category, idx) => (
-                  <div
-                    key={category.id}
-                    className="py-3 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-xs font-mono font-bold text-sushi-text-dim shrink-0">
-                        0{idx + 1}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-sushi-text truncate">
+              <>
+                {/* Mobile (< md): Dạng thẻ/card độc lập từng danh mục */}
+                <div className="flex flex-col space-y-2 md:hidden">
+                  {categories.slice(0, 5).map((category, idx) => (
+                    <div
+                      key={category.id}
+                      className="p-3 rounded-xl bg-sushi-surface/70 border border-sushi-border/80 flex items-center justify-between shadow-2xs"
+                    >
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <span className="w-6 h-6 rounded-md bg-sushi-card border border-sushi-border flex items-center justify-center text-2xs font-mono font-bold text-sushi-text-dim shrink-0">
+                          0{idx + 1}
+                        </span>
+                        <span className="text-sm font-semibold text-sushi-text truncate">
                           {category.name}
-                        </div>
-                        <div className="text-2xs text-sushi-text-dim font-mono truncate">
-                          ID: {category.id.slice(0, 8)}...
-                        </div>
+                        </span>
                       </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3 shrink-0">
-                      <Tag color="success" className="font-semibold text-2xs mr-0">
+                      <Tag color="success" className="font-semibold text-2xs mr-0 shrink-0">
                         {t('common.active')}
                       </Tag>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+
+                {/* Desktop (>= md): Dạng danh sách phân cách thanh mảnh */}
+                <div className="hidden md:block divide-y divide-sushi-border/50">
+                  {categories.slice(0, 5).map((category, idx) => (
+                    <div
+                      key={category.id}
+                      className="py-3 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-xs font-mono font-bold text-sushi-text-dim shrink-0">
+                          0{idx + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-sushi-text truncate">
+                            {category.name}
+                          </div>
+                          <div className="text-2xs text-sushi-text-dim font-mono truncate">
+                            ID: {category.id.slice(0, 8)}...
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 shrink-0">
+                        <Tag color="success" className="font-semibold text-2xs mr-0">
+                          {t('common.active')}
+                        </Tag>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -301,60 +382,115 @@ export default function DashboardOverviewPage() {
                 {t('dashboard.noProductsYet')}
               </div>
             ) : (
-              <div className="divide-y divide-sushi-border/50">
-                {products.slice(0, 5).map((product) => (
-                  <div
-                    key={product.id}
-                    className="py-2.5 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-sushi-surface border border-sushi-border flex items-center justify-center shrink-0">
-                        {product.imageUrl ? (
-                          <Image
-                            src={product.imageUrl}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <ForkKnife size={18} className="text-sushi-text-dim" />
-                        )}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-sushi-text truncate">
-                          {product.name}
-                        </div>
-                        <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono">
-                          <span>{product.sku}</span>
-                          {product.category?.name && (
-                            <>
-                              <span>·</span>
-                              <span className="text-sushi-text-muted truncate max-w-[100px]">
-                                {product.category.name}
-                              </span>
-                            </>
+              <>
+                {/* Mobile (< md): Dạng thẻ/card độc lập từng món ăn */}
+                <div className="flex flex-col space-y-2 md:hidden">
+                  {products.slice(0, 5).map((product) => (
+                    <div
+                      key={product.id}
+                      className="p-3 rounded-xl bg-sushi-surface/70 border border-sushi-border/80 flex items-center justify-between shadow-2xs"
+                    >
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-sushi-card border border-sushi-border flex items-center justify-center shrink-0">
+                          {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt={product.name}
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <ForkKnife size={18} className="text-sushi-text-dim" />
                           )}
                         </div>
+
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-sushi-text truncate">
+                            {product.name}
+                          </div>
+                          <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim mt-0.5">
+                            <Tag
+                              color={product.type === 'COMBO' ? 'gold' : 'blue'}
+                              className="text-3xs font-mono font-semibold !px-1.5 !py-0 !leading-none mr-0"
+                            >
+                              {product.type}
+                            </Tag>
+                            {product.category?.name && (
+                              <span className="text-sushi-text-muted truncate">
+                                · {product.category.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0 ml-2">
+                        <span className="text-xs font-bold text-sushi-text font-sans">
+                          {formatCurrency(product.sellingPrice)}
+                        </span>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="flex items-center space-x-3 shrink-0 ml-3">
-                      <Tag
-                        color={product.type === 'COMBO' ? 'gold' : 'blue'}
-                        className="text-2xs font-mono font-semibold mr-0"
-                      >
-                        {product.type}
-                      </Tag>
-                      <span className="text-xs font-bold text-sushi-text font-sans">
-                        {formatCurrency(product.sellingPrice)}
-                      </span>
+                {/* Desktop (>= md): Dạng danh sách phân cách thanh mảnh */}
+                <div className="hidden md:block divide-y divide-sushi-border/50">
+                  {products.slice(0, 5).map((product) => (
+                    <div
+                      key={product.id}
+                      className="py-2.5 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-sushi-surface border border-sushi-border flex items-center justify-center shrink-0">
+                          {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt={product.name}
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <ForkKnife size={18} className="text-sushi-text-dim" />
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-sushi-text truncate">
+                            {product.name}
+                          </div>
+                          <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono">
+                            <span>{product.sku}</span>
+                            {product.category?.name && (
+                              <>
+                                <span>·</span>
+                                <span className="text-sushi-text-muted truncate max-w-[100px]">
+                                  {product.category.name}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 shrink-0 ml-3">
+                        <Tag
+                          color={product.type === 'COMBO' ? 'gold' : 'blue'}
+                          className="text-2xs font-mono font-semibold mr-0"
+                        >
+                          {product.type}
+                        </Tag>
+                        <span className="text-xs font-bold text-sushi-text font-sans">
+                          {formatCurrency(product.sellingPrice)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
