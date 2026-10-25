@@ -1,6 +1,6 @@
 export function getApiBaseUrl(): string {
-  // Khi chạy trong trình duyệt, luôn dùng đường dẫn tương đối '' để yêu cầu đi qua Next.js rewrite (cổng 3004).
-  // Nhờ đó cookie trở thành First-Party Cookie, khắc phục 100% lỗi iOS Safari chặn cookie khác cổng (3004 vs 3000).
+  // Khi chạy trong trình duyệt, luôn dùng đường dẫn tương đối '' để yêu cầu đi qua Next.js rewrite (cổng 3005).
+  // Nhờ đó cookie trở thành First-Party Cookie, khắc phục 100% lỗi iOS Safari chặn cookie khác cổng (3005 vs 3000).
   if (typeof window !== 'undefined') {
     return '';
   }
