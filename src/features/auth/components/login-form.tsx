@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui';
 import { authApi } from '../api/auth.api';
 import { useTranslation } from '@/lib/i18n';
-import { loginSchema } from '../schemas/auth.schema';
+import { createLoginSchema } from '../schemas/auth.schema';
 import { createZodRule } from '@/lib/zod-validator';
 
 export function LoginForm() {
@@ -27,10 +27,20 @@ export function LoginForm() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
+  const schema = useMemo(() => createLoginSchema(t), [t]);
+
+  // Cập nhật lại thông báo lỗi validation tức thì khi người dùng chuyển đổi ngôn ngữ (VI <-> EN)
+  useEffect(() => {
+    const hasErrors = form.getFieldsError().some((item) => item.errors.length > 0);
+    if (hasErrors) {
+      form.validateFields();
+    }
+  }, [locale, form]);
+
   const onFinish = async (values: unknown) => {
     setLoading(true);
 
-    const result = loginSchema.safeParse(values);
+    const result = schema.safeParse(values);
     if (!result.success) {
       messageApi.error(result.error.issues[0]?.message || 'Dữ liệu không hợp lệ');
       setLoading(false);
@@ -39,7 +49,8 @@ export function LoginForm() {
 
     try {
       await authApi.login(result.data);
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
+      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('auth.loginError');
       messageApi.error(msg);
@@ -64,6 +75,7 @@ export function LoginForm() {
                   alt="Sushi Platform Logo"
                   width={40}
                   height={40}
+                  style={{ width: 'auto', height: 'auto' }}
                   className="object-contain"
                   priority
                 />
@@ -130,7 +142,7 @@ export function LoginForm() {
                   {t('auth.emailLabel')}
                 </span>
               }
-              rules={[createZodRule(loginSchema, 'email')]}
+              rules={[createZodRule(schema, 'email')]}
               style={{ marginBottom: 18 }}
             >
               <Input
@@ -150,7 +162,7 @@ export function LoginForm() {
                   </span>
                 </div>
               }
-              rules={[createZodRule(loginSchema, 'password')]}
+              rules={[createZodRule(schema, 'password')]}
               style={{ marginBottom: 26 }}
             >
               <Input.Password

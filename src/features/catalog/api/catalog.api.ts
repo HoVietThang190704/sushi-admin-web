@@ -1,4 +1,4 @@
-import { fetchApi, getApiBaseUrl } from '@/lib/api';
+import { fetchApi } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
 import { Category, CreateCategoryInput, Product, CreateProductInput } from '../types';
 
@@ -52,17 +52,9 @@ export const catalogApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const baseUrl = getApiBaseUrl();
-    const response = await fetch(`${baseUrl}${API_ENDPOINTS.CATALOG.UPLOAD}`, {
+    return fetchApi<{ url: string; publicId: string }>(API_ENDPOINTS.CATALOG.UPLOAD, {
       method: 'POST',
       body: formData,
-      credentials: 'include',
     });
-
-    const data = await response.json().catch(() => null);
-    if (!response.ok) {
-      throw new Error(data?.error?.message || data?.message || 'Tải ảnh lên Cloudinary thất bại');
-    }
-    return (data?.data || data) as { url: string; publicId: string };
   },
 };

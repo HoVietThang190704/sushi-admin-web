@@ -3,7 +3,6 @@
 import React from 'react';
 import {
   Table,
-  Tag,
   Typography,
   SquaresFour,
   PencilSimple,

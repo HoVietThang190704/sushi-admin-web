@@ -1,9 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useCallback, useSyncExternalStore } from 'react';
 import vi from '@/locales/vi.json';
 import en from '@/locales/en.json';
-import { Select } from 'antd';
 import { Globe } from '@phosphor-icons/react';
 
 export type Locale = 'vi' | 'en';
@@ -31,24 +30,37 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'sushi_admin_locale';
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('vi');
+function subscribeLocale(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  window.addEventListener('sushi-locale-change', callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('sushi-locale-change', callback);
+  };
+}
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
-      if (saved && (saved === 'vi' || saved === 'en')) {
-        setLocaleState((prev) => (prev !== saved ? saved : prev));
-      }
-    } catch {
-      // Ignore storage access errors
-    }
-  }, []);
+function getLocaleSnapshot(): Locale {
+  if (typeof window === 'undefined') return 'vi';
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved === 'en' ? 'en' : 'vi';
+  } catch {
+    return 'vi';
+  }
+}
+
+function getLocaleServerSnapshot(): Locale {
+  return 'vi';
+}
+
+export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const locale = useSyncExternalStore(subscribeLocale, getLocaleSnapshot, getLocaleServerSnapshot);
 
   const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale);
     try {
       localStorage.setItem(STORAGE_KEY, newLocale);
+      window.dispatchEvent(new Event('sushi-locale-change'));
     } catch {
       // Ignore storage write errors
     }

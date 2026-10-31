@@ -28,6 +28,7 @@ export function BrandShowcase() {
             alt="Sushi Platform Logo"
             width={48}
             height={48}
+            style={{ width: 'auto', height: 'auto' }}
             className="object-contain"
             priority
           />

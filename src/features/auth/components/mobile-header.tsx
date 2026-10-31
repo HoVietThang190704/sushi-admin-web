@@ -30,6 +30,7 @@ export function MobileHeader() {
             alt="Sushi Platform Logo"
             width={56}
             height={56}
+            style={{ width: 'auto', height: 'auto' }}
             className="object-contain"
             priority
           />

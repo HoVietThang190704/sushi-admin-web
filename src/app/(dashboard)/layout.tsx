@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Layout,
   Space,
   Typography,
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
-import { AuthProvider, useAuth } from '@/features/auth';
+import { AuthProvider, useAuth, authApi } from '@/features/auth';
 import { RealtimeProvider } from '@/providers/realtime-provider';
 import { useTranslation } from '@/lib/i18n';
 import {
@@ -25,14 +25,24 @@ const { Text } = Typography;
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { loading } = useAuth();
+  const router = useRouter();
+  const { loading, isAuthenticated } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Tách biệt logic cử chỉ vuốt và chuyển hướng vào hook chuyên biệt
   const { contentRef, direction, handlers } = useDashboardSwipe();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      // Dọn dẹp cookie không hợp lệ/hết hạn qua API logout để tránh proxy.ts redirect lặp (307)
+      authApi.logout().finally(() => {
+        router.replace('/');
+      });
+    }
+  }, [loading, isAuthenticated, router]);
+
+  if (loading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-sushi-bg text-sushi-text">
         <Space orientation="vertical" align="center" size="middle">
@@ -42,6 +52,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               alt="Logo"
               width={32}
               height={32}
+              style={{ width: 'auto', height: 'auto' }}
               className="object-contain animate-pulse"
             />
           </div>

@@ -12,7 +12,7 @@ import {
   Radio,
 } from '@/components/ui';
 import { Ingredient, CreateTransactionInput, TransactionType } from '../types';
-import { createTransactionSchema } from '../schemas/inventory.schema';
+import { createTransactionSchemaFactory } from '../schemas/inventory.schema';
 import { createZodRule } from '@/lib/zod-validator';
 import { useTranslation } from '@/lib/i18n';
 
@@ -33,10 +33,22 @@ export function CreateTransactionModal({
   onClose,
   onSubmit,
 }: CreateTransactionModalProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [form] = Form.useForm<CreateTransactionInput>();
   const [submitting, setSubmitting] = useState(false);
-  const [transactionType, setTransactionType] = useState<TransactionType>(defaultType);
+
+  const schema = useMemo(() => createTransactionSchemaFactory(t), [t]);
+
+  useEffect(() => {
+    if (!open) return;
+    const hasErrors = form.getFieldsError().some((item) => item.errors.length > 0);
+    if (hasErrors) {
+      form.validateFields();
+    }
+  }, [open, locale, form]);
+
+  const watchedType = Form.useWatch('type', form);
+  const transactionType = watchedType || defaultType;
 
   const watchedIngredientId = Form.useWatch('ingredientId', form);
 
@@ -48,7 +60,6 @@ export function CreateTransactionModal({
 
   useEffect(() => {
     if (open) {
-      setTransactionType(defaultType);
       form.setFieldsValue({
         type: defaultType,
         ingredientId: selectedIngredient?.id,
@@ -56,19 +67,30 @@ export function CreateTransactionModal({
         unitPrice: selectedIngredient?.costPrice || 0,
         quantity: 1,
       });
-    } else {
-      form.resetFields();
     }
   }, [open, defaultType, selectedIngredient, form]);
+
+  const handleModalClose = () => {
+    form.resetFields();
+    onClose();
+  };
 
   const handleSubmit = async (values: CreateTransactionInput) => {
     try {
       setSubmitting(true);
-      await onSubmit({
+      const result = schema.safeParse({
         ...values,
         type: transactionType,
-        quantity: Number(values.quantity),
-        unitPrice: values.unitPrice !== undefined ? Number(values.unitPrice) : undefined,
+      });
+      if (!result.success) {
+        setSubmitting(false);
+        return;
+      }
+      await onSubmit({
+        ...result.data,
+        type: transactionType,
+        quantity: Number(result.data.quantity),
+        unitPrice: result.data.unitPrice !== undefined ? Number(result.data.unitPrice) : undefined,
       });
       form.resetFields();
       onClose();
@@ -102,7 +124,7 @@ export function CreateTransactionModal({
           : t('dashboard.modalStockOutTitle')
       }
       open={open}
-      onCancel={onClose}
+      onCancel={handleModalClose}
       footer={null}
       destroyOnHidden
       width={520}
@@ -122,7 +144,6 @@ export function CreateTransactionModal({
             value={transactionType}
             onChange={(e) => {
               const newType = e.target.value as TransactionType;
-              setTransactionType(newType);
               form.setFieldValue('type', newType);
               form.setFieldValue(
                 'reason',
@@ -145,7 +166,7 @@ export function CreateTransactionModal({
         <Form.Item
           name="ingredientId"
           label={t('dashboard.selectIngredient')}
-          rules={[createZodRule(createTransactionSchema, 'ingredientId')]}
+          rules={[createZodRule(schema, 'ingredientId')]}
         >
           <Select
             showSearch
@@ -183,7 +204,7 @@ export function CreateTransactionModal({
           <Form.Item
             name="quantity"
             label={`${t('dashboard.quantity')} (${currentIngredient?.unit || 'ĐVT'})`}
-            rules={[createZodRule(createTransactionSchema, 'quantity')]}
+            rules={[createZodRule(schema, 'quantity')]}
           >
             <InputNumber
               style={{ width: '100%' }}
@@ -198,7 +219,7 @@ export function CreateTransactionModal({
             <Form.Item
               name="unitPrice"
               label={t('dashboard.unitPrice')}
-              rules={[createZodRule(createTransactionSchema, 'unitPrice')]}
+              rules={[createZodRule(schema, 'unitPrice')]}
             >
               <InputNumber
                 style={{ width: '100%' }}
@@ -212,7 +233,7 @@ export function CreateTransactionModal({
             <Form.Item
               name="reason"
               label={t('dashboard.reason')}
-              rules={[createZodRule(createTransactionSchema, 'reason')]}
+              rules={[createZodRule(schema, 'reason')]}
             >
               <Select options={reasonOptions} />
             </Form.Item>
@@ -223,7 +244,7 @@ export function CreateTransactionModal({
           <Form.Item
             name="reason"
             label={t('dashboard.reason')}
-            rules={[createZodRule(createTransactionSchema, 'reason')]}
+            rules={[createZodRule(schema, 'reason')]}
           >
             <Select options={reasonOptions} />
           </Form.Item>

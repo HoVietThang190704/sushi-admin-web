@@ -32,9 +32,12 @@ export async function fetchApi<T = unknown>(
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : {
+        'Content-Type': 'application/json',
+      };
 
   const response = await fetch(url, {
     ...options,

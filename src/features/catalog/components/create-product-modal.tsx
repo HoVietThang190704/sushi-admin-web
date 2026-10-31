@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Modal,
@@ -17,7 +17,7 @@ import {
   message,
 } from '@/components/ui';
 import { CreateProductInput } from '../types';
-import { createProductSchema } from '../schemas/catalog.schema';
+import { createProductSchemaFactory } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
 import { useTranslation } from '@/lib/i18n';
@@ -34,13 +34,23 @@ export function CreateProductModal({
   onClose,
   onSubmit,
 }: CreateProductModalProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { options: categoryOptions } = useCategoryOptions();
+
+  const schema = useMemo(() => createProductSchemaFactory(t), [t]);
+
+  useEffect(() => {
+    if (!open) return;
+    const hasErrors = form.getFieldsError().some((item) => item.errors.length > 0);
+    if (hasErrors) {
+      form.validateFields();
+    }
+  }, [open, locale, form]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,7 +91,7 @@ export function CreateProductModal({
   const handleSubmit = async (values: unknown) => {
     setSubmitting(true);
 
-    const result = createProductSchema.safeParse(values);
+    const result = schema.safeParse(values);
     if (!result.success) {
       setSubmitting(false);
       return;
@@ -124,7 +134,7 @@ export function CreateProductModal({
         <Form.Item
           name="name"
           label={t('dashboard.productNameLabel')}
-          rules={[createZodRule(createProductSchema, 'name')]}
+          rules={[createZodRule(schema, 'name')]}
         >
           <Input placeholder={t('dashboard.productNamePlaceholder')} />
         </Form.Item>
@@ -134,7 +144,7 @@ export function CreateProductModal({
           <Form.Item
             name="sku"
             label={t('dashboard.productSkuLabel')}
-            rules={[createZodRule(createProductSchema, 'sku')]}
+            rules={[createZodRule(schema, 'sku')]}
           >
             <Input placeholder={t('dashboard.productSkuPlaceholder')} className="uppercase font-mono" />
           </Form.Item>
@@ -172,7 +182,7 @@ export function CreateProductModal({
           <Form.Item
             name="sellingPrice"
             label={t('dashboard.productPriceLabel')}
-            rules={[createZodRule(createProductSchema, 'sellingPrice')]}
+            rules={[createZodRule(schema, 'sellingPrice')]}
           >
             <InputNumber<number>
               style={{ width: '100%' }}
@@ -195,7 +205,7 @@ export function CreateProductModal({
         <Form.Item
           name="imageUrl"
           label={t('dashboard.productImageLabel')}
-          rules={[createZodRule(createProductSchema, 'imageUrl')]}
+          rules={[createZodRule(schema, 'imageUrl')]}
         >
           <div className="space-y-3">
             {/* Input file ẩn để kích hoạt chọn file */}

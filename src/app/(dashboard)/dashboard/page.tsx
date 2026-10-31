@@ -10,10 +10,13 @@ import {
   SquaresFour,
   ForkKnife,
   Package,
-  Database,
+  CookingPot,
+  WarningCircle,
+  ShieldCheck,
   ArrowRight,
 } from '@/components/ui';
 import { useCategories, useProducts } from '@/features/catalog';
+import { useIngredients, useInventoryAlerts } from '@/features/inventory';
 import { useTranslation } from '@/lib/i18n';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 
@@ -22,6 +25,8 @@ export default function DashboardOverviewPage() {
   const router = useRouter();
   const { data: categories = [] } = useCategories();
   const { data: products = [] } = useProducts();
+  const { data: ingredients = [] } = useIngredients();
+  const { data: alerts = [] } = useInventoryAlerts();
   const { formatCurrency } = useFormatCurrency();
 
   return (
@@ -79,44 +84,65 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 3: Đơn Hàng & Bếp (Take Away) - Chỉ hiện trên tablet/desktop */}
-        <div className="hidden md:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 3: Tổng Số Nguyên Liệu Kho */}
+        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.orderSystemStatus')}
+              {t('dashboard.totalIngredients')}
             </span>
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-              <Package size={20} weight="fill" />
+              <CookingPot size={20} weight="fill" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-xl font-bold text-blue-400 tracking-tight font-sans">
-              Take Away
+            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+              {ingredients.length}
             </span>
-            <span className="inline-flex items-center space-x-1 text-2xs text-emerald-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>{t('dashboard.readyStatus')}</span>
+            <span className="text-2xs text-blue-400 font-mono">
+              {t('dashboard.menuInventory')}
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Cơ Sở Dữ Liệu & Hạ Tầng - Chỉ hiện trên tablet/desktop */}
-        <div className="hidden md:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 4: Cảnh Báo Tồn Kho */}
+        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.infraStatus')}
+              {t('dashboard.alertItemsCount')}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-              <Database size={20} weight="fill" />
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+                alerts.length > 0
+                  ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+                  : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+              }`}
+            >
+              {alerts.length > 0 ? (
+                <WarningCircle size={20} weight="fill" />
+              ) : (
+                <ShieldCheck size={20} weight="fill" />
+              )}
             </div>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-xl font-bold text-emerald-400 tracking-tight font-sans truncate">
-              {t('dashboard.databaseValue')}
+            <span
+              className={`text-3xl font-bold tracking-tight font-sans ${
+                alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
+              }`}
+            >
+              {alerts.length}
             </span>
-            <span className="inline-flex items-center space-x-1 text-2xs text-emerald-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <span>PostgreSQL</span>
+            <span
+              className={`inline-flex items-center space-x-1 text-2xs font-mono ${
+                alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  alerts.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'
+                }`}
+              ></span>
+              <span>{alerts.length > 0 ? t('dashboard.alertLow') : t('dashboard.alertSafe')}</span>
             </span>
           </div>
         </div>
@@ -136,21 +162,21 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* 3.1 Giao diện dạng thẻ/chip theo chiều ngang trên Mobile (< md) */}
-        <div className="grid grid-cols-3 gap-2 md:hidden">
-          {/* Action 1: Đơn Hàng & Bếp (Ưu tiên vận hành) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:hidden">
+          {/* Action 1: Danh Mục Món */}
           <button
             type="button"
-            onClick={() => router.push('/dashboard/orders')}
+            onClick={() => router.push('/dashboard/categories')}
             className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <Package size={17} weight="fill" />
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/25 flex items-center justify-center text-sushi-primary mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <SquaresFour size={17} weight="fill" />
             </div>
             <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.ordersTitle')}
+              {t('dashboard.categoriesTitle')}
             </span>
-            <span className="text-3xs text-blue-400/90 font-mono mt-0.5 truncate w-full">
-              Take Away
+            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
+              {categories.length} nhóm
             </span>
           </button>
 
@@ -171,26 +197,43 @@ export default function DashboardOverviewPage() {
             </span>
           </button>
 
-          {/* Action 3: Danh Mục Món */}
+          {/* Action 3: Kho Nguyên Liệu */}
           <button
             type="button"
-            onClick={() => router.push('/dashboard/categories')}
+            onClick={() => router.push('/dashboard/inventory')}
             className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
           >
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/25 flex items-center justify-center text-sushi-primary mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <SquaresFour size={17} weight="fill" />
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <CookingPot size={17} weight="fill" />
             </div>
             <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.categoriesTitle')}
+              {t('dashboard.menuInventory')}
+            </span>
+            <span className="text-3xs text-blue-400/90 font-mono mt-0.5 truncate w-full">
+              {ingredients.length} items
+            </span>
+          </button>
+
+          {/* Action 4: Đơn Hàng & Bếp (Sắp ra mắt) */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/orders')}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-muted mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+              <Package size={17} weight="fill" />
+            </div>
+            <span className="text-xs font-semibold text-sushi-text truncate w-full">
+              {t('dashboard.ordersTitle')}
             </span>
             <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              {categories.length} nhóm
+              Sắp ra mắt
             </span>
           </button>
         </div>
 
         {/* 3.2 Giao diện dạng Bento Cards lớn trên Desktop (>= md) */}
-        <div className="hidden md:grid md:grid-cols-3 gap-4">
+        <div className="hidden md:grid md:grid-cols-4 gap-4">
           {/* Action 1: Danh Mục Món */}
           <button
             type="button"
@@ -237,22 +280,45 @@ export default function DashboardOverviewPage() {
             </div>
           </button>
 
-          {/* Action 3: Đơn Hàng & Bếp */}
+          {/* Action 3: Kho Nguyên Liệu */}
           <button
             type="button"
-            onClick={() => router.push('/dashboard/orders')}
+            onClick={() => router.push('/dashboard/inventory')}
             className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-blue-500/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
           >
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-blue-400 shadow-inner">
-                  <Package size={20} />
-                </div>
-                <Tag color="cyan" className="font-mono text-2xs mr-0">
-                  Take Away
-                </Tag>
+              <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-blue-400 mb-3 shadow-inner">
+                <CookingPot size={20} />
               </div>
               <h3 className="text-sm font-bold text-sushi-text group-hover:text-blue-400 transition-colors">
+                {t('dashboard.inventoryTitle')}
+              </h3>
+              <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
+                {t('dashboard.inventorySubtitle')}
+              </p>
+            </div>
+            <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
+              <span>{t('dashboard.menuInventory')}</span>
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-blue-400" />
+            </div>
+          </button>
+
+          {/* Action 4: Đơn Hàng & Bếp */}
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/orders')}
+            className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-cyan-500/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-muted shadow-inner">
+                  <Package size={20} />
+                </div>
+                <Tag color="default" className="font-mono text-2xs mr-0">
+                  Coming Soon
+                </Tag>
+              </div>
+              <h3 className="text-sm font-bold text-sushi-text group-hover:text-cyan-400 transition-colors">
                 {t('dashboard.ordersTitle')}
               </h3>
               <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
@@ -261,7 +327,7 @@ export default function DashboardOverviewPage() {
             </div>
             <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
               <span>{t('dashboard.orders')}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-blue-400" />
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-cyan-400" />
             </div>
           </button>
         </div>
