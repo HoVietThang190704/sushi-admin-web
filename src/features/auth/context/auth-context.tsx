@@ -15,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   logout: () => Promise<void>;
+  setUser: (user: UserProfile | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,18 +34,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 phút lưu Cache phiên làm việc
+    // Chỉ lưu cache 5 phút khi đã đăng nhập thành công; nếu chưa đăng nhập (null) thì stale ngay
+    staleTime: (query) => (query.state.data ? 5 * 60 * 1000 : 0),
     gcTime: 10 * 60 * 1000,
     retry: false,
   });
+
+  const setUser = (newUser: UserProfile | null) => {
+    queryClient.setQueryData(authKeys.me, newUser);
+  };
 
   const logout = async () => {
     try {
       await authApi.logout();
     } finally {
+      queryClient.setQueryData(authKeys.me, null);
       queryClient.clear(); // Xóa sạch toàn bộ Cache khi người dùng đăng xuất
       router.push('/');
-      router.refresh();
     }
   };
 
@@ -55,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         isAuthenticated: Boolean(user),
         logout,
+        setUser,
       }}
     >
       {children}

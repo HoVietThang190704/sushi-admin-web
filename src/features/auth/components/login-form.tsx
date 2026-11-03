@@ -15,6 +15,7 @@ import {
   message,
 } from '@/components/ui';
 import { authApi } from '../api/auth.api';
+import { useAuth } from '../context/auth-context';
 import { useTranslation } from '@/lib/i18n';
 import { createLoginSchema } from '../schemas/auth.schema';
 import { createZodRule } from '@/lib/zod-validator';
@@ -22,12 +23,20 @@ import { createZodRule } from '@/lib/zod-validator';
 export function LoginForm() {
   const { t, locale, setLocale } = useTranslation();
   const router = useRouter();
+  const { setUser, isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
   const schema = useMemo(() => createLoginSchema(t), [t]);
+
+  // Nếu đã đăng nhập thành công, tự động chuyển vào dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Cập nhật lại thông báo lỗi validation tức thì khi người dùng chuyển đổi ngôn ngữ (VI <-> EN)
   useEffect(() => {
@@ -48,9 +57,10 @@ export function LoginForm() {
     }
 
     try {
-      await authApi.login(result.data);
+      const response = await authApi.login(result.data);
+      // Cập nhật trực tiếp phiên đăng nhập vào AuthContext/TanStack Query để tránh lag/race condition
+      setUser(response.user);
       router.push('/dashboard');
-      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t('auth.loginError');
       messageApi.error(msg);

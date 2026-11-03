@@ -5,6 +5,7 @@ import { ConfigProvider } from 'antd';
 import { antdThemeConfig } from '@/lib/theme';
 import { I18nProvider } from '@/lib/i18n';
 import { QueryProvider } from '@/providers/query-provider';
+import { AuthProvider } from '@/features/auth';
 import './globals.css';
 
 const geistSans = Geist({
@@ -38,7 +39,7 @@ export default function RootLayout({
           <ConfigProvider theme={antdThemeConfig}>
             <I18nProvider>
               <QueryProvider>
-                {children}
+                <AuthProvider>{children}</AuthProvider>
               </QueryProvider>
             </I18nProvider>
           </ConfigProvider>

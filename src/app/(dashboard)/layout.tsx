@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
-import { AuthProvider, useAuth, authApi } from '@/features/auth';
+import { useAuth } from '@/features/auth';
 import { RealtimeProvider } from '@/providers/realtime-provider';
 import { useTranslation } from '@/lib/i18n';
 import {
@@ -35,10 +35,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      // Dọn dẹp cookie không hợp lệ/hết hạn qua API logout để tránh proxy.ts redirect lặp (307)
-      authApi.logout().finally(() => {
-        router.replace('/');
-      });
+      router.replace('/');
     }
   }, [loading, isAuthenticated, router]);
 
@@ -105,10 +102,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <RealtimeProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </RealtimeProvider>
-    </AuthProvider>
+    <RealtimeProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </RealtimeProvider>
   );
 }
