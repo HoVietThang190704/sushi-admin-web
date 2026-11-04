@@ -50,6 +50,8 @@ export interface GetOrdersFilter {
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
   branchId?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface UpdateOrderStatusInput {

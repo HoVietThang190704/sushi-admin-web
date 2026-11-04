@@ -3,32 +3,36 @@
 import React, { useState } from 'react';
 import {
   Modal,
+  Drawer,
   Button,
-  Descriptions,
   Table,
   Space,
-  Input,
-  message,
-  Popconfirm,
-  Divider,
+  App,
 } from '@/components/ui';
 import {
   CookingPot,
   CheckCircle,
   Package,
-  WarningCircle,
   Receipt,
   User,
   Phone,
   FileText,
+  X,
+  CreditCard,
 } from '@phosphor-icons/react';
 import { Order, OrderItem, OrderStatus } from '../types';
 import { OrderStatusBadge } from './order-status-badge';
 import { OrderPaymentBadge } from './order-payment-badge';
+import { OrderLifecycleTimeline } from './order-lifecycle-timeline';
+import { OrderCancelForm } from './order-cancel-form';
+import { getOrderStatusLabel } from '../utils';
 import {
   useUpdateOrderStatus,
   useUpdatePaymentStatus,
 } from '../hooks/use-orders';
+import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
+import { useIsMobile } from '@/lib/hooks/use-is-mobile';
+import { SUSHICOLORS } from '@/lib/theme';
 
 interface OrderDetailModalProps {
   order: Order | null;
@@ -41,6 +45,10 @@ export function OrderDetailModal({
   open,
   onClose,
 }: OrderDetailModalProps) {
+  const { message } = App.useApp();
+  const { formatCurrency } = useFormatCurrency();
+  const isMobile = useIsMobile();
+
   const [cancelReason, setCancelReason] = useState('');
   const [showCancelInput, setShowCancelInput] = useState(false);
 
@@ -49,13 +57,18 @@ export function OrderDetailModal({
 
   if (!order) return null;
 
+  const totalItemsCount =
+    order.items?.reduce((sum, item) => sum + item.quantity, 0) ||
+    order.items?.length ||
+    0;
+
   const handleUpdateStatus = async (toStatus: OrderStatus, reason?: string) => {
     try {
       await updateStatusMutation.mutateAsync({
         orderId: order.id,
         input: { status: toStatus, reason },
       });
-      message.success(`Đã cập nhật trạng thái đơn sang "${toStatus}"`);
+      message.success(`Đã cập nhật trạng thái đơn sang "${getOrderStatusLabel(toStatus)}"`);
       setShowCancelInput(false);
       setCancelReason('');
       onClose();
@@ -73,7 +86,7 @@ export function OrderDetailModal({
         input: { paymentStatus: nextStatus },
       });
       message.success(
-        `Đã cập nhật trạng thái thanh toán sang "${nextStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"`,
+        `Đã cập nhật thanh toán sang "${nextStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"`,
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Cập nhật thanh toán thất bại';
@@ -81,16 +94,278 @@ export function OrderDetailModal({
     }
   };
 
+  // ---------------------------------------------------------------------------
+  // 1. GIAO DIỆN MOBILE BOTTOM SHEET (< 768px)
+  // ---------------------------------------------------------------------------
+  if (isMobile) {
+    const hasActiveWorkflow =
+      order.status === 'PENDING' ||
+      order.status === 'PREPARING' ||
+      order.status === 'READY_FOR_PICKUP';
+
+    return (
+      <Drawer
+        open={open}
+        onClose={onClose}
+        placement="bottom"
+        closable={false}
+        size="auto"
+        styles={{
+          wrapper: { maxHeight: '92vh' },
+          section: {
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            overflow: 'hidden',
+            maxHeight: '92vh',
+            backgroundColor: SUSHICOLORS.card,
+          },
+          body: {
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '92vh',
+            backgroundColor: SUSHICOLORS.card,
+          },
+        }}
+        className="rounded-t-3xl overflow-hidden [&_.ant-drawer-content]:bg-sushi-card [&_.ant-drawer-section]:bg-sushi-card [&_.ant-drawer-body]:bg-sushi-card"
+      >
+        {/* Sticky Mobile Header */}
+        <div className="sticky top-0 z-20 bg-sushi-card/95 backdrop-blur-md px-4 pt-3 pb-3 border-b border-sushi-border/80 shrink-0">
+          <div className="w-10 h-1 bg-zinc-600/80 rounded-full mx-auto mb-2.5" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <Receipt size={18} className="text-sushi-gold shrink-0" weight="fill" />
+                <span className="font-mono font-bold text-base text-sushi-text tracking-wide break-all">
+                  {order.code}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <OrderStatusBadge status={order.status} />
+                <span className="text-xs text-sushi-text-muted">
+                  {new Date(order.createdAt).toLocaleString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer shrink-0 mt-0.5"
+              aria-label="Đóng chi tiết"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable Mobile Body */}
+        <div className="flex-1 overflow-y-auto px-4 py-3.5 space-y-3.5">
+          {/* Card Thông tin khách hàng & Thanh toán */}
+          <div className="p-3.5 rounded-2xl bg-sushi-surface/70 border border-sushi-border/70 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-sushi-gold/15 text-sushi-gold flex items-center justify-center shrink-0">
+                  <User size={16} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold">Khách hàng</div>
+                  <div className="font-bold text-sm text-sushi-text truncate">{order.customerName}</div>
+                </div>
+              </div>
+              <a
+                href={`tel:${order.customerPhone}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sushi-gold/10 hover:bg-sushi-gold/20 text-sushi-gold font-semibold text-xs border border-sushi-gold/30 shrink-0 transition-colors"
+              >
+                <Phone size={13} weight="fill" />
+                <span>{order.customerPhone}</span>
+              </a>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-sushi-border/50">
+              <div className="min-w-0">
+                <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold mb-1">Thanh toán</div>
+                <div className="flex items-center gap-1.5">
+                  <OrderPaymentBadge status={order.paymentStatus} />
+                  <span className="text-2xs text-sushi-text-muted">({order.paymentMethod})</span>
+                </div>
+              </div>
+              <Button
+                size="small"
+                onClick={handleTogglePayment}
+                loading={updatePaymentMutation.isPending}
+                className="text-xs rounded-lg border-sushi-border/80 text-sushi-gold hover:border-sushi-gold hover:text-sushi-gold shrink-0 h-8 px-2.5"
+              >
+                {order.paymentStatus === 'PAID' ? 'Đổi sang Chưa TT' : 'Đổi sang Đã TT'}
+              </Button>
+            </div>
+
+            {order.note && (
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-start gap-2">
+                <FileText size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <span className="font-semibold text-amber-400">Ghi chú: </span>
+                  <span className="text-amber-200/90 italic leading-relaxed">{order.note}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Form hủy đơn nếu đang kích hoạt */}
+          {showCancelInput && (
+            <OrderCancelForm
+              reason={cancelReason}
+              onChangeReason={setCancelReason}
+              onCancel={() => setShowCancelInput(false)}
+              onConfirm={() => handleUpdateStatus('CANCELLED', cancelReason)}
+              isPending={updateStatusMutation.isPending}
+              isMobile
+            />
+          )}
+
+          {/* Phiếu Danh sách Món ăn & Tổng tiền liền khối */}
+          <div className="rounded-2xl border border-sushi-border/70 bg-sushi-surface/50 overflow-hidden shadow-xs">
+            <div className="px-3.5 py-2.5 bg-zinc-900/60 border-b border-sushi-border/60 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-sushi-text-muted">
+              <span>Món ăn đã đặt</span>
+              <span className="text-sushi-gold font-mono">{totalItemsCount} món</span>
+            </div>
+
+            <div className="divide-y divide-sushi-border/40 px-3.5">
+              {order.items?.map((item) => (
+                <div key={item.id} className="py-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm text-sushi-text leading-snug">
+                      {item.productName}
+                    </div>
+                    {item.note && (
+                      <div className="text-xs text-sushi-text-muted italic mt-0.5">
+                        Ghi chú: {item.note}
+                      </div>
+                    )}
+                    <div className="text-xs text-sushi-text-muted mt-1 font-mono">
+                      {item.quantity > 1 ? (
+                        <span>
+                          {item.quantity} × {formatCurrency(item.unitPrice)}
+                        </span>
+                      ) : (
+                        formatCurrency(item.unitPrice)
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-bold text-sm text-sushi-text font-mono">
+                      {formatCurrency(item.subtotal)}
+                    </div>
+                    {item.quantity > 1 && (
+                      <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded bg-sushi-gold/15 text-sushi-gold text-2xs font-bold font-mono">
+                        x{item.quantity}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-3.5 py-3 bg-zinc-900/70 border-t border-sushi-border/70 flex items-center justify-between">
+              <span className="text-sm font-semibold text-sushi-text-muted">
+                Tổng thanh toán:
+              </span>
+              <span className="text-lg font-bold font-mono text-sushi-gold">
+                {formatCurrency(order.totalAmount)}
+              </span>
+            </div>
+          </div>
+
+          {/* Lịch sử vòng đời đơn (Thu gọn) */}
+          <OrderLifecycleTimeline histories={order.statusHistories} collapsible />
+
+          {/* Nút đóng nội dung nếu đơn đã hoàn tất/đã hủy */}
+          {!hasActiveWorkflow && (
+            <div className="pt-1">
+              <Button
+                onClick={onClose}
+                className="w-full h-11 rounded-xl text-sm font-semibold border-sushi-border text-sushi-text hover:bg-zinc-800"
+              >
+                Đóng
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Sticky Mobile Action Footer */}
+        {hasActiveWorkflow && (
+          <div className="sticky bottom-0 z-20 bg-sushi-card/95 backdrop-blur-md px-4 py-3 border-t border-sushi-border/80 shrink-0 space-y-2">
+            {order.status === 'PENDING' && (
+              <div className="flex items-center gap-2">
+                <Button
+                  danger
+                  onClick={() => setShowCancelInput(!showCancelInput)}
+                  className="h-12 px-4 rounded-xl text-xs font-semibold shrink-0"
+                >
+                  Hủy đơn
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<CookingPot size={20} />}
+                  onClick={() => handleUpdateStatus('PREPARING')}
+                  loading={updateStatusMutation.isPending}
+                  className="flex-1 h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 border-none shadow-md text-white cursor-pointer"
+                >
+                  Bắt đầu chế biến
+                </Button>
+              </div>
+            )}
+
+            {order.status === 'PREPARING' && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<Package size={20} />}
+                onClick={() => handleUpdateStatus('READY_FOR_PICKUP')}
+                loading={updateStatusMutation.isPending}
+                className="w-full h-12 rounded-xl font-bold bg-purple-600 hover:bg-purple-500 border-none shadow-md text-white cursor-pointer"
+              >
+                Sẵn sàng lấy món
+              </Button>
+            )}
+
+            {order.status === 'READY_FOR_PICKUP' && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<CheckCircle size={20} />}
+                onClick={() => handleUpdateStatus('COMPLETED')}
+                loading={updateStatusMutation.isPending}
+                className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 border-none shadow-md text-white cursor-pointer"
+              >
+                Hoàn thành giao khách
+              </Button>
+            )}
+          </div>
+        )}
+      </Drawer>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. GIAO DIỆN DESKTOP MODAL (>= 768px)
+  // ---------------------------------------------------------------------------
   const itemColumns = [
     {
-      title: 'Món ăn',
+      title: 'MÓN ĂN',
       dataIndex: 'productName',
       key: 'productName',
       render: (name: string, item: OrderItem) => (
         <div>
-          <div className="font-medium text-sushi-text-primary">{name}</div>
+          <div className="font-semibold text-sushi-text">{name}</div>
           {item.note && (
-            <div className="text-xs text-sushi-text-muted italic">
+            <div className="text-xs text-sushi-text-muted italic mt-0.5">
               Ghi chú: {item.note}
             </div>
           )}
@@ -98,36 +373,36 @@ export function OrderDetailModal({
       ),
     },
     {
-      title: 'Đơn giá',
+      title: 'ĐƠN GIÁ',
       dataIndex: 'unitPrice',
       key: 'unitPrice',
       align: 'right' as const,
-      render: (price: number) =>
-        new Intl.NumberFormat('vi-VN', {
-          style: 'currency',
-          currency: 'VND',
-        }).format(price),
-    },
-    {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      align: 'center' as const,
-      render: (qty: number) => (
-        <span className="font-semibold text-sushi-gold">x{qty}</span>
+      width: 140,
+      render: (price: number) => (
+        <span className="font-mono text-sushi-text-muted">{formatCurrency(price)}</span>
       ),
     },
     {
-      title: 'Thành tiền',
+      title: 'SỐ LƯỢNG',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      align: 'center' as const,
+      width: 100,
+      render: (qty: number) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-md bg-sushi-gold/15 text-sushi-gold font-bold font-mono text-xs">
+          x{qty}
+        </span>
+      ),
+    },
+    {
+      title: 'THÀNH TIỀN',
       dataIndex: 'subtotal',
       key: 'subtotal',
       align: 'right' as const,
+      width: 150,
       render: (subtotal: number) => (
-        <span className="font-medium text-sushi-text-primary">
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-          }).format(subtotal)}
+        <span className="font-semibold font-mono text-sushi-text">
+          {formatCurrency(subtotal)}
         </span>
       ),
     },
@@ -137,36 +412,42 @@ export function OrderDetailModal({
     <Modal
       open={open}
       onCancel={onClose}
-      width={750}
+      width={780}
+      centered
       title={
-        <div className="flex items-center gap-3">
-          <Receipt size={24} className="text-sushi-gold" />
-          <span className="font-serif text-lg font-bold text-sushi-text-primary">
-            Chi tiết đơn hàng {order.code}
-          </span>
-          <OrderStatusBadge status={order.status} />
+        <div className="flex items-center gap-3 pr-8 py-0.5">
+          <div className="w-10 h-10 rounded-xl bg-sushi-gold/15 text-sushi-gold flex items-center justify-center border border-sushi-gold/30 shrink-0">
+            <Receipt size={22} weight="fill" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="font-mono font-bold text-lg text-sushi-text tracking-wide">
+                {order.code}
+              </span>
+              <OrderStatusBadge status={order.status} />
+            </div>
+            <div className="text-xs text-sushi-text-muted mt-0.5 font-sans">
+              Thời gian đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}
+            </div>
+          </div>
         </div>
       }
       footer={
-        <div className="flex items-center justify-between gap-2 pt-2">
-          {/* Nút hành động thanh toán */}
+        <div className="flex items-center justify-between pt-2">
           <Button
-            onClick={handleTogglePayment}
-            loading={updatePaymentMutation.isPending}
-            className="border-sushi-border"
+            onClick={onClose}
+            className="border-sushi-border text-sushi-text hover:bg-zinc-800"
           >
-            {order.paymentStatus === 'PAID'
-              ? 'Đánh dấu Chưa thanh toán'
-              : 'Đánh dấu Đã thanh toán'}
+            Đóng
           </Button>
 
-          {/* Các nút chuyển trạng thái quy trình */}
-          <Space>
+          <Space size="middle">
             {order.status === 'PENDING' && (
               <>
                 <Button
                   danger
                   onClick={() => setShowCancelInput(!showCancelInput)}
+                  className="font-semibold"
                 >
                   Hủy đơn
                 </Button>
@@ -175,7 +456,7 @@ export function OrderDetailModal({
                   icon={<CookingPot size={18} />}
                   onClick={() => handleUpdateStatus('PREPARING')}
                   loading={updateStatusMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-500"
+                  className="bg-blue-600 hover:bg-blue-500 font-semibold h-9 px-4 border-none shadow-sm"
                 >
                   Bắt đầu chế biến
                 </Button>
@@ -188,7 +469,7 @@ export function OrderDetailModal({
                 icon={<Package size={18} />}
                 onClick={() => handleUpdateStatus('READY_FOR_PICKUP')}
                 loading={updateStatusMutation.isPending}
-                className="bg-purple-600 hover:bg-purple-500"
+                className="bg-purple-600 hover:bg-purple-500 font-semibold h-9 px-4 border-none shadow-sm"
               >
                 Sẵn sàng lấy món
               </Button>
@@ -200,13 +481,11 @@ export function OrderDetailModal({
                 icon={<CheckCircle size={18} />}
                 onClick={() => handleUpdateStatus('COMPLETED')}
                 loading={updateStatusMutation.isPending}
-                className="bg-emerald-600 hover:bg-emerald-500"
+                className="bg-emerald-600 hover:bg-emerald-500 font-semibold h-9 px-4 border-none shadow-sm"
               >
                 Hoàn thành giao khách
               </Button>
             )}
-
-            <Button onClick={onClose}>Đóng</Button>
           </Space>
         </div>
       }
@@ -214,160 +493,107 @@ export function OrderDetailModal({
       <div className="space-y-4 py-2">
         {/* Form nhập lý do hủy đơn nếu được bật */}
         {showCancelInput && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg space-y-2">
-            <div className="text-sm font-medium text-rose-400 flex items-center gap-1.5">
-              <WarningCircle size={18} />
-              Xác nhận hủy đơn hàng này
-            </div>
-            <Input
-              placeholder="Nhập lý do hủy đơn (ví dụ: Hết nguyên liệu, Khách đổi ý...)"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
-              <Button size="small" onClick={() => setShowCancelInput(false)}>
-                Hủy bỏ
-              </Button>
-              <Popconfirm
-                title="Bạn có chắc chắn muốn hủy đơn hàng này?"
-                onConfirm={() => handleUpdateStatus('CANCELLED', cancelReason)}
-                okText="Đồng ý hủy"
-                cancelText="Quay lại"
-              >
-                <Button
-                  size="small"
-                  danger
-                  type="primary"
-                  loading={updateStatusMutation.isPending}
+          <OrderCancelForm
+            reason={cancelReason}
+            onChangeReason={setCancelReason}
+            onCancel={() => setShowCancelInput(false)}
+            onConfirm={() => handleUpdateStatus('CANCELLED', cancelReason)}
+            isPending={updateStatusMutation.isPending}
+          />
+        )}
+
+        {/* 1. Thông tin Khách hàng & Thanh toán */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3.5 rounded-xl bg-sushi-surface/80 border border-sushi-border/80 flex items-start justify-between">
+            <div className="space-y-1 min-w-0">
+              <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted flex items-center gap-1.5">
+                <User size={14} className="text-sushi-gold" /> Khách hàng
+              </span>
+              <div className="font-bold text-sm text-sushi-text truncate">
+                {order.customerName}
+              </div>
+              <div className="pt-0.5">
+                <a
+                  href={`tel:${order.customerPhone}`}
+                  className="inline-flex items-center gap-1.5 text-xs text-sushi-gold font-semibold hover:underline"
                 >
-                  Xác nhận Hủy
-                </Button>
-              </Popconfirm>
+                  <Phone size={13} weight="fill" />
+                  <span>{order.customerPhone}</span>
+                </a>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-2xs text-sushi-text-muted block mb-1">Loại hình</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-sushi-border/60">
+                Take Away
+              </span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-sushi-surface/80 border border-sushi-border/80 flex items-start justify-between">
+            <div className="space-y-1.5 min-w-0">
+              <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted flex items-center gap-1.5">
+                <CreditCard size={14} className="text-sushi-gold" /> Thanh toán
+              </span>
+              <div className="flex items-center gap-2">
+                <OrderPaymentBadge status={order.paymentStatus} />
+                <span className="text-xs text-sushi-text-muted">({order.paymentMethod})</span>
+              </div>
+            </div>
+            <Button
+              size="small"
+              onClick={handleTogglePayment}
+              loading={updatePaymentMutation.isPending}
+              className="text-xs rounded-lg border-sushi-border/80 text-sushi-gold hover:border-sushi-gold hover:text-sushi-gold shrink-0 mt-0.5"
+            >
+              {order.paymentStatus === 'PAID' ? 'Hủy đánh dấu Đã TT' : 'Đánh dấu Đã TT'}
+            </Button>
+          </div>
+        </div>
+
+        {/* 2. Ghi chú từ khách hàng (nếu có) */}
+        {order.note && (
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs flex items-start gap-2.5">
+            <FileText size={17} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <span className="font-semibold text-amber-400">Ghi chú từ khách: </span>
+              <span className="text-amber-200/90 italic leading-relaxed">{order.note}</span>
             </div>
           </div>
         )}
 
-        {/* Thông tin khách hàng & đơn hàng */}
-        <Descriptions
-          bordered
-          size="small"
-          column={{ xs: 1, sm: 2 }}
-          className="bg-sushi-card/50"
-        >
-          <Descriptions.Item
-            label={
-              <span className="flex items-center gap-1 text-sushi-text-muted">
-                <User size={16} /> Khách hàng
-              </span>
-            }
-          >
-            <span className="font-semibold text-sushi-text-primary">
-              {order.customerName}
+        {/* 3. Bảng danh sách món ăn & Hóa đơn tổng tiền gắn liền */}
+        <div className="rounded-xl border border-sushi-border/80 overflow-hidden bg-sushi-surface/40">
+          <div className="px-4 py-2.5 bg-zinc-900/70 border-b border-sushi-border/80 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-sushi-text">
+              Danh sách món ăn ({order.items?.length || 0})
             </span>
-          </Descriptions.Item>
-
-          <Descriptions.Item
-            label={
-              <span className="flex items-center gap-1 text-sushi-text-muted">
-                <Phone size={16} /> Số điện thoại
-              </span>
-            }
-          >
-            <a
-              href={`tel:${order.customerPhone}`}
-              className="text-sushi-gold font-medium hover:underline"
-            >
-              {order.customerPhone}
-            </a>
-          </Descriptions.Item>
-
-          <Descriptions.Item label="Thời gian đặt">
-            {new Date(order.createdAt).toLocaleString('vi-VN')}
-          </Descriptions.Item>
-
-          <Descriptions.Item label="Thanh toán">
-            <div className="flex items-center gap-2">
-              <OrderPaymentBadge status={order.paymentStatus} />
-              <span className="text-xs text-sushi-text-muted">
-                ({order.paymentMethod})
-              </span>
-            </div>
-          </Descriptions.Item>
-
-          {order.note && (
-            <Descriptions.Item
-              label={
-                <span className="flex items-center gap-1 text-sushi-text-muted">
-                  <FileText size={16} /> Ghi chú
-                </span>
-              }
-              span={2}
-            >
-              <span className="text-sushi-text-secondary italic">
-                {order.note}
-              </span>
-            </Descriptions.Item>
-          )}
-        </Descriptions>
-
-        {/* Danh sách món ăn */}
-        <div>
-          <div className="text-sm font-semibold text-sushi-text-primary mb-2">
-            Danh sách món ăn ({order.items?.length || 0})
+            <span className="text-xs text-sushi-gold font-semibold">
+              {totalItemsCount} phần
+            </span>
           </div>
+
           <Table
             dataSource={order.items || []}
             columns={itemColumns}
             rowKey="id"
             pagination={false}
             size="small"
-            className="border border-sushi-border rounded-lg overflow-hidden"
+            className="[&_.ant-table]:bg-transparent [&_.ant-table-thead_th]:bg-zinc-900/90 [&_.ant-table-thead_th]:text-sushi-text-muted [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:border-b-sushi-border/70"
           />
-        </div>
 
-        {/* Tổng tiền */}
-        <div className="flex justify-end items-center gap-3 pr-2">
-          <span className="text-sm text-sushi-text-muted">Tổng thanh toán:</span>
-          <span className="text-xl font-bold font-serif text-sushi-gold">
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-            }).format(order.totalAmount)}
-          </span>
-        </div>
-
-        {/* Lịch sử trạng thái */}
-        {order.statusHistories && order.statusHistories.length > 0 && (
-          <div>
-            <Divider style={{ margin: '12px 0' }} />
-            <div className="text-xs font-semibold text-sushi-text-muted uppercase tracking-wider mb-2">
-              Lịch sử vòng đời đơn
-            </div>
-            <div className="space-y-1.5 text-xs text-sushi-text-secondary">
-              {order.statusHistories.map((h) => (
-                <div key={h.id} className="flex items-center gap-2">
-                  <span className="text-sushi-text-muted">
-                    {new Date(h.createdAt).toLocaleTimeString('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })}
-                  </span>
-                  <span className="font-medium text-sushi-text-primary">
-                    {h.fromStatus ? `${h.fromStatus} → ` : ''}
-                    {h.toStatus}
-                  </span>
-                  <span className="text-sushi-text-muted">bởi {h.changedBy}</span>
-                  {h.reason && (
-                    <span className="italic text-amber-400/90">
-                      ({h.reason})
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="px-4 py-3 bg-zinc-900/50 border-t border-sushi-border/80 flex items-center justify-between">
+            <span className="text-sm font-semibold text-sushi-text-muted">
+              Tổng tiền thanh toán:
+            </span>
+            <span className="text-xl font-bold font-mono text-sushi-gold">
+              {formatCurrency(order.totalAmount)}
+            </span>
           </div>
-        )}
+        </div>
+
+        {/* 4. Lịch sử vòng đời đơn (Dùng chung component OrderLifecycleTimeline) */}
+        <OrderLifecycleTimeline histories={order.statusHistories} />
       </div>
     </Modal>
   );

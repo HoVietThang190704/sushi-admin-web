@@ -5,7 +5,6 @@ import {
   SushiPageHeader,
   Button,
   Input,
-  Space,
   Tabs,
 } from '@/components/ui';
 import {
@@ -17,18 +16,41 @@ import {
   CheckCircle,
   WarningCircle,
   List as ListIcon,
+  Funnel,
+  X,
 } from '@phosphor-icons/react';
-import { useOrders, OrderTable, OrderStatus } from '@/features/orders';
+import dayjs from 'dayjs';
+import {
+  useOrders,
+  OrderTable,
+  OrderStatus,
+  OrderDateFilterDrawer,
+} from '@/features/orders';
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [filterDateRange, setFilterDateRange] = useState<{
+    startDate?: string;
+    endDate?: string;
+  }>({});
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const filterStatus = activeTab === 'ALL' ? undefined : (activeTab as OrderStatus);
-
-  const { data: orders = [], isLoading, refetch, isFetching } = useOrders(
-    filterStatus ? { status: filterStatus } : undefined,
+  const hasDateFilter = Boolean(
+    filterDateRange.startDate || filterDateRange.endDate,
   );
+
+  const queryFilter = useMemo(
+    () => ({
+      status: filterStatus,
+      startDate: filterDateRange.startDate,
+      endDate: filterDateRange.endDate,
+    }),
+    [filterStatus, filterDateRange],
+  );
+
+  const { data: orders = [], isLoading, refetch, isFetching } = useOrders(queryFilter);
 
   // Tính số lượng đơn theo từng trạng thái để hiển thị count trên Tabs
   const counts = useMemo(() => {
@@ -123,35 +145,89 @@ export default function OrdersPage() {
         title="Quản Lý Đơn Hàng (Take Away)"
         subtitle="Theo dõi vòng đời đơn hàng, điều phối bếp và cập nhật trạng thái theo thời gian thực"
         extra={
-          <Space>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Input
               placeholder="Tìm theo mã đơn, tên, SĐT..."
               prefix={<MagnifyingGlass size={16} className="text-sushi-text-muted" />}
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               allowClear
-              className="w-64"
+              className="w-full sm:w-64"
             />
-            <Button
-              icon={<ArrowsClockwise size={16} className={isFetching ? 'animate-spin' : ''} />}
-              onClick={() => refetch()}
-              loading={isFetching}
-            >
-              Làm mới
-            </Button>
-          </Space>
+            <div className="flex items-center gap-2">
+              <Button
+                icon={
+                  <Funnel
+                    size={16}
+                    weight={hasDateFilter ? 'fill' : 'regular'}
+                    className={hasDateFilter ? 'text-sushi-gold' : ''}
+                  />
+                }
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className={`flex-1 sm:flex-initial ${
+                  hasDateFilter ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
+                }`}
+              >
+                <span>Lọc ngày</span>
+                {hasDateFilter && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 inline-block" />
+                )}
+              </Button>
+              <Button
+                icon={<ArrowsClockwise size={16} className={isFetching ? 'animate-spin' : ''} />}
+                onClick={() => refetch()}
+                loading={isFetching}
+                className="shrink-0"
+              >
+                Làm mới
+              </Button>
+            </div>
+          </div>
         }
       />
 
-      <div className="bg-sushi-card border border-sushi-border rounded-xl p-3 shadow-sm">
+      {/* Thanh thông báo bộ lọc ngày đang kích hoạt */}
+      {hasDateFilter && (
+        <div className="flex items-center gap-2 text-xs bg-sushi-gold/10 text-sushi-gold border border-sushi-gold/30 px-3 py-1.5 rounded-xl w-fit">
+          <span>
+            Lọc ngày:{' '}
+            {filterDateRange.startDate
+              ? dayjs(filterDateRange.startDate).format('DD/MM/YYYY')
+              : '...'}
+            {' → '}
+            {filterDateRange.endDate
+              ? dayjs(filterDateRange.endDate).format('DD/MM/YYYY')
+              : '...'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setFilterDateRange({})}
+            className="hover:text-white p-0.5 cursor-pointer ml-1 inline-flex items-center"
+            title="Xóa bộ lọc ngày"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      <div className="bg-sushi-card border border-sushi-border rounded-xl p-2.5 sm:p-4 shadow-sm">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
           items={tabItems}
-          className="border-b-0"
+          className="border-b-0 overflow-x-auto"
         />
         <OrderTable orders={filteredOrders} isLoading={isLoading} />
       </div>
+
+      <OrderDateFilterDrawer
+        open={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        startDate={filterDateRange.startDate}
+        endDate={filterDateRange.endDate}
+        onApply={(filter) => setFilterDateRange(filter)}
+        onReset={() => setFilterDateRange({})}
+      />
     </div>
   );
 }

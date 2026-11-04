@@ -12,6 +12,8 @@ export const ordersApi = {
     if (filters?.status) params.set('status', filters.status);
     if (filters?.paymentStatus) params.set('paymentStatus', filters.paymentStatus);
     if (filters?.branchId) params.set('branchId', filters.branchId);
+    if (filters?.startDate) params.set('startDate', filters.startDate);
+    if (filters?.endDate) params.set('endDate', filters.endDate);
 
     const qs = params.toString();
     return fetchApi<Order[]>(`/api/orders${qs ? `?${qs}` : ''}`);

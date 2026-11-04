@@ -8,7 +8,7 @@ interface OrderStatusBadgeProps {
   status: OrderStatus;
 }
 
-const statusConfig: Record<
+export const ORDER_STATUS_CONFIG: Record<
   OrderStatus,
   { label: string; color: string; bg: string; border: string; text: string }
 > = {
@@ -50,7 +50,7 @@ const statusConfig: Record<
 };
 
 export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
-  const config = statusConfig[status] || {
+  const config = ORDER_STATUS_CONFIG[status] || {
     label: status,
     color: 'default',
     bg: 'bg-zinc-500/10',

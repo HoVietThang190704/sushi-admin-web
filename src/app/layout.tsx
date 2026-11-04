@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App } from 'antd';
 import { antdThemeConfig } from '@/lib/theme';
 import { I18nProvider } from '@/lib/i18n';
 import { QueryProvider } from '@/providers/query-provider';
@@ -37,11 +37,13 @@ export default function RootLayout({
       <body className="min-h-screen bg-sushi-bg text-sushi-text antialiased font-sans">
         <AntdRegistry>
           <ConfigProvider theme={antdThemeConfig}>
-            <I18nProvider>
-              <QueryProvider>
-                <AuthProvider>{children}</AuthProvider>
-              </QueryProvider>
-            </I18nProvider>
+            <App>
+              <I18nProvider>
+                <QueryProvider>
+                  <AuthProvider>{children}</AuthProvider>
+                </QueryProvider>
+              </I18nProvider>
+            </App>
           </ConfigProvider>
         </AntdRegistry>
       </body>
