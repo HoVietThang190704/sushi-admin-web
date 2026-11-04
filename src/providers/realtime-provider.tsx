@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth';
 import { inventoryKeys } from '@/features/inventory/hooks/use-inventory';
 import { catalogKeys } from '@/features/catalog/hooks/use-categories';
+import { orderKeys } from '@/features/orders/hooks/use-orders';
 
 export interface RealtimeContextType {
   isConnected: boolean;
@@ -49,6 +50,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
         } else if (event?.resource === 'catalog') {
           queryClient.invalidateQueries({ queryKey: catalogKeys.all });
+        } else if (event?.resource === 'order') {
+          queryClient.invalidateQueries({ queryKey: orderKeys.all });
         }
         setLastEvent(event);
       },
