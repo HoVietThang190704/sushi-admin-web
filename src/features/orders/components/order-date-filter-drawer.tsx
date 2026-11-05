@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Drawer, Button, DatePicker } from '@/components/ui';
+import { Drawer, Modal, Button, DatePicker } from '@/components/ui';
 import { CalendarBlank, X } from '@phosphor-icons/react';
 import dayjs, { Dayjs } from 'dayjs';
 import { SUSHICOLORS } from '@/lib/theme';
+import { useIsMobile } from '@/lib/hooks/use-is-mobile';
 
 interface OrderDateFilterDrawerProps {
   open: boolean;
@@ -172,6 +173,41 @@ export function OrderDateFilterDrawer({
   onApply,
   onReset,
 }: OrderDateFilterDrawerProps) {
+  const isMobile = useIsMobile();
+
+  // Desktop (>= 768px): Modal căn giữa nhỏ gọn, không choán toàn màn hình
+  if (!isMobile) {
+    return (
+      <Modal
+        open={open}
+        onCancel={onClose}
+        width={480}
+        centered
+        footer={null}
+        closable={false}
+        styles={{
+          body: {
+            backgroundColor: SUSHICOLORS.card,
+            padding: 0,
+          },
+        }}
+        className="[&_.ant-modal-content]:bg-sushi-card [&_.ant-modal-content]:border [&_.ant-modal-content]:border-sushi-border [&_.ant-modal-content]:rounded-2xl"
+      >
+        {open && (
+          <FilterForm
+            key={`${startDate || ''}-${endDate || ''}`}
+            startDate={startDate}
+            endDate={endDate}
+            onClose={onClose}
+            onApply={onApply}
+            onReset={onReset}
+          />
+        )}
+      </Modal>
+    );
+  }
+
+  // Mobile (< 768px): Bottom Sheet Drawer vuốt từ dưới lên giữ nguyên 100%
   return (
     <Drawer
       open={open}
