@@ -227,7 +227,7 @@ export function ShippingManagementView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sushi-border/70">
         <div>
-          <h1 className="text-2xl font-bold font-serif text-sushi-text tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold font-sans text-sushi-text tracking-normal flex items-center gap-2.5">
             <Truck size={28} className="text-sushi-gold" />
             <span>Cấu Hình Phí Giao Hàng (TP.HCM)</span>
           </h1>
