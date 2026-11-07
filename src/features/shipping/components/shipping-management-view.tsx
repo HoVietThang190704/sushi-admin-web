@@ -32,6 +32,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   fetchBranches,
   fetchShippingRules,
+  fetchShippingLocations,
   upsertShippingRule,
   deleteShippingRule,
 } from '../api/shipping.api';
@@ -56,6 +57,11 @@ export function ShippingManagementView() {
   const { data: branches = [], isLoading: loadingBranches } = useQuery({
     queryKey: ['branches'],
     queryFn: fetchBranches,
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['shipping-locations'],
+    queryFn: fetchShippingLocations,
   });
 
   const { data: rules = [], isLoading: loadingRules } = useQuery({
@@ -232,6 +238,44 @@ export function ShippingManagementView() {
     return rules.slice(start, start + mobilePageSize);
   }, [rules, mobilePage]);
 
+  const handleWardSelect = (selectedWardName: string) => {
+    const loc = locations.find((l) => l.ward === selectedWardName);
+    if (loc) {
+      form.setFieldsValue({
+        ward: loc.ward,
+        district: loc.district || '',
+      });
+    } else {
+      form.setFieldsValue({ ward: selectedWardName });
+    }
+  };
+
+  const wardSelectOptions = React.useMemo(() => {
+    // Sắp xếp đưa các phường có hỗ trợ lên trước, sau đó theo alphabet A-Z
+    return locations
+      .slice()
+      .sort((a, b) => {
+        if (a.isSupported !== b.isSupported) {
+          return a.isSupported ? -1 : 1;
+        }
+        return a.ward.localeCompare(b.ward, 'vi');
+      })
+      .map((l) => ({
+        label: (
+          <div className="flex items-center justify-between gap-2 py-0.5">
+            <span className="font-semibold text-sushi-text">{l.ward}</span>
+            <span className="text-2xs text-sushi-text-muted truncate max-w-[180px]">
+              {l.district}
+              {l.formerWards ? ` • Cũ: ${l.formerWards}` : ''}
+            </span>
+          </div>
+        ),
+        value: l.ward,
+        district: l.district,
+        searchKey: `${l.ward} ${l.district} ${l.formerWards || ''}`.toLowerCase(),
+      }));
+  }, [locations]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -401,7 +445,7 @@ export function ShippingManagementView() {
         cancelText="Hủy"
         className="[&_.ant-modal-content]:bg-sushi-card [&_.ant-modal-content]:border [&_.ant-modal-content]:border-sushi-border/80"
       >
-        <Form form={form} layout="vertical" className="pt-3">
+        <Form form={form} layout="vertical" className="pt-3 space-y-1">
           <Form.Item
             name="branchId"
             label={<span className="text-xs font-semibold text-sushi-text">Chi Nhánh Phục Vụ</span>}
@@ -409,6 +453,7 @@ export function ShippingManagementView() {
           >
             <Select
               placeholder="Chọn chi nhánh"
+              className="w-full"
               options={branches.map((b) => ({
                 label: `${b.name} (${b.code})`,
                 value: b.id,
@@ -416,22 +461,43 @@ export function ShippingManagementView() {
             />
           </Form.Item>
 
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="district"
-                label={<span className="text-xs font-semibold text-sushi-text">Khu Vực / Quận (tham chiếu)</span>}
-              >
-                <Input placeholder="Ví dụ: Khu vực 1 (Quận 1 cũ)" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
+          <Row gutter={[16, 0]}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="ward"
-                label={<span className="text-xs font-semibold text-sushi-text">Phường / Xã (TP.HCM mới)</span>}
-                rules={[{ required: true, message: 'Nhập Phường/Xã' }]}
+                label={
+                  <span className="text-xs font-semibold text-sushi-text">
+                    Phường / Xã (Chọn chuẩn TP.HCM)
+                  </span>
+                }
+                rules={[{ required: true, message: 'Vui lòng chọn Phường/Xã' }]}
               >
-                <Input placeholder="Ví dụ: Phường Sài Gòn, Phường Thạnh Mỹ Tây" />
+                <Select
+                  showSearch
+                  placeholder="Gõ tên mới hoặc cũ (Bến Nghé, Đa Kao...)"
+                  className="w-full"
+                  options={wardSelectOptions}
+                  onChange={handleWardSelect}
+                  filterOption={(input, option) => {
+                    const searchStr = (option as { searchKey?: string })?.searchKey || '';
+                    return searchStr.includes(input.trim().toLowerCase());
+                  }}
+                  notFoundContent="Không tìm thấy phường/xã phù hợp"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name="district"
+                label={
+                  <span className="text-xs font-semibold text-sushi-text">
+                    Khu Vực / Quận (tham chiếu)
+                  </span>
+                }
+                rules={[{ required: true, message: 'Vui lòng nhập/chọn khu vực' }]}
+              >
+                <Input placeholder="Tự động điền theo phường/xã" className="w-full" />
               </Form.Item>
             </Col>
           </Row>
@@ -454,7 +520,7 @@ export function ShippingManagementView() {
             />
           </Form.Item>
 
-          <Row gutter={16}>
+          <Row gutter={16} className="pt-1">
             <Col span={12}>
               <Form.Item
                 name="isDefault"

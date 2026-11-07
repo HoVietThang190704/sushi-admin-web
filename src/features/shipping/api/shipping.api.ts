@@ -20,6 +20,27 @@ export async function fetchShippingRules(params?: {
   return res || [];
 }
 
+export async function fetchShippingLocations(): Promise<
+  Array<{
+    district: string;
+    ward: string;
+    wardCode?: string;
+    formerWards?: string;
+    isSupported: boolean;
+  }>
+> {
+  const res = await fetchApi<
+    Array<{
+      district: string;
+      ward: string;
+      wardCode?: string;
+      formerWards?: string;
+      isSupported: boolean;
+    }>
+  >('/api/shipping/locations');
+  return res || [];
+}
+
 export async function upsertShippingRule(
   input: UpsertShippingRuleInput
 ): Promise<ShippingRule> {
