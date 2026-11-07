@@ -131,7 +131,7 @@ export function ShippingManagementView() {
 
   const columns = [
     {
-      title: 'QUẬN / HUYỆN',
+      title: 'KHU VỰC / QUẬN THAM CHIẾU',
       dataIndex: 'district',
       key: 'district',
       render: (text: string) => (
@@ -139,7 +139,7 @@ export function ShippingManagementView() {
       ),
     },
     {
-      title: 'PHƯỜNG / XÃ',
+      title: 'PHƯỜNG / XÃ (TP.HCM)',
       dataIndex: 'ward',
       key: 'ward',
       render: (text: string, record: ShippingRule) => (
@@ -297,19 +297,18 @@ export function ShippingManagementView() {
             <Col span={12}>
               <Form.Item
                 name="district"
-                label={<span className="text-xs font-semibold text-sushi-text">Quận / Huyện</span>}
-                rules={[{ required: true, message: 'Nhập Quận/Huyện' }]}
+                label={<span className="text-xs font-semibold text-sushi-text">Khu Vực / Quận (tham chiếu)</span>}
               >
-                <Input placeholder="Ví dụ: Quận 1, Bình Thạnh" />
+                <Input placeholder="Ví dụ: Khu vực 1 (Quận 1 cũ)" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="ward"
-                label={<span className="text-xs font-semibold text-sushi-text">Phường / Xã</span>}
+                label={<span className="text-xs font-semibold text-sushi-text">Phường / Xã (TP.HCM mới)</span>}
                 rules={[{ required: true, message: 'Nhập Phường/Xã' }]}
               >
-                <Input placeholder="Ví dụ: Phường Bến Nghé" />
+                <Input placeholder="Ví dụ: Phường Sài Gòn, Phường Thạnh Mỹ Tây" />
               </Form.Item>
             </Col>
           </Row>
