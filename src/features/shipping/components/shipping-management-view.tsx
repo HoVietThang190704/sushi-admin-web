@@ -16,6 +16,9 @@ import {
   Card,
   Row,
   Col,
+  Pagination,
+  Empty,
+  Spin,
 } from '@/components/ui';
 import {
   Truck,
@@ -44,6 +47,8 @@ export function ShippingManagementView() {
   const [branchFilter, setBranchFilter] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ShippingRule | null>(null);
+  const [mobilePage, setMobilePage] = useState<number>(1);
+  const mobilePageSize = 10;
 
   const [form] = Form.useForm();
 
@@ -222,6 +227,11 @@ export function ShippingManagementView() {
     },
   ];
 
+  const paginatedRulesMobile = React.useMemo(() => {
+    const start = (mobilePage - 1) * mobilePageSize;
+    return rules.slice(start, start + mobilePageSize);
+  }, [rules, mobilePage]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -246,8 +256,8 @@ export function ShippingManagementView() {
         </Button>
       </div>
 
-      {/* Bảng dữ liệu */}
-      <Card className="rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
+      {/* Bảng dữ liệu (Desktop & Tablet ngang) */}
+      <Card className="hidden sm:block rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
         <Table
           dataSource={rules}
           columns={columns}
@@ -257,6 +267,119 @@ export function ShippingManagementView() {
           className="[&_.ant-table]:bg-transparent [&_.ant-table-thead_th]:bg-zinc-900/80 [&_.ant-table-thead_th]:text-sushi-text-muted [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:font-semibold"
         />
       </Card>
+
+      {/* Danh sách Dạng Card (Tối ưu riêng cho Mobile) */}
+      <div className="block sm:hidden space-y-3">
+        {loadingRules || loadingBranches ? (
+          <div className="py-12 flex justify-center items-center">
+            <Spin size="large" />
+          </div>
+        ) : rules.length === 0 ? (
+          <Card className="rounded-2xl border-sushi-border/80 bg-sushi-card/90 p-6 text-center">
+            <Empty description="Chưa có cấu hình phí giao hàng nào" />
+          </Card>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {paginatedRulesMobile.map((rule) => (
+                <div
+                  key={rule.id}
+                  className="rounded-2xl border border-sushi-border/80 bg-sushi-card/95 p-4 shadow-sm space-y-3 transition-colors hover:border-sushi-gold/50"
+                >
+                  {/* Phường/Xã + Giá ship */}
+                  <div className="flex items-start justify-between gap-2 border-b border-sushi-border/60 pb-2.5">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-sm text-sushi-text">
+                          {rule.ward}
+                        </span>
+                        {rule.isDefault && (
+                          <Tag color="gold" className="text-2xs font-semibold m-0">
+                            Mặc định
+                          </Tag>
+                        )}
+                      </div>
+                      <span className="text-2xs text-sushi-text-muted flex items-center gap-1">
+                        <MapPin size={12} className="text-sushi-gold shrink-0" />
+                        <span>{rule.district || 'TP.HCM'}</span>
+                      </span>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-extrabold text-base text-sushi-gold block">
+                        {formatCurrency(Number(rule.fee))}
+                      </span>
+                      <Tag
+                        color={rule.isActive ? 'green' : 'default'}
+                        className="text-2xs m-0 mt-0.5"
+                      >
+                        {rule.isActive ? 'Đang phục vụ' : 'Tạm dừng'}
+                      </Tag>
+                    </div>
+                  </div>
+
+                  {/* Chi nhánh phục vụ */}
+                  <div className="rounded-xl bg-zinc-900/60 p-2.5 flex items-start gap-2 border border-sushi-border/40">
+                    <Storefront size={15} className="text-sushi-gold mt-0.5 shrink-0" />
+                    <div className="min-w-0 text-xs">
+                      <span className="font-semibold text-sushi-text block truncate">
+                        {rule.branch?.name || rule.branchId}
+                      </span>
+                      <span className="text-2xs text-sushi-text-muted block truncate">
+                        {rule.branch?.address || 'Chưa cập nhật địa chỉ'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Hành động */}
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-sushi-border/40">
+                    <Button
+                      size="small"
+                      icon={<PencilSimple size={14} />}
+                      onClick={() => handleOpenEdit(rule)}
+                      className="rounded-lg text-xs font-medium border-sushi-border/70 text-sushi-gold hover:text-amber-400 h-8"
+                    >
+                      Sửa
+                    </Button>
+                    <Button
+                      size="small"
+                      danger
+                      icon={<Trash size={14} />}
+                      onClick={() => {
+                        Modal.confirm({
+                          title: 'Xóa cấu hình phí ship?',
+                          content: `Bạn có chắc muốn xóa phí ship cho ${rule.ward}, ${rule.district}?`,
+                          okText: 'Xác nhận xóa',
+                          cancelText: 'Hủy',
+                          okType: 'danger',
+                          onOk: () => deleteMutation.mutate(rule.id),
+                        });
+                      }}
+                      className="rounded-lg text-xs font-medium h-8"
+                    >
+                      Xóa
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Phân trang Mobile */}
+            {rules.length > mobilePageSize && (
+              <div className="flex justify-center pt-2">
+                <Pagination
+                  current={mobilePage}
+                  pageSize={mobilePageSize}
+                  total={rules.length}
+                  onChange={(page) => setMobilePage(page)}
+                  size="small"
+                  showSizeChanger={false}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Modal Thêm / Sửa */}
       <Modal
