@@ -54,11 +54,13 @@ export default function OrdersPage() {
 
   // Tính số lượng đơn theo từng trạng thái để hiển thị count trên Tabs
   const counts = useMemo(() => {
-    const res = {
+    const res: Record<string, number> = {
       ALL: orders.length,
       PENDING: 0,
+      CONFIRMED: 0,
       PREPARING: 0,
       READY_FOR_PICKUP: 0,
+      DELIVERING: 0,
       COMPLETED: 0,
       CANCELLED: 0,
     };

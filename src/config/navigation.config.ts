@@ -5,6 +5,7 @@ import {
   SquaresFour,
   Package,
   CookingPot,
+  Truck,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -56,6 +57,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: '/dashboard/orders',
     labelKey: 'dashboard.orders',
     icon: Package,
+  },
+  {
+    key: 'shipping',
+    path: '/dashboard/shipping',
+    labelKey: 'dashboard.shipping',
+    icon: Truck,
   },
 ] as const;
 

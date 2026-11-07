@@ -13,28 +13,42 @@ export const ORDER_STATUS_CONFIG: Record<
   { label: string; color: string; bg: string; border: string; text: string }
 > = {
   PENDING: {
-    label: 'Chờ xác nhận',
+    label: 'Chờ tiếp nhận',
     color: 'gold',
     bg: 'bg-amber-500/10',
     border: 'border-amber-500/30',
     text: 'text-amber-400',
   },
-  PREPARING: {
-    label: 'Đang chế biến',
+  CONFIRMED: {
+    label: 'Đã xác nhận',
     color: 'blue',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/30',
     text: 'text-blue-400',
   },
+  PREPARING: {
+    label: 'Đang chế biến',
+    color: 'orange',
+    bg: 'bg-orange-500/10',
+    border: 'border-orange-500/30',
+    text: 'text-orange-400',
+  },
   READY_FOR_PICKUP: {
-    label: 'Sẵn sàng lấy',
+    label: 'Chờ giao hàng',
     color: 'purple',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/30',
     text: 'text-purple-400',
   },
+  DELIVERING: {
+    label: 'Đang giao hàng',
+    color: 'cyan',
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-500/30',
+    text: 'text-cyan-400',
+  },
   COMPLETED: {
-    label: 'Hoàn thành',
+    label: 'Đã hoàn thành',
     color: 'green',
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/30',

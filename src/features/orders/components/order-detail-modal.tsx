@@ -19,6 +19,8 @@ import {
   FileText,
   X,
   CreditCard,
+  Truck,
+  MapPin,
 } from '@phosphor-icons/react';
 import { Order, OrderItem, OrderStatus } from '../types';
 import { OrderStatusBadge } from './order-status-badge';
@@ -100,8 +102,10 @@ export function OrderDetailModal({
   if (isMobile) {
     const hasActiveWorkflow =
       order.status === 'PENDING' ||
+      order.status === 'CONFIRMED' ||
       order.status === 'PREPARING' ||
-      order.status === 'READY_FOR_PICKUP';
+      order.status === 'READY_FOR_PICKUP' ||
+      order.status === 'DELIVERING';
 
     return (
       <Drawer
@@ -339,12 +343,25 @@ export function OrderDetailModal({
               <Button
                 type="primary"
                 size="large"
+                icon={<Truck size={20} />}
+                onClick={() => handleUpdateStatus('DELIVERING')}
+                loading={updateStatusMutation.isPending}
+                className="w-full h-12 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-500 border-none shadow-md text-white cursor-pointer"
+              >
+                Bắt đầu giao hàng (Shipper lấy)
+              </Button>
+            )}
+
+            {order.status === 'DELIVERING' && (
+              <Button
+                type="primary"
+                size="large"
                 icon={<CheckCircle size={20} />}
                 onClick={() => handleUpdateStatus('COMPLETED')}
                 loading={updateStatusMutation.isPending}
                 className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 border-none shadow-md text-white cursor-pointer"
               >
-                Hoàn thành giao khách
+                Xác nhận đã giao thành công
               </Button>
             )}
           </div>
@@ -478,12 +495,24 @@ export function OrderDetailModal({
             {order.status === 'READY_FOR_PICKUP' && (
               <Button
                 type="primary"
+                icon={<Truck size={18} />}
+                onClick={() => handleUpdateStatus('DELIVERING')}
+                loading={updateStatusMutation.isPending}
+                className="bg-cyan-600 hover:bg-cyan-500 font-semibold h-9 px-4 border-none shadow-sm"
+              >
+                Bắt đầu giao hàng
+              </Button>
+            )}
+
+            {order.status === 'DELIVERING' && (
+              <Button
+                type="primary"
                 icon={<CheckCircle size={18} />}
                 onClick={() => handleUpdateStatus('COMPLETED')}
                 loading={updateStatusMutation.isPending}
                 className="bg-emerald-600 hover:bg-emerald-500 font-semibold h-9 px-4 border-none shadow-sm"
               >
-                Hoàn thành giao khách
+                Xác nhận đã giao
               </Button>
             )}
           </Space>
@@ -524,8 +553,9 @@ export function OrderDetailModal({
             </div>
             <div className="text-right shrink-0">
               <span className="text-2xs text-sushi-text-muted block mb-1">Loại hình</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-sushi-border/60">
-                Take Away
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 flex items-center gap-1">
+                <Truck size={12} />
+                <span>Giao tận nơi</span>
               </span>
             </div>
           </div>
@@ -550,6 +580,21 @@ export function OrderDetailModal({
             </Button>
           </div>
         </div>
+
+        {/* Địa chỉ giao hàng tận nơi */}
+        {order.address && (
+          <div className="p-3.5 rounded-xl bg-sushi-surface/80 border border-sushi-border/80 flex items-start gap-2.5 text-xs">
+            <MapPin size={18} className="text-sushi-gold shrink-0 mt-0.5" weight="fill" />
+            <div className="min-w-0 flex-1">
+              <span className="font-semibold text-sushi-text-muted block text-2xs uppercase tracking-wider mb-0.5">
+                Địa chỉ giao hàng:
+              </span>
+              <span className="text-sushi-text font-medium leading-relaxed block text-sm">
+                {order.address}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* 2. Ghi chú từ khách hàng (nếu có) */}
         {order.note && (

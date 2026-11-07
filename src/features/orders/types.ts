@@ -1,7 +1,9 @@
 export type OrderStatus =
   | 'PENDING'
+  | 'CONFIRMED'
   | 'PREPARING'
   | 'READY_FOR_PICKUP'
+  | 'DELIVERING'
   | 'COMPLETED'
   | 'CANCELLED';
 
@@ -34,10 +36,16 @@ export interface Order {
   code: string;
   customerName: string;
   customerPhone: string;
+  customerEmail?: string | null;
+  address?: string | null;
+  province?: string | null;
+  district?: string | null;
+  ward?: string | null;
   branchId?: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
+  shippingFee?: number;
   totalAmount: number;
   note?: string | null;
   createdAt: string;

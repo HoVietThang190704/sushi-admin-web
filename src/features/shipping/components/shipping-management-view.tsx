@@ -1,0 +1,359 @@
+'use client';
+
+import React, { useState } from 'react';
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Switch,
+  Space,
+  Tag,
+  App,
+  Card,
+  Row,
+  Col,
+} from '@/components/ui';
+import {
+  Truck,
+  Plus,
+  PencilSimple,
+  Trash,
+  MapPin,
+  Storefront,
+} from '@/components/ui';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchBranches,
+  fetchShippingRules,
+  upsertShippingRule,
+  deleteShippingRule,
+} from '../api/shipping.api';
+import { ShippingRule, UpsertShippingRuleInput } from '../types';
+import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
+
+export function ShippingManagementView() {
+  const { message } = App.useApp();
+  const queryClient = useQueryClient();
+  const { formatCurrency } = useFormatCurrency();
+
+  const [districtFilter, setDistrictFilter] = useState<string>('');
+  const [branchFilter, setBranchFilter] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<ShippingRule | null>(null);
+
+  const [form] = Form.useForm();
+
+  // Queries
+  const { data: branches = [], isLoading: loadingBranches } = useQuery({
+    queryKey: ['branches'],
+    queryFn: fetchBranches,
+  });
+
+  const { data: rules = [], isLoading: loadingRules } = useQuery({
+    queryKey: ['shipping-rules', districtFilter, branchFilter],
+    queryFn: () =>
+      fetchShippingRules({
+        district: districtFilter || undefined,
+        branchId: branchFilter || undefined,
+      }),
+  });
+
+  // Mutations
+  const upsertMutation = useMutation({
+    mutationFn: upsertShippingRule,
+    onSuccess: () => {
+      message.success('Lưu cấu hình phí ship thành công!');
+      setIsModalOpen(false);
+      form.resetFields();
+      setEditingRule(null);
+      queryClient.invalidateQueries({ queryKey: ['shipping-rules'] });
+    },
+    onError: (err: Error) => {
+      message.error(err.message || 'Lỗi khi lưu cấu hình');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteShippingRule,
+    onSuccess: () => {
+      message.success('Đã xóa cấu hình phí ship');
+      queryClient.invalidateQueries({ queryKey: ['shipping-rules'] });
+    },
+    onError: (err: Error) => {
+      message.error(err.message || 'Không thể xóa cấu hình');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingRule(null);
+    form.resetFields();
+    form.setFieldsValue({
+      fee: 20000,
+      isDefault: true,
+      isActive: true,
+      branchId: branches[0]?.id,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (rule: ShippingRule) => {
+    setEditingRule(rule);
+    form.setFieldsValue({
+      branchId: rule.branchId,
+      district: rule.district,
+      ward: rule.ward,
+      fee: Number(rule.fee),
+      isDefault: rule.isDefault,
+      isActive: rule.isActive,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      upsertMutation.mutate({
+        branchId: values.branchId,
+        district: values.district.trim(),
+        ward: values.ward.trim(),
+        fee: values.fee,
+        isDefault: values.isDefault,
+        isActive: values.isActive,
+      });
+    } catch {
+      // Validate form failed
+    }
+  };
+
+  const columns = [
+    {
+      title: 'QUẬN / HUYỆN',
+      dataIndex: 'district',
+      key: 'district',
+      render: (text: string) => (
+        <span className="font-semibold text-sushi-text">{text}</span>
+      ),
+    },
+    {
+      title: 'PHƯỜNG / XÃ',
+      dataIndex: 'ward',
+      key: 'ward',
+      render: (text: string, record: ShippingRule) => (
+        <div>
+          <span className="font-medium text-sushi-text block">{text}</span>
+          {record.isDefault && (
+            <Tag color="gold" className="text-2xs font-semibold mt-0.5">
+              Chi nhánh mặc định
+            </Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'CHI NHÁNH PHỤC VỤ',
+      dataIndex: 'branch',
+      key: 'branch',
+      render: (_: unknown, record: ShippingRule) => (
+        <div className="text-xs">
+          <span className="font-semibold text-sushi-gold block">
+            {record.branch?.name || record.branchId}
+          </span>
+          <span className="text-sushi-text-muted text-2xs truncate max-w-xs block">
+            {record.branch?.address}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: 'MỨC PHÍ SHIP',
+      dataIndex: 'fee',
+      key: 'fee',
+      align: 'right' as const,
+      render: (fee: number) => (
+        <span className="font-mono font-bold text-sushi-text">
+          {formatCurrency(fee)}
+        </span>
+      ),
+    },
+    {
+      title: 'TRẠNG THÁI',
+      dataIndex: 'isActive',
+      key: 'isActive',
+      align: 'center' as const,
+      render: (isActive: boolean) => (
+        <Tag color={isActive ? 'green' : 'default'}>
+          {isActive ? 'Đang phục vụ' : 'Tạm dừng'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'THAO TÁC',
+      key: 'actions',
+      align: 'center' as const,
+      render: (_: unknown, record: ShippingRule) => (
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<PencilSimple size={16} />}
+            onClick={() => handleOpenEdit(record)}
+            className="text-sushi-gold hover:text-sushi-gold"
+          />
+          <Button
+            type="text"
+            danger
+            icon={<Trash size={16} />}
+            onClick={() => {
+              Modal.confirm({
+                title: 'Xóa cấu hình phí ship?',
+                content: `Bạn có chắc muốn xóa phí ship cho ${record.ward}, ${record.district}?`,
+                okText: 'Xác nhận xóa',
+                cancelText: 'Hủy',
+                okType: 'danger',
+                onOk: () => deleteMutation.mutate(record.id),
+              });
+            }}
+          />
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sushi-border/70">
+        <div>
+          <h1 className="text-2xl font-bold font-serif text-sushi-text tracking-tight flex items-center gap-2.5">
+            <Truck size={28} className="text-sushi-gold" />
+            <span>Cấu Hình Phí Giao Hàng (TP.HCM)</span>
+          </h1>
+          <p className="text-xs text-sushi-text-muted mt-1">
+            Thiết lập bảng giá ship và chỉ định chi nhánh mặc định theo từng Xã/Phường
+          </p>
+        </div>
+
+        <Button
+          type="primary"
+          icon={<Plus size={16} />}
+          onClick={handleOpenCreate}
+          className="bg-sushi-gold hover:bg-amber-500 text-zinc-950 font-bold h-10 rounded-xl"
+        >
+          Thêm Mức Phí Phường/Xã
+        </Button>
+      </div>
+
+      {/* Bảng dữ liệu */}
+      <Card className="rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
+        <Table
+          dataSource={rules}
+          columns={columns}
+          rowKey="id"
+          loading={loadingRules || loadingBranches}
+          pagination={{ pageSize: 15 }}
+          className="[&_.ant-table]:bg-transparent [&_.ant-table-thead_th]:bg-zinc-900/80 [&_.ant-table-thead_th]:text-sushi-text-muted [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:font-semibold"
+        />
+      </Card>
+
+      {/* Modal Thêm / Sửa */}
+      <Modal
+        open={isModalOpen}
+        title={
+          <div className="font-bold text-base text-sushi-text flex items-center gap-2">
+            <Truck size={20} className="text-sushi-gold" />
+            <span>
+              {editingRule
+                ? 'Chỉnh Sửa Phí Giao Hàng'
+                : 'Thêm Cấu Hình Phí Giao Hàng Mới'}
+            </span>
+          </div>
+        }
+        onCancel={() => setIsModalOpen(false)}
+        onOk={handleSubmit}
+        confirmLoading={upsertMutation.isPending}
+        okText="Lưu cấu hình"
+        cancelText="Hủy"
+        className="[&_.ant-modal-content]:bg-sushi-card [&_.ant-modal-content]:border [&_.ant-modal-content]:border-sushi-border/80"
+      >
+        <Form form={form} layout="vertical" className="pt-3">
+          <Form.Item
+            name="branchId"
+            label={<span className="text-xs font-semibold text-sushi-text">Chi Nhánh Phục Vụ</span>}
+            rules={[{ required: true, message: 'Vui lòng chọn chi nhánh' }]}
+          >
+            <Select
+              placeholder="Chọn chi nhánh"
+              options={branches.map((b) => ({
+                label: `${b.name} (${b.code})`,
+                value: b.id,
+              }))}
+            />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="district"
+                label={<span className="text-xs font-semibold text-sushi-text">Quận / Huyện</span>}
+                rules={[{ required: true, message: 'Nhập Quận/Huyện' }]}
+              >
+                <Input placeholder="Ví dụ: Quận 1, Bình Thạnh" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="ward"
+                label={<span className="text-xs font-semibold text-sushi-text">Phường / Xã</span>}
+                rules={[{ required: true, message: 'Nhập Phường/Xã' }]}
+              >
+                <Input placeholder="Ví dụ: Phường Bến Nghé" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="fee"
+            label={<span className="text-xs font-semibold text-sushi-text">Mức Phí Giao Hàng (VNĐ)</span>}
+            rules={[{ required: true, message: 'Nhập số tiền phí ship' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1000}
+              className="w-full"
+              formatter={(value) =>
+                value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
+              }
+              parser={(value) =>
+                (value ? Number(value.replace(/,/g, '')) : 0) as 0
+              }
+            />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="isDefault"
+                label={<span className="text-xs font-semibold text-sushi-text">Chi nhánh mặc định</span>}
+                valuePropName="checked"
+              >
+                <Switch />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="isActive"
+                label={<span className="text-xs font-semibold text-sushi-text">Đang phục vụ</span>}
+                valuePropName="checked"
+              >
+                <Switch defaultChecked />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
+    </div>
+  );
+}

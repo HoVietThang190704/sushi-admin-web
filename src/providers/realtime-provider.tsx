@@ -27,7 +27,11 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000';
+    const socketUrl =
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      (typeof window !== 'undefined'
+        ? `${window.location.protocol}//${window.location.hostname}:3000`
+        : 'http://localhost:3000');
     const socket: Socket = io(`${socketUrl}/realtime`, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
