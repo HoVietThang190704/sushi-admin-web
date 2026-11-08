@@ -2,13 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Modal,
+  ResponsiveModalDrawer,
   Form,
   Input,
   InputNumber,
   Select,
   Button,
-  Space,
   Radio,
 } from '@/components/ui';
 import { Ingredient, CreateTransactionInput, TransactionType } from '../types';
@@ -117,15 +116,14 @@ export function CreateTransactionModal({
   }, [transactionType, t]);
 
   return (
-    <Modal
+    <ResponsiveModalDrawer
       title={
         transactionType === 'IN'
           ? t('dashboard.modalStockInTitle')
           : t('dashboard.modalStockOutTitle')
       }
       open={open}
-      onCancel={handleModalClose}
-      footer={null}
+      onClose={handleModalClose}
       destroyOnHidden
       width={520}
     >
@@ -258,20 +256,22 @@ export function CreateTransactionModal({
           />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right', marginTop: 16 }}>
-          <Space>
-            <Button onClick={onClose}>{t('common.cancel')}</Button>
+        <Form.Item style={{ marginBottom: 0, marginTop: 16 }}>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button onClick={onClose} className="w-full sm:w-auto h-10 sm:h-auto rounded-xl">
+              {t('common.cancel')}
+            </Button>
             <Button
               type="primary"
               htmlType="submit"
               loading={submitting}
-              className={transactionType === 'OUT' ? 'bg-amber-600 border-amber-600' : ''}
+              className={`w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold ${transactionType === 'OUT' ? 'bg-amber-600 border-amber-600' : ''}`}
             >
               {transactionType === 'IN' ? t('dashboard.stockIn') : t('dashboard.stockOut')}
             </Button>
-          </Space>
+          </div>
         </Form.Item>
       </Form>
-    </Modal>
+    </ResponsiveModalDrawer>
   );
 }

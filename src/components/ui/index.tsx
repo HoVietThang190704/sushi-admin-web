@@ -338,11 +338,12 @@ export interface SushiPageHeaderProps {
   subtitle?: string;
   extra?: React.ReactNode;
   subtitleClassName?: string;
+  className?: string;
 }
 
-export function SushiPageHeader({ title, subtitle, extra, subtitleClassName }: SushiPageHeaderProps) {
+export function SushiPageHeader({ title, subtitle, extra, subtitleClassName, className }: SushiPageHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-sushi-border gap-4">
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 mb-3.5 sm:pb-6 sm:mb-6 border-b border-sushi-border gap-4 ${className || ''}`}>
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-sushi-text tracking-tight font-sans">
           {title}
@@ -357,3 +358,7 @@ export function SushiPageHeader({ title, subtitle, extra, subtitleClassName }: S
     </div>
   );
 }
+
+export { ResponsiveModalDrawer } from './responsive-modal-drawer';
+export type { ResponsiveModalDrawerProps } from './responsive-modal-drawer';
+

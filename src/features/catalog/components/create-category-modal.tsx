@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Modal, Form, Input, Button, Space } from '@/components/ui';
+import { ResponsiveModalDrawer, Form, Input, Button } from '@/components/ui';
 import { Category, CreateCategoryInput } from '../types';
 import { createCategorySchemaFactory } from '../schemas/catalog.schema';
 import { createZodRule } from '@/lib/zod-validator';
@@ -54,12 +54,12 @@ export function CreateCategoryModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModalDrawer
       title={t('dashboard.modalCreateTitle')}
       open={open}
-      onCancel={onClose}
-      footer={null}
+      onClose={onClose}
       destroyOnHidden
+      width={480}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
@@ -70,19 +70,22 @@ export function CreateCategoryModal({
           <Input placeholder={t('dashboard.categoryNamePlaceholder')} />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-          <Space>
-            <Button onClick={onClose}>{t('common.cancel')}</Button>
+        <Form.Item style={{ marginBottom: 0, marginTop: 16 }}>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button onClick={onClose} className="w-full sm:w-auto h-10 sm:h-auto rounded-xl">
+              {t('common.cancel')}
+            </Button>
             <Button
               type="primary"
               htmlType="submit"
               loading={submitting}
+              className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
             >
               {t('common.create')}
             </Button>
-          </Space>
+          </div>
         </Form.Item>
       </Form>
-    </Modal>
+    </ResponsiveModalDrawer>
   );
 }

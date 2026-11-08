@@ -2,12 +2,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Modal,
+  ResponsiveModalDrawer,
   Form,
   Input,
   InputNumber,
   Button,
-  Space,
 } from '@/components/ui';
 import { CreateIngredientInput } from '../types';
 import { createIngredientSchemaFactory } from '../schemas/inventory.schema';
@@ -63,11 +62,10 @@ export function CreateIngredientModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModalDrawer
       title={t('dashboard.modalCreateIngredientTitle')}
       open={open}
-      onCancel={onClose}
-      footer={null}
+      onClose={onClose}
       destroyOnHidden
       width={520}
     >
@@ -135,15 +133,22 @@ export function CreateIngredientModal({
           </Form.Item>
         </div>
 
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right', marginTop: 16 }}>
-          <Space>
-            <Button onClick={onClose}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={submitting}>
+        <Form.Item style={{ marginBottom: 0, marginTop: 16 }}>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button onClick={onClose} className="w-full sm:w-auto h-10 sm:h-auto rounded-xl">
+              {t('common.cancel')}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submitting}
+              className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
+            >
               {t('common.create')}
             </Button>
-          </Space>
+          </div>
         </Form.Item>
       </Form>
-    </Modal>
+    </ResponsiveModalDrawer>
   );
 }

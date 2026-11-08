@@ -30,7 +30,7 @@ export default function DashboardOverviewPage() {
   const { formatCurrency } = useFormatCurrency();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* =========================================================================
           1. Header Trang
          ========================================================================= */}
@@ -41,11 +41,11 @@ export default function DashboardOverviewPage() {
       />
 
       {/* =========================================================================
-          2. KPI Metric Cards (Grid 4 cột cân xứng phong cách Bento)
+          2. KPI Metric Cards (Mobile: 2 thẻ quan trọng gọn gàng; Desktop: Grid 4 cột Bento)
          ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Danh Mục Thực Đơn */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-sushi-primary/40 transition-all duration-300 shadow-md group">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Metric 1: Danh Mục Thực Đơn (Ẩn trên mobile, hiện từ sm trở lên) */}
+        <div className="hidden sm:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-sushi-primary/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
               {t('dashboard.totalCategories')}
@@ -64,8 +64,8 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 2: Tổng Số Món Ăn & Combo */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-amber-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 2: Tổng Số Món Ăn & Combo (Ẩn trên mobile, hiện từ sm trở lên) */}
+        <div className="hidden sm:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-amber-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-sushi-text-muted">
               {t('dashboard.totalProducts')}
@@ -84,56 +84,56 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 3: Tổng Số Nguyên Liệu Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 3: Tổng Số Nguyên Liệu Kho (Hiện trên cả mobile và desktop) */}
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+            <span className="text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.totalIngredients')}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-              <CookingPot size={20} weight="fill" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform shrink-0 ml-1">
+              <CookingPot size={18} weight="fill" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+          <div className="mt-2.5 sm:mt-4 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {ingredients.length}
             </span>
-            <span className="text-2xs text-blue-400 font-mono">
+            <span className="hidden sm:inline text-2xs text-blue-400 font-mono">
               {t('dashboard.menuInventory')}
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Cảnh Báo Tồn Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
+        {/* Metric 4: Cảnh Báo Tồn Kho (Hiện trên cả mobile và desktop) */}
+        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+            <span className="text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.alertItemsCount')}
             </span>
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${
+              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 shrink-0 ml-1 ${
                 alerts.length > 0
                   ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
                   : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
               }`}
             >
               {alerts.length > 0 ? (
-                <WarningCircle size={20} weight="fill" />
+                <WarningCircle size={18} weight="fill" />
               ) : (
-                <ShieldCheck size={20} weight="fill" />
+                <ShieldCheck size={18} weight="fill" />
               )}
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
+          <div className="mt-2.5 sm:mt-4 flex items-baseline justify-between">
             <span
-              className={`text-3xl font-bold tracking-tight font-sans ${
+              className={`text-2xl sm:text-3xl font-bold tracking-tight font-sans ${
                 alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
               }`}
             >
               {alerts.length}
             </span>
             <span
-              className={`inline-flex items-center space-x-1 text-2xs font-mono ${
+              className={`inline-flex items-center space-x-1 text-3xs sm:text-2xs font-mono ${
                 alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
               }`}
             >

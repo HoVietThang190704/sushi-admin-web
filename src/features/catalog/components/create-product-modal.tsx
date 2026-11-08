@@ -3,14 +3,13 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import {
-  Modal,
+  ResponsiveModalDrawer,
   Form,
   Input,
   InputNumber,
   Select,
   Radio,
   Button,
-  Space,
   ImageSquare,
   Trash,
   Spin,
@@ -116,11 +115,10 @@ export function CreateProductModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModalDrawer
       title={t('dashboard.modalCreateProductTitle')}
       open={open}
-      onCancel={handleModalClose}
-      footer={null}
+      onClose={handleModalClose}
       destroyOnHidden
       width={560}
     >
@@ -300,15 +298,22 @@ export function CreateProductModal({
         </Form.Item>
 
         {/* Buttons */}
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right', marginTop: 20 }}>
-          <Space>
-            <Button onClick={handleModalClose}>{t('common.cancel')}</Button>
-            <Button type="primary" htmlType="submit" loading={submitting}>
+        <Form.Item style={{ marginBottom: 0, marginTop: 20 }}>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button onClick={handleModalClose} className="w-full sm:w-auto h-10 sm:h-auto rounded-xl">
+              {t('common.cancel')}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submitting}
+              className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
+            >
               {t('common.create')}
             </Button>
-          </Space>
+          </div>
         </Form.Item>
       </Form>
-    </Modal>
+    </ResponsiveModalDrawer>
   );
 }

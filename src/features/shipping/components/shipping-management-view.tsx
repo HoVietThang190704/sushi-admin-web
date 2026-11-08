@@ -5,6 +5,7 @@ import {
   Table,
   Button,
   Modal,
+  ResponsiveModalDrawer,
   Form,
   Input,
   InputNumber,
@@ -425,8 +426,8 @@ export function ShippingManagementView() {
         )}
       </div>
 
-      {/* Modal Thêm / Sửa */}
-      <Modal
+      {/* Modal / Bottom Sheet Thêm / Sửa */}
+      <ResponsiveModalDrawer
         open={isModalOpen}
         title={
           <div className="font-bold text-base text-sushi-text flex items-center gap-2">
@@ -438,14 +439,28 @@ export function ShippingManagementView() {
             </span>
           </div>
         }
-        onCancel={() => setIsModalOpen(false)}
-        onOk={handleSubmit}
-        confirmLoading={upsertMutation.isPending}
-        okText="Lưu cấu hình"
-        cancelText="Hủy"
+        onClose={() => setIsModalOpen(false)}
+        footer={
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button
+              onClick={() => setIsModalOpen(false)}
+              className="w-full sm:w-auto h-10 sm:h-auto rounded-xl"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              loading={upsertMutation.isPending}
+              className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
+            >
+              Lưu cấu hình
+            </Button>
+          </div>
+        }
         className="[&_.ant-modal-content]:bg-sushi-card [&_.ant-modal-content]:border [&_.ant-modal-content]:border-sushi-border/80"
       >
-        <Form form={form} layout="vertical" className="pt-3 space-y-1">
+        <Form form={form} layout="vertical" className="pt-1 space-y-1">
           <Form.Item
             name="branchId"
             label={<span className="text-xs font-semibold text-sushi-text">Chi Nhánh Phục Vụ</span>}
@@ -541,7 +556,7 @@ export function ShippingManagementView() {
             </Col>
           </Row>
         </Form>
-      </Modal>
+      </ResponsiveModalDrawer>
     </div>
   );
 }
