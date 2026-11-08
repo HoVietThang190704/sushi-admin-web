@@ -135,8 +135,8 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
               alt="Logo"
               width={22}
               height={22}
-              style={{ width: 'auto', height: 'auto' }}
-              className="object-contain"
+              className="w-[22px] h-[22px] object-contain"
+              priority
             />
           </div>
           <span className="font-bold text-sushi-text tracking-wider text-xs font-sans">

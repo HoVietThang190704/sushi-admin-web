@@ -231,6 +231,8 @@ export default function InventoryPage() {
           <div className="flex flex-wrap items-center gap-3 flex-1">
             <div className="w-full sm:w-80">
               <Input
+                id="inventory-search-input"
+                name="search"
                 prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
                 placeholder={t('dashboard.searchIngredientPlaceholder')}
                 allowClear
