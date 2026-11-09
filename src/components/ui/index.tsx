@@ -124,7 +124,7 @@ export {
 
 // 4. Các Components được bọc phong cách Sushi Platform cao cấp (Bespoke Wrappers)
 import React from 'react';
-import { Button as AntdButton, ButtonProps, Card as AntdCard, CardProps } from 'antd';
+import { Button as AntdButton, ButtonProps, Card as AntdCard, CardProps, Pagination as AntdPagination } from 'antd';
 import { PencilSimple, Trash } from '@phosphor-icons/react';
 import { SUSHICOLORS } from '@/lib/theme';
 
@@ -293,6 +293,7 @@ export interface SushiMobileCardListProps<T> {
   renderItem: (item: T, index: number) => React.ReactNode;
   keyExtractor?: (item: T, index: number) => string | number;
   className?: string;
+  pageSize?: number;
 }
 
 export function SushiMobileCardList<T>({
@@ -302,7 +303,20 @@ export function SushiMobileCardList<T>({
   renderItem,
   keyExtractor,
   className = '',
+  pageSize,
 }: SushiMobileCardListProps<T>) {
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  // Tự động điều chỉnh trang khi tổng số items thay đổi
+  const totalPages = pageSize ? Math.max(1, Math.ceil(items.length / pageSize)) : 1;
+  const activePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const displayItems = React.useMemo(() => {
+    if (!pageSize || items.length <= pageSize) return items;
+    const start = (activePage - 1) * pageSize;
+    return items.slice(start, start + pageSize);
+  }, [items, pageSize, activePage]);
+
   return (
     <div className={`md:hidden ${className}`}>
       {loading ? (
@@ -313,7 +327,7 @@ export function SushiMobileCardList<T>({
         emptyState || null
       ) : (
         <div className="space-y-2.5">
-          {items.map((item, index) => (
+          {displayItems.map((item, index) => (
             <React.Fragment
               key={
                 keyExtractor
@@ -324,6 +338,22 @@ export function SushiMobileCardList<T>({
               {renderItem(item, index)}
             </React.Fragment>
           ))}
+
+          {pageSize && items.length > pageSize && (
+            <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-sushi-border/40 mt-3">
+              <span className="text-2xs text-sushi-text-dim font-mono">
+                Trang {activePage} / {totalPages} ({items.length} mục)
+              </span>
+              <AntdPagination
+                simple
+                current={activePage}
+                total={items.length}
+                pageSize={pageSize}
+                onChange={setCurrentPage}
+                size="small"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

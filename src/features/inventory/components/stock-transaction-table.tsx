@@ -144,6 +144,7 @@ export function StockTransactionTable({
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={transactions}
+        pageSize={8}
         loading={loading}
         emptyState={
           <SushiEmptyState

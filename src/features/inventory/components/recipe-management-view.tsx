@@ -261,6 +261,7 @@ export function RecipeManagementView() {
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={filteredProducts}
+        pageSize={8}
         loading={productsLoading || recipesLoading}
         emptyState={
           <SushiEmptyState

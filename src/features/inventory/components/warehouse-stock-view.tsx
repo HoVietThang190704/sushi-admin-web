@@ -193,6 +193,7 @@ export function WarehouseStockView() {
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={stocks}
+        pageSize={8}
         loading={stocksLoading}
         emptyState={
           <SushiEmptyState

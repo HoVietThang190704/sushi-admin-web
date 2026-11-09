@@ -176,6 +176,7 @@ export function StockBalanceTable({
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={ingredients}
+        pageSize={8}
         loading={loading}
         emptyState={
           <SushiEmptyState
