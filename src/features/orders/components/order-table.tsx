@@ -161,11 +161,26 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
         <Space onClick={(e) => e.stopPropagation()}>
           {/* Quick status progress buttons */}
           {record.status === 'PENDING' && (
-            <Tooltip title="Bắt đầu chế biến món">
+            <Tooltip title="Xác nhận tiếp nhận đơn hàng">
               <Button
                 size="small"
                 type="primary"
                 className="bg-blue-600 hover:bg-blue-500 text-xs px-2"
+                icon={<CheckCircle size={15} />}
+                loading={updateStatusMutation.isPending}
+                onClick={(e) => handleQuickStatusChange(record, 'CONFIRMED', e)}
+              >
+                Nhận đơn
+              </Button>
+            </Tooltip>
+          )}
+
+          {record.status === 'CONFIRMED' && (
+            <Tooltip title="Bắt đầu chế biến món (Khấu trừ kho)">
+              <Button
+                size="small"
+                type="primary"
+                className="bg-amber-600 hover:bg-amber-500 text-xs px-2"
                 icon={<CookingPot size={15} />}
                 loading={updateStatusMutation.isPending}
                 onClick={(e) => handleQuickStatusChange(record, 'PREPARING', e)}
@@ -338,6 +353,21 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                         size="small"
                         type="primary"
                         className="bg-blue-600 hover:bg-blue-500 text-xs px-2.5"
+                        icon={<CheckCircle size={15} />}
+                        loading={updateStatusMutation.isPending}
+                        onClick={(e) =>
+                          handleQuickStatusChange(order, 'CONFIRMED', e)
+                        }
+                      >
+                        Nhận đơn
+                      </Button>
+                    )}
+
+                    {order.status === 'CONFIRMED' && (
+                      <Button
+                        size="small"
+                        type="primary"
+                        className="bg-amber-600 hover:bg-amber-500 text-xs px-2.5"
                         icon={<CookingPot size={15} />}
                         loading={updateStatusMutation.isPending}
                         onClick={(e) =>

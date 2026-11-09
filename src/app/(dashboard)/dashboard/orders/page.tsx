@@ -104,9 +104,18 @@ export default function OrdersPage() {
       ),
     },
     {
-      key: 'PREPARING',
+      key: 'CONFIRMED',
       label: (
         <span className="flex items-center gap-1.5 text-blue-400">
+          <CheckCircle size={16} />
+          Đã nhận {counts.CONFIRMED > 0 && `(${counts.CONFIRMED})`}
+        </span>
+      ),
+    },
+    {
+      key: 'PREPARING',
+      label: (
+        <span className="flex items-center gap-1.5 text-orange-400">
           <CookingPot size={16} />
           Đang làm món {counts.PREPARING > 0 && `(${counts.PREPARING})`}
         </span>
