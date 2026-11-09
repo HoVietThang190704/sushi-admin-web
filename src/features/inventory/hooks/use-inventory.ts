@@ -2,7 +2,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '../api/inventory.api';
-import { CreateIngredientInput, CreateTransactionInput, TransactionType } from '../types';
+import {
+  CreateIngredientInput,
+  CreateTransactionInput,
+  TransactionType,
+  UpsertRecipeInput,
+  AdjustWarehouseStockInput,
+} from '../types';
 import { message } from '@/components/ui';
 
 export const inventoryKeys = {
@@ -10,6 +16,12 @@ export const inventoryKeys = {
   ingredients: () => [...inventoryKeys.all, 'ingredients'] as const,
   alerts: () => [...inventoryKeys.all, 'alerts'] as const,
   transactions: (type?: TransactionType) => [...inventoryKeys.all, 'transactions', type] as const,
+  warehouses: () => [...inventoryKeys.all, 'warehouses'] as const,
+  warehouseStocks: (warehouseId?: string) =>
+    [...inventoryKeys.all, 'warehouse-stocks', warehouseId] as const,
+  recipes: () => [...inventoryKeys.all, 'recipes'] as const,
+  recipeByProduct: (productId?: string) =>
+    [...inventoryKeys.all, 'recipes', 'product', productId] as const,
 };
 
 export function useIngredients() {
@@ -61,6 +73,101 @@ export function useCreateTransaction() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'Giao dịch kho thất bại';
+      message.error(msg);
+    },
+  });
+}
+
+// ------------------------------------------
+// Warehouses & Stocks Hooks
+// ------------------------------------------
+
+export function useWarehouses() {
+  return useQuery({
+    queryKey: inventoryKeys.warehouses(),
+    queryFn: () => inventoryApi.getWarehouses(),
+  });
+}
+
+export function useWarehouseStocks(warehouseId?: string) {
+  return useQuery({
+    queryKey: inventoryKeys.warehouseStocks(warehouseId),
+    queryFn: () => (warehouseId ? inventoryApi.getWarehouseStocks(warehouseId) : Promise.resolve([])),
+    enabled: Boolean(warehouseId),
+  });
+}
+
+export function useAdjustWarehouseStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      warehouseId,
+      ingredientId,
+      dto,
+    }: {
+      warehouseId: string;
+      ingredientId: string;
+      dto: AdjustWarehouseStockInput;
+    }) => inventoryApi.adjustWarehouseStock(warehouseId, ingredientId, dto),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      const actionLabel = res.transaction.type === 'IN' ? 'Nhập kho' : 'Xuất kho';
+      message.success(`${actionLabel} thành công! Mã phiếu: ${res.transaction.code}`);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Điều chỉnh kho thất bại';
+      message.error(msg);
+    },
+  });
+}
+
+// ------------------------------------------
+// Recipe (BOM) Hooks
+// ------------------------------------------
+
+export function useRecipes() {
+  return useQuery({
+    queryKey: inventoryKeys.recipes(),
+    queryFn: () => inventoryApi.getRecipes(),
+  });
+}
+
+export function useRecipeByProduct(productId?: string) {
+  return useQuery({
+    queryKey: inventoryKeys.recipeByProduct(productId),
+    queryFn: () => (productId ? inventoryApi.getRecipeByProduct(productId) : Promise.resolve(null)),
+    enabled: Boolean(productId),
+  });
+}
+
+export function useUpsertRecipe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: UpsertRecipeInput) => inventoryApi.upsertRecipe(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      message.success('Lưu công thức món ăn thành công!');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Lưu công thức thất bại';
+      message.error(msg);
+    },
+  });
+}
+
+export function useDeleteRecipe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => inventoryApi.deleteRecipe(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      message.success('Đã xóa công thức thành công!');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Xóa công thức thất bại';
       message.error(msg);
     },
   });

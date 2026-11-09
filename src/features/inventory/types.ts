@@ -63,3 +63,84 @@ export interface CreateTransactionInput {
   unitPrice?: number;
   note?: string;
 }
+
+export interface Warehouse {
+  id: string;
+  code: string;
+  name: string;
+  address?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    stocks: number;
+    branches: number;
+  };
+}
+
+export interface WarehouseStock {
+  id: string;
+  warehouseId: string;
+  ingredientId: string;
+  currentStock: number;
+  minStock: number;
+  status: StockAlertStatus;
+  isAlert: boolean;
+  ingredient: {
+    id: string;
+    code: string;
+    name: string;
+    unit: string;
+    costPrice: number;
+    isActive: boolean;
+  };
+}
+
+export interface RecipeItem {
+  id: string;
+  recipeId: string;
+  ingredientId: string;
+  quantity: number;
+  ingredient: {
+    id: string;
+    code: string;
+    name: string;
+    unit: string;
+    costPrice: number;
+  };
+}
+
+export interface Recipe {
+  id: string;
+  productId: string;
+  notes?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  product?: {
+    id: string;
+    sku: string;
+    name: string;
+    sellingPrice: number;
+    imageUrl?: string | null;
+    type: 'SINGLE' | 'COMBO';
+  };
+  items: RecipeItem[];
+}
+
+export interface UpsertRecipeInput {
+  productId: string;
+  notes?: string;
+  items: Array<{
+    ingredientId: string;
+    quantity: number;
+  }>;
+}
+
+export interface AdjustWarehouseStockInput {
+  type: TransactionType;
+  reason: TransactionReason;
+  quantity: number;
+  unitPrice?: number;
+  note?: string;
+}

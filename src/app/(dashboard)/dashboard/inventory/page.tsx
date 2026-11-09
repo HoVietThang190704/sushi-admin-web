@@ -26,6 +26,8 @@ import {
   StockTransactionTable,
   CreateIngredientModal,
   CreateTransactionModal,
+  RecipeManagementView,
+  WarehouseStockView,
 } from '@/features/inventory';
 import { useTranslation } from '@/lib/i18n';
 
@@ -273,10 +275,38 @@ export default function InventoryPage() {
           animated={{ inkBar: true, tabPane: true }}
           items={[
             {
+              key: 'warehouse-stocks',
+              label: (
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Package size={16} />
+                  <span>Tồn kho Chi Nhánh</span>
+                </span>
+              ),
+              children: (
+                <div className="pt-2">
+                  <WarehouseStockView />
+                </div>
+              ),
+            },
+            {
+              key: 'recipes',
+              label: (
+                <span className="flex items-center gap-1.5 font-medium">
+                  <CookingPot size={16} />
+                  <span>Công thức món (BOM)</span>
+                </span>
+              ),
+              children: (
+                <div className="pt-2">
+                  <RecipeManagementView />
+                </div>
+              ),
+            },
+            {
               key: 'balance',
               label: (
                 <span className="flex items-center space-x-2">
-                  <span>{t('dashboard.tabStockBalance')}</span>
+                  <span>{t('dashboard.tabStockBalance')} (Tổng)</span>
                   {alertCount > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full text-2xs font-mono font-bold bg-red-500 text-white">
                       {alertCount}

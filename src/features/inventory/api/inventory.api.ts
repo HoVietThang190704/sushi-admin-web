@@ -5,6 +5,11 @@ import {
   CreateIngredientInput,
   CreateTransactionInput,
   TransactionType,
+  Warehouse,
+  WarehouseStock,
+  Recipe,
+  UpsertRecipeInput,
+  AdjustWarehouseStockInput,
 } from '../types';
 
 export const inventoryApi = {
@@ -26,5 +31,36 @@ export const inventoryApi = {
     fetchApi<InventoryTransaction>('/api/inventory/transactions', {
       method: 'POST',
       body: JSON.stringify(dto),
+    }),
+
+  // Warehouses & Stocks
+  getWarehouses: () => fetchApi<Warehouse[]>('/api/inventory/warehouses'),
+  getWarehouseStocks: (warehouseId: string) =>
+    fetchApi<WarehouseStock[]>(`/api/inventory/warehouses/${warehouseId}/stocks`),
+  adjustWarehouseStock: (
+    warehouseId: string,
+    ingredientId: string,
+    dto: AdjustWarehouseStockInput,
+  ) =>
+    fetchApi<{ transaction: InventoryTransaction; stock: WarehouseStock }>(
+      `/api/inventory/warehouses/${warehouseId}/stocks/${ingredientId}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      },
+    ),
+
+  // Recipes (BOM)
+  getRecipes: () => fetchApi<Recipe[]>('/api/inventory/recipes'),
+  getRecipeByProduct: (productId: string) =>
+    fetchApi<Recipe | null>(`/api/inventory/recipes/product/${productId}`),
+  upsertRecipe: (dto: UpsertRecipeInput) =>
+    fetchApi<Recipe>('/api/inventory/recipes', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    }),
+  deleteRecipe: (id: string) =>
+    fetchApi<{ id: string }>(`/api/inventory/recipes/${id}`, {
+      method: 'DELETE',
     }),
 };

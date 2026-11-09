@@ -76,7 +76,7 @@ export function OrderDetailModal({
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Cập nhật trạng thái thất bại';
-      message.error(msg);
+      message.error(msg, 7);
     }
   };
 
@@ -316,10 +316,32 @@ export function OrderDetailModal({
                 <Button
                   type="primary"
                   size="large"
-                  icon={<CookingPot size={20} />}
-                  onClick={() => handleUpdateStatus('PREPARING')}
+                  icon={<CheckCircle size={20} />}
+                  onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
                   loading={updateStatusMutation.isPending}
                   className="flex-1 h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 border-none shadow-md text-white cursor-pointer"
+                >
+                  Xác nhận đơn
+                </Button>
+              </div>
+            )}
+
+            {order.status === 'CONFIRMED' && (
+              <div className="flex items-center gap-2">
+                <Button
+                  danger
+                  onClick={() => setShowCancelInput(!showCancelInput)}
+                  className="h-12 px-4 rounded-xl text-xs font-semibold shrink-0"
+                >
+                  Hủy đơn
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<CookingPot size={20} />}
+                  onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
+                  loading={updateStatusMutation.isPending}
+                  className="flex-1 h-12 rounded-xl font-bold bg-amber-600 hover:bg-amber-500 border-none shadow-md text-white cursor-pointer"
                 >
                   Bắt đầu chế biến
                 </Button>
@@ -470,10 +492,31 @@ export function OrderDetailModal({
                 </Button>
                 <Button
                   type="primary"
-                  icon={<CookingPot size={18} />}
-                  onClick={() => handleUpdateStatus('PREPARING')}
+                  icon={<CheckCircle size={18} />}
+                  onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
                   loading={updateStatusMutation.isPending}
                   className="bg-blue-600 hover:bg-blue-500 font-semibold h-9 px-4 border-none shadow-sm"
+                >
+                  Xác nhận đơn
+                </Button>
+              </>
+            )}
+
+            {order.status === 'CONFIRMED' && (
+              <>
+                <Button
+                  danger
+                  onClick={() => setShowCancelInput(!showCancelInput)}
+                  className="font-semibold"
+                >
+                  Hủy đơn
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<CookingPot size={18} />}
+                  onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
+                  loading={updateStatusMutation.isPending}
+                  className="bg-amber-600 hover:bg-amber-500 font-semibold h-9 px-4 border-none shadow-sm"
                 >
                   Bắt đầu chế biến
                 </Button>
