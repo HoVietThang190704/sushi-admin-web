@@ -20,6 +20,9 @@ import {
   MagnifyingGlass,
   CheckCircle,
   WarningCircle,
+  SushiMobileCardList,
+  SushiCardItem,
+  SushiEmptyState,
 } from '@/components/ui';
 import { useProducts } from '@/features/catalog';
 import {
@@ -255,8 +258,119 @@ export function RecipeManagementView() {
         </div>
       </div>
 
-      {/* Bảng danh sách */}
-      <div className="bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden shadow-sm">
+      {/* 1. Giao diện Mobile Card List (< md) */}
+      <SushiMobileCardList
+        items={filteredProducts}
+        loading={productsLoading || recipesLoading}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<CookingPot size={24} />}
+            title="Không tìm thấy món ăn phù hợp"
+            description="Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc trạng thái."
+          />
+        }
+        renderItem={(item) => {
+          const recipe = recipeMap.get(item.id);
+          const hasRecipe = Boolean(recipe && recipe.items && recipe.items.length > 0);
+
+          return (
+            <SushiCardItem>
+              {/* Header card: Tên món, SKU & nút Cấu hình */}
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-bold text-sushi-text truncate">
+                    {item.name}
+                  </h4>
+                  <div className="text-2xs text-sushi-text-dim font-mono mt-0.5">
+                    SKU: {item.sku}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    size="small"
+                    icon={<PencilSimple size={14} className="text-sushi-gold" />}
+                    onClick={() => handleOpenConfig(item.id, item.name, item.sku)}
+                    className="h-8 px-2.5 rounded-lg text-xs text-sushi-gold border-sushi-gold/30 hover:bg-sushi-gold/10 font-medium"
+                  >
+                    Cấu hình
+                  </Button>
+
+                  {recipe && (
+                    <Popconfirm
+                      title="Xác nhận xóa công thức?"
+                      description="Khi xóa, bếp sẽ bị chặn chế biến món này cho đến khi có công thức mới."
+                      onConfirm={() => handleDeleteRecipe(recipe.id)}
+                      okText="Xóa"
+                      cancelText="Hủy"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<Trash size={15} />}
+                        className="h-8 w-8 flex items-center justify-center p-0 rounded-lg hover:bg-red-500/10"
+                      />
+                    </Popconfirm>
+                  )}
+                </div>
+              </div>
+
+              {/* Trạng thái định mức */}
+              <div className="mt-2.5 flex items-center">
+                {hasRecipe ? (
+                  <Tag
+                    color="success"
+                    className="px-2 py-0.5 text-3xs rounded-full font-medium inline-flex items-center gap-1"
+                  >
+                    <CheckCircle size={12} weight="fill" />
+                    <span>Đã có công thức ({recipe?.items?.length} NL)</span>
+                  </Tag>
+                ) : (
+                  <Tag
+                    color="error"
+                    className="px-2 py-0.5 text-3xs rounded-full font-medium inline-flex items-center gap-1"
+                  >
+                    <WarningCircle size={12} weight="fill" />
+                    <span>Chưa có (Chặn bếp)</span>
+                  </Tag>
+                )}
+              </div>
+
+              {/* Danh sách định mức nguyên liệu */}
+              <div className="mt-2.5 pt-2 border-t border-sushi-border/60">
+                <div className="text-3xs text-sushi-text-dim uppercase tracking-wider font-mono mb-1.5">
+                  Định mức cho 1 phần:
+                </div>
+                {hasRecipe ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {recipe?.items?.map((it) => (
+                      <span
+                        key={it.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800/90 border border-zinc-700/60 text-2xs text-zinc-300"
+                      >
+                        <span className="truncate max-w-[130px]">{it.ingredient?.name || it.ingredientId}:</span>
+                        <strong className="text-sushi-gold font-mono shrink-0">
+                          {Number(it.quantity)} {it.ingredient?.unit}
+                        </strong>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-2xs text-zinc-500 italic">
+                    Chưa khai báo nguyên vật liệu
+                  </span>
+                )}
+              </div>
+            </SushiCardItem>
+          );
+        }}
+      />
+
+      {/* 2. Giao diện Desktop Table (>= md) */}
+      <div className="hidden md:block bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden shadow-sm">
         <Table
           columns={columns}
           dataSource={filteredProducts}
@@ -273,9 +387,9 @@ export function RecipeManagementView() {
       {/* Modal Cấu hình công thức */}
       <Modal
         title={
-          <div className="flex items-center gap-2 text-sushi-text">
-            <CookingPot size={22} className="text-sushi-gold" />
-            <span>Cấu hình Công thức (BOM): {editingProduct?.name}</span>
+          <div className="flex items-center gap-2 text-sushi-text text-sm sm:text-base">
+            <CookingPot size={20} className="text-sushi-gold shrink-0" />
+            <span className="truncate">Cấu hình BOM: {editingProduct?.name}</span>
           </div>
         }
         open={isModalOpen}
@@ -285,8 +399,9 @@ export function RecipeManagementView() {
         okText="Lưu công thức"
         cancelText="Hủy"
         width={680}
+        className="max-w-[calc(100vw-24px)]"
         styles={{
-          body: { maxHeight: '70vh', overflowY: 'auto' },
+          body: { maxHeight: '75vh', overflowY: 'auto' },
         }}
       >
         <div className="py-2 space-y-4">
@@ -338,7 +453,7 @@ export function RecipeManagementView() {
                               { required: true, message: 'Nhập số lượng' },
                               { type: 'number', min: 0.001, message: 'Phải > 0' },
                             ]}
-                            className="w-36 mb-0"
+                            className="w-28 sm:w-36 mb-0"
                           >
                             <InputNumber
                               placeholder="Định mức"
