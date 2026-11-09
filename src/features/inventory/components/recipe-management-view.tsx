@@ -229,15 +229,15 @@ export function RecipeManagementView() {
   return (
     <div className="space-y-4">
       {/* Thanh công cụ lọc */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3.5 rounded-2xl">
-        <div className="flex items-center gap-2 flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
+        <div className="flex items-center gap-2 flex-1">
           <Input
             placeholder="Tìm theo tên món hoặc mã SKU..."
             prefix={<MagnifyingGlass size={16} className="text-zinc-500" />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             allowClear
-            className="rounded-xl bg-zinc-900 border-zinc-700"
+            className="rounded-xl bg-zinc-900 border-zinc-700 h-10 sm:h-9"
           />
         </div>
 
@@ -245,7 +245,7 @@ export function RecipeManagementView() {
           <Select
             value={filterStatus}
             onChange={setFilterStatus}
-            className="w-48"
+            className="w-full sm:w-48 h-10 sm:h-9"
             options={[
               { value: 'ALL', label: 'Tất cả trạng thái' },
               { value: 'CONFIGURED', label: 'Đã có công thức' },
@@ -256,13 +256,14 @@ export function RecipeManagementView() {
       </div>
 
       {/* Bảng danh sách */}
-      <div className="bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden">
+      <div className="bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden shadow-sm">
         <Table
           columns={columns}
           dataSource={filteredProducts}
           rowKey="id"
           loading={productsLoading || recipesLoading}
           pagination={{ pageSize: 10, showSizeChanger: true }}
+          scroll={{ x: 'max-content' }}
           locale={{
             emptyText: <Empty description="Không tìm thấy món ăn nào phù hợp" />,
           }}

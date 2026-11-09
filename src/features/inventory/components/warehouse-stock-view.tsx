@@ -14,6 +14,9 @@ import {
   Package,
   CheckCircle,
   WarningCircle,
+  SushiMobileCardList,
+  SushiCardItem,
+  SushiEmptyState,
 } from '@/components/ui';
 import {
   useWarehouses,
@@ -159,16 +162,18 @@ export function WarehouseStockView() {
 
   return (
     <div className="space-y-4">
-      {/* Bộ chọn kho */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3.5 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <Package size={20} className="text-sushi-gold shrink-0" />
-          <span className="text-sm font-semibold text-sushi-text">Chọn Kho nguyên vật liệu:</span>
+      {/* Bộ chọn kho (Responsive) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <Package size={18} className="text-sushi-gold shrink-0" />
+            <span className="text-xs sm:text-sm font-semibold text-sushi-text">Chọn Kho:</span>
+          </div>
           <Select
             value={activeWarehouseId}
             onChange={setSelectedWarehouseId}
             loading={warehousesLoading}
-            className="w-72"
+            className="w-full sm:w-72 h-10 sm:h-9"
             options={warehouses.map((w) => ({
               value: w.id,
               label: `${w.name} (${w.code})`,
@@ -177,21 +182,97 @@ export function WarehouseStockView() {
         </div>
 
         {selectedWarehouse && (
-          <div className="text-xs text-sushi-text-muted">
-            Địa chỉ: <strong>{selectedWarehouse.address || 'Trung tâm'}</strong> • Số chi nhánh liên kết:{' '}
-            <strong>{selectedWarehouse._count?.branches || 1}</strong>
+          <div className="text-3xs sm:text-xs text-sushi-text-muted">
+            <span>Địa chỉ: <strong>{selectedWarehouse.address || 'Trung tâm'}</strong></span>
+            <span className="mx-1.5">•</span>
+            <span>Chi nhánh liên kết: <strong>{selectedWarehouse._count?.branches || 1}</strong></span>
           </div>
         )}
       </div>
 
-      {/* Bảng tồn kho */}
-      <div className="bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden">
+      {/* 1. Giao diện Mobile Card List (< md) */}
+      <SushiMobileCardList
+        items={stocks}
+        loading={stocksLoading}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<Package size={24} />}
+            title="Kho này chưa có dữ liệu tồn kho"
+            description="Vui lòng thực hiện nhập kho hoặc kiểm kê đầu kỳ."
+          />
+        }
+        renderItem={(item) => {
+          const colorClass =
+            item.status === 'OUT_OF_STOCK'
+              ? 'text-red-400 font-bold'
+              : item.status === 'LOW_STOCK'
+              ? 'text-amber-400 font-bold'
+              : 'text-sushi-text font-bold';
+
+          return (
+            <SushiCardItem>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="text-sm font-bold text-sushi-text truncate">
+                    {item.ingredient?.name}
+                  </h4>
+                  <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                    <span>Mã: {item.ingredient?.code}</span>
+                    <span>·</span>
+                    <span>Min: {item.minStock} {item.ingredient?.unit}</span>
+                  </div>
+                </div>
+
+                <Button
+                  size="small"
+                  onClick={() => handleOpenAdjust(item)}
+                  className="rounded-lg h-8 px-2.5 text-xs text-sushi-gold border-sushi-gold/30 hover:bg-sushi-gold/10 shrink-0 font-medium"
+                >
+                  Nhập / Xuất
+                </Button>
+              </div>
+
+              <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+                <div className="flex items-baseline space-x-1 font-mono">
+                  <span className="text-sushi-text-dim text-3xs uppercase mr-0.5">Tồn kho:</span>
+                  <span className={`text-sm ${colorClass}`}>{item.currentStock.toLocaleString()}</span>
+                  <span className="text-sushi-text-dim">{item.ingredient?.unit}</span>
+                </div>
+
+                <div>
+                  {item.status === 'OUT_OF_STOCK' ? (
+                    <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold bg-red-500/15 border border-red-500/35 text-red-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                      <span>Hết hàng</span>
+                    </span>
+                  ) : item.status === 'LOW_STOCK' ? (
+                    <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold bg-amber-500/15 border border-amber-500/35 text-amber-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                      <span>Gần hết</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-3xs font-medium bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      <span>An toàn</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </SushiCardItem>
+          );
+        }}
+      />
+
+      {/* 2. Giao diện Desktop Table (>= md) */}
+      <div className="hidden md:block bg-sushi-card border border-sushi-border/80 rounded-2xl overflow-hidden shadow-sm">
         <Table
           columns={columns}
           dataSource={stocks}
           rowKey="id"
           loading={stocksLoading}
           pagination={{ pageSize: 10, showSizeChanger: true }}
+          scroll={{ x: 'max-content' }}
           locale={{
             emptyText: <Empty description="Kho này chưa có dữ liệu nguyên vật liệu" />,
           }}

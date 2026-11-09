@@ -100,29 +100,31 @@ export default function InventoryPage() {
         title={t('dashboard.inventoryTitle')}
         subtitle={t('dashboard.inventorySubtitle')}
         extra={
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2.5">
             <Button
-              icon={<ArrowRight size={15} className="text-amber-400" />}
+              icon={<ArrowRight size={15} className="text-amber-400 shrink-0" />}
               onClick={() => handleOpenStockOut()}
-              className="rounded-xl border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+              className="h-10 sm:h-9 rounded-xl border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 px-2 sm:px-3 text-xs sm:text-sm flex items-center justify-center"
             >
-              {t('dashboard.stockOut')}
+              <span className="truncate">{t('dashboard.stockOut')}</span>
             </Button>
 
             <SushiButton
               type="primary"
-              icon={<Plus size={16} weight="bold" />}
+              icon={<Plus size={15} weight="bold" className="shrink-0" />}
               onClick={() => handleOpenStockIn()}
+              className="h-10 sm:h-9 rounded-xl px-2 sm:px-3.5 text-xs sm:text-sm font-semibold flex items-center justify-center shadow-md shadow-emerald-500/15"
             >
-              {t('dashboard.stockIn')}
+              <span className="truncate">{t('dashboard.stockIn')}</span>
             </SushiButton>
 
             <Button
-              icon={<CookingPot size={16} />}
+              icon={<CookingPot size={15} className="shrink-0" />}
               onClick={() => setIsIngredientModalOpen(true)}
-              className="rounded-xl"
+              className="h-10 sm:h-9 rounded-xl px-2 sm:px-3 text-xs sm:text-sm flex items-center justify-center"
             >
-              {t('dashboard.addIngredient')}
+              <span className="truncate sm:hidden">Thêm NL</span>
+              <span className="hidden sm:inline">{t('dashboard.addIngredient')}</span>
             </Button>
           </div>
         }
@@ -130,97 +132,103 @@ export default function InventoryPage() {
 
       {/* =========================================================================
           2. KPI Bento Cards (4 Thẻ Thống Kê Tổng Quan Kho)
+          - Mobile: 2x2 grid compact giúp tiết kiệm 70% chiều cao
+          - Desktop: 4 cột chuẩn
          ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Metric 1: Tổng Nguyên Liệu */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm sm:shadow-md">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.totalIngredients')}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-              <CookingPot size={20} weight="fill" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <CookingPot size={15} className="sm:hidden" weight="fill" />
+              <CookingPot size={20} className="hidden sm:block" weight="fill" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+          <div className="mt-2 sm:mt-4 flex items-baseline justify-between gap-1">
+            <span className="text-xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {ingredients.length}
             </span>
-            <span className="text-2xs text-sushi-text-dim font-mono">
-              Nguyên vật liệu F&B
+            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono truncate">
+              F&B items
             </span>
           </div>
         </div>
 
         {/* Metric 2: Cảnh Báo Tồn (Hết Hàng / Gần Hết) */}
         <div
-          className={`p-5 rounded-2xl bg-sushi-card border shadow-md transition-colors ${
+          className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border shadow-sm sm:shadow-md transition-colors ${
             alertCount > 0
               ? 'border-red-500/50 bg-gradient-to-br from-sushi-card to-red-500/5'
               : 'border-sushi-border/90'
           }`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.alertItemsCount')}
             </span>
             <div
-              className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
+              className={`w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 ${
                 alertCount > 0
                   ? 'bg-red-500/15 border-red-500/35 text-red-400'
                   : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
               }`}
             >
-              <Package size={20} weight="fill" />
+              <Package size={15} className="sm:hidden" weight="fill" />
+              <Package size={20} className="hidden sm:block" weight="fill" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
+          <div className="mt-2 sm:mt-4 flex items-baseline justify-between gap-1">
             <span
-              className={`text-3xl font-bold tracking-tight font-sans ${
+              className={`text-xl sm:text-3xl font-bold tracking-tight font-sans ${
                 alertCount > 0 ? 'text-red-400' : 'text-emerald-400'
               }`}
             >
               {alertCount}
             </span>
-            <span className="text-2xs font-mono text-sushi-text-dim">
-              {alertCount > 0 ? 'Cần nhập bổ sung' : 'Mức tồn an toàn'}
+            <span className="text-3xs sm:text-2xs font-mono text-sushi-text-dim truncate">
+              {alertCount > 0 ? 'Cần nhập' : 'An toàn'}
             </span>
           </div>
         </div>
 
         {/* Metric 3: Lượt Phiếu Nhập Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm sm:shadow-md">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.totalStockInCount')}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Receipt size={20} weight="fill" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+              <Receipt size={15} className="sm:hidden" weight="fill" />
+              <Receipt size={20} className="hidden sm:block" weight="fill" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+          <div className="mt-2 sm:mt-4 flex items-baseline justify-between gap-1">
+            <span className="text-xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {stockInTransactions.length}
             </span>
-            <span className="text-2xs text-emerald-400 font-mono">Phiếu PNK</span>
+            <span className="text-3xs sm:text-2xs text-emerald-400 font-mono">Phiếu PNK</span>
           </div>
         </div>
 
         {/* Metric 4: Lượt Phiếu Xuất Kho */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm sm:shadow-md">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
               {t('dashboard.totalStockOutCount')}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <Receipt size={20} weight="fill" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+              <Receipt size={15} className="sm:hidden" weight="fill" />
+              <Receipt size={20} className="hidden sm:block" weight="fill" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+          <div className="mt-2 sm:mt-4 flex items-baseline justify-between gap-1">
+            <span className="text-xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {stockOutTransactions.length}
             </span>
-            <span className="text-2xs text-amber-400 font-mono">Phiếu PXK</span>
+            <span className="text-3xs sm:text-2xs text-amber-400 font-mono">Phiếu PXK</span>
           </div>
         </div>
       </div>
@@ -229,8 +237,8 @@ export default function InventoryPage() {
           3. Toolbar Tìm Kiếm & Lọc Nhanh (Chỉ áp dụng khi ở Tab Tồn Kho)
          ========================================================================= */}
       {activeTab === 'balance' && (
-        <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3 flex-1">
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 sm:gap-3 flex-1">
             <div className="w-full sm:w-80">
               <Input
                 id="inventory-search-input"
@@ -240,13 +248,13 @@ export default function InventoryPage() {
                 allowClear
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-xl"
+                className="rounded-xl h-10"
               />
             </div>
 
             <div className="w-full sm:w-48">
               <Select
-                className="w-full"
+                className="w-full h-10"
                 value={alertFilter}
                 onChange={(val) => setAlertFilter(val)}
                 options={[
@@ -257,7 +265,7 @@ export default function InventoryPage() {
             </div>
           </div>
 
-          <div className="text-xs font-mono text-sushi-text-dim shrink-0">
+          <div className="text-2xs sm:text-xs font-mono text-sushi-text-dim text-right sm:text-left shrink-0">
             <span>
               {filteredIngredients.length} / {ingredients.length} {t('common.itemsCount')}
             </span>
@@ -268,7 +276,7 @@ export default function InventoryPage() {
       {/* =========================================================================
           4. Tabs Giao Diện: Tồn Kho & Cảnh Báo / Lịch Sử Nhập / Lịch Sử Xuất
          ========================================================================= */}
-      <div className="rounded-2xl bg-sushi-card border border-sushi-border/80 p-4 shadow-sm">
+      <div className="rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 p-3 sm:p-4 shadow-sm">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
