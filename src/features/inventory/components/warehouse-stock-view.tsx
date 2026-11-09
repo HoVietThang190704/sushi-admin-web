@@ -253,7 +253,7 @@ export function WarehouseStockView() {
               className="w-full"
               step={1}
               precision={3}
-              addonAfter={adjustingStock?.ingredient?.unit || 'ĐVT'}
+              suffix={adjustingStock?.ingredient?.unit || 'ĐVT'}
             />
           </Form.Item>
 

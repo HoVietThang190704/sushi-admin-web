@@ -342,7 +342,7 @@ export function RecipeManagementView() {
                             <InputNumber
                               placeholder="Định mức"
                               className="w-full"
-                              addonAfter={selectedIng?.unit || 'ĐVT'}
+                              suffix={selectedIng?.unit || 'ĐVT'}
                               step={1}
                               precision={3}
                             />
