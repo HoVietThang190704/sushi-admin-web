@@ -68,6 +68,7 @@ export const createTransactionSchemaFactory = (t: (key: TranslationKey) => strin
     ingredientId: z
       .string({ error: t('validation.selectIngredientRequired') })
       .uuid(t('validation.selectIngredientRequired')),
+    warehouseId: z.string().uuid().optional(),
     quantity: z.coerce
       .number({ error: t('validation.quantityRequired') })
       .positive(t('validation.quantityPositive')),
@@ -87,6 +88,7 @@ export const createTransactionSchema = z.object({
   ingredientId: z
     .string({ error: 'Vui lòng chọn nguyên liệu hợp lệ' })
     .uuid('Vui lòng chọn nguyên liệu hợp lệ'),
+  warehouseId: z.string().uuid().optional(),
   quantity: z.coerce
     .number({ error: 'Vui lòng nhập số lượng' })
     .positive('Số lượng xuất/nhập phải lớn hơn 0'),

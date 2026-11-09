@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '../api/orders.api';
+import { inventoryKeys } from '@/features/inventory/hooks/use-inventory';
 import {
   GetOrdersFilter,
   UpdateOrderStatusInput,
@@ -32,6 +33,7 @@ export function useUpdateOrderStatus() {
     }) => ordersApi.updateOrderStatus(orderId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
     },
   });
 }

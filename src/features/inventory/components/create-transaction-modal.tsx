@@ -1,16 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  ResponsiveModalDrawer,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Button,
-  Radio,
-} from '@/components/ui';
+import { ResponsiveModalDrawer, Form, Input, InputNumber, Select, Button, Radio } from '@/components/ui';
 import { Ingredient, CreateTransactionInput, TransactionType } from '../types';
+import { useWarehouses } from '../hooks/use-inventory';
 import { createTransactionSchemaFactory } from '../schemas/inventory.schema';
 import { createZodRule } from '@/lib/zod-validator';
 import { useTranslation } from '@/lib/i18n';
@@ -33,6 +26,7 @@ export function CreateTransactionModal({
   onSubmit,
 }: CreateTransactionModalProps) {
   const { t, locale } = useTranslation();
+  const { data: warehouses = [] } = useWarehouses();
   const [form] = Form.useForm<CreateTransactionInput>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -62,12 +56,13 @@ export function CreateTransactionModal({
       form.setFieldsValue({
         type: defaultType,
         ingredientId: selectedIngredient?.id,
+        warehouseId: warehouses[0]?.id,
         reason: defaultType === 'IN' ? 'PURCHASE' : 'KITCHEN_USAGE',
         unitPrice: selectedIngredient?.costPrice || 0,
         quantity: 1,
       });
     }
-  }, [open, defaultType, selectedIngredient, form]);
+  }, [open, defaultType, selectedIngredient, warehouses, form]);
 
   const handleModalClose = () => {
     form.resetFields();
@@ -182,6 +177,23 @@ export function CreateTransactionModal({
             }}
           />
         </Form.Item>
+
+        {/* Chọn kho thực hiện */}
+        {warehouses.length > 0 && (
+          <Form.Item
+            name="warehouseId"
+            label="Kho thực hiện"
+            rules={[createZodRule(schema, 'warehouseId')]}
+          >
+            <Select
+              placeholder="Chọn kho thực hiện nhập / xuất"
+              options={warehouses.map((w) => ({
+                value: w.id,
+                label: `${w.name} (${w.code})`,
+              }))}
+            />
+          </Form.Item>
+        )}
 
         {/* Hiển thị tồn kho hiện có nếu là Xuất kho */}
         {transactionType === 'OUT' && currentIngredient && (

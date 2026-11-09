@@ -59,6 +59,7 @@ export interface CreateTransactionInput {
   type: TransactionType;
   reason: TransactionReason;
   ingredientId: string;
+  warehouseId?: string;
   quantity: number;
   unitPrice?: number;
   note?: string;
