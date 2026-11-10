@@ -14,7 +14,9 @@ import {
   MagnifyingGlass,
   Tabs,
   Select,
+  Funnel,
 } from '@/components/ui';
+import { X } from '@phosphor-icons/react';
 import {
   Ingredient,
   TransactionType,
@@ -28,6 +30,7 @@ import {
   CreateTransactionModal,
   RecipeManagementView,
   WarehouseStockView,
+  IngredientFilterDrawer,
 } from '@/features/inventory';
 import { useTranslation } from '@/lib/i18n';
 
@@ -44,6 +47,13 @@ export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<string>('balance');
   const [search, setSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState<'ALL' | 'ALERTS'>('ALL');
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  const hasActiveFilters = alertFilter !== 'ALL';
+
+  const handleResetFilters = () => {
+    setAlertFilter('ALL');
+  };
 
   // TanStack Query Hooks
   const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredients();
@@ -237,22 +247,44 @@ export default function InventoryPage() {
           3. Toolbar Tìm Kiếm & Lọc Nhanh (Chỉ áp dụng khi ở Tab Tồn Kho)
          ========================================================================= */}
       {activeTab === 'balance' && (
-        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 sm:gap-3 flex-1">
-            <div className="w-full sm:w-80">
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex items-center sm:flex-wrap gap-2 sm:gap-3 flex-1 w-full">
+            {/* Ô tìm kiếm theo mã, tên */}
+            <div className="flex-1 sm:w-80 min-w-0">
               <Input
                 id="inventory-search-input"
                 name="search"
-                prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
+                prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5 shrink-0" />}
                 placeholder={t('dashboard.searchIngredientPlaceholder')}
                 allowClear
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-xl h-10"
+                className="rounded-xl h-10 w-full"
               />
             </div>
 
-            <div className="w-full sm:w-48">
+            {/* Nút Lọc Mobile (< sm) */}
+            <Button
+              icon={
+                <Funnel
+                  size={16}
+                  weight={hasActiveFilters ? 'fill' : 'regular'}
+                  className={hasActiveFilters ? 'text-sushi-gold' : ''}
+                />
+              }
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className={`h-10 rounded-xl px-3 flex items-center justify-center shrink-0 sm:hidden ${
+                hasActiveFilters ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
+              }`}
+              title="Lọc trạng thái nguyên liệu"
+            >
+              {hasActiveFilters && (
+                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 inline-block" />
+              )}
+            </Button>
+
+            {/* Dropdown desktop (>= sm) */}
+            <div className="hidden sm:block sm:w-48">
               <Select
                 className="w-full h-10"
                 value={alertFilter}
@@ -265,7 +297,18 @@ export default function InventoryPage() {
             </div>
           </div>
 
-          <div className="text-2xs sm:text-xs font-mono text-sushi-text-dim text-right sm:text-left shrink-0">
+          {/* Đếm số lượng & Xóa bộ lọc nhanh trên mobile */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 text-2xs sm:text-xs font-mono text-sushi-text-dim shrink-0">
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="sm:hidden text-2xs text-sushi-gold hover:underline flex items-center gap-1 cursor-pointer font-sans"
+              >
+                <X size={12} />
+                <span>Xóa bộ lọc</span>
+              </button>
+            )}
             <span>
               {filteredIngredients.length} / {ingredients.length} {t('common.itemsCount')}
             </span>
@@ -381,6 +424,17 @@ export default function InventoryPage() {
         onSubmit={async (dto) => {
           await createTransactionMutation.mutateAsync(dto);
         }}
+      />
+
+      {/* Bottom Sheet Lọc Trạng Thái Nguyên Liệu Cho Mobile */}
+      <IngredientFilterDrawer
+        open={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        alertFilter={alertFilter}
+        onSelectAlertFilter={(val) => setAlertFilter(val)}
+        onReset={handleResetFilters}
+        totalFilteredCount={filteredIngredients.length}
+        alertCount={alertCount}
       />
     </div>
   );
