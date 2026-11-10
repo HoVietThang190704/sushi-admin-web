@@ -6,3 +6,4 @@ export { CategoryTable } from './components/category-table';
 export { CreateCategoryModal } from './components/create-category-modal';
 export { ProductTable } from './components/product-table';
 export { CreateProductModal } from './components/create-product-modal';
+export { ProductFilterDrawer } from './components/product-filter-drawer';
