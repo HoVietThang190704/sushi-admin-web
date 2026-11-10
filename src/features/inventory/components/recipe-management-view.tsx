@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Table,
   Button,
-  Modal,
+  ResponsiveModalDrawer,
   Form,
   Input,
   InputNumber,
@@ -401,94 +401,138 @@ export function RecipeManagementView({
         />
       </div>
 
-      {/* Modal Cấu hình công thức */}
-      <Modal
+      {/* Bottom Sheet / Modal Cấu hình công thức BOM */}
+      <ResponsiveModalDrawer
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        destroyOnClose
+        destroyOnHidden
         title={
-          <div className="flex items-center gap-2 text-sushi-text text-sm sm:text-base">
+          <div className="flex items-center gap-2 text-sushi-text text-sm sm:text-base min-w-0 pr-6 sm:pr-0">
             <CookingPot size={20} className="text-sushi-gold shrink-0" />
-            <span className="truncate">Cấu hình BOM: {editingProduct?.name}</span>
+            <span className="truncate font-semibold">Cấu hình BOM: {editingProduct?.name}</span>
           </div>
         }
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onOk={handleSaveRecipe}
-        confirmLoading={upsertMutation.isPending}
-        okText="Lưu công thức"
-        cancelText="Hủy"
-        width={680}
-        className="max-w-[calc(100vw-24px)]"
-        styles={{
-          body: { maxHeight: '75vh', overflowY: 'auto' },
-        }}
+        width={640}
+        footer={
+          <div className="flex items-center justify-between gap-3 w-full">
+            <Button
+              onClick={() => setIsModalOpen(false)}
+              className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSaveRecipe}
+              loading={upsertMutation.isPending}
+              className="rounded-xl flex-1 h-11 bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-1.5"
+            >
+              <span>Lưu công thức</span>
+            </Button>
+          </div>
+        }
       >
-        <div className="py-2 space-y-4">
-          <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-300">
+        <div className="py-1 space-y-4">
+          <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-300 leading-relaxed">
             💡 Định mức được tính cho <strong>1 phần phục vụ chuẩn</strong>. Khi khách đặt món (hoặc gọi combo chứa món này), kho của chi nhánh sẽ tự động nhân số lượng để trừ tồn khi bếp bấm <strong>Bắt đầu chế biến</strong>.
           </div>
 
           <Form form={form} layout="vertical">
-            <Form.Item name="notes" label={<span className="text-xs text-zinc-400">Ghi chú kỹ thuật chế biến (tùy chọn)</span>}>
-              <Input.TextArea placeholder="Ví dụ: Cắt phi lê 6 miếng đều tay, ăn kèm wasabi tươi..." rows={2} />
+            <Form.Item
+              name="notes"
+              label={<span className="text-xs font-medium text-zinc-400">Ghi chú kỹ thuật chế biến (tùy chọn)</span>}
+            >
+              <Input.TextArea
+                placeholder="Ví dụ: Cắt phi lê 6 miếng đều tay, ăn kèm wasabi tươi..."
+                rows={2}
+                className="rounded-xl"
+              />
             </Form.Item>
 
-            <div className="space-y-2">
-              <span className="text-sm font-semibold text-sushi-text block">Danh sách nguyên vật liệu tiêu hao:</span>
+            <div className="space-y-2.5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
+                Danh sách nguyên vật liệu tiêu hao:
+              </span>
 
               <Form.List name="items">
                 {(fields, { add, remove }) => (
-                  <div className="space-y-2.5">
-                    {fields.map(({ key, name, ...restField }) => {
+                  <div className="space-y-3">
+                    {fields.map(({ key, name, ...restField }, index) => {
                       const selectedIngId = form.getFieldValue(['items', name, 'ingredientId']);
                       const selectedIng = ingredients.find((i) => i.id === selectedIngId);
 
                       return (
                         <div
                           key={key}
-                          className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800"
+                          className="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 transition-colors"
                         >
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'ingredientId']}
-                            rules={[{ required: true, message: 'Vui lòng chọn nguyên liệu' }]}
-                            className="flex-1 mb-0"
-                          >
-                            <Select
-                              placeholder="Chọn nguyên liệu..."
-                              showSearch
-                              optionFilterProp="label"
-                              options={ingredients.map((ing) => ({
-                                value: ing.id,
-                                label: `${ing.name} (${ing.code}) - ĐVT: ${ing.unit}`,
-                              }))}
-                            />
-                          </Form.Item>
+                          {/* Hàng 1 trên Mobile / Khối trái trên Desktop: STT, Chọn nguyên liệu & Nút xóa trên mobile */}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-3xs font-mono font-bold text-sushi-text-dim w-4 text-center shrink-0">
+                              #{index + 1}
+                            </span>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'ingredientId']}
+                              rules={[{ required: true, message: 'Vui lòng chọn nguyên liệu' }]}
+                              className="flex-1 mb-0 min-w-0"
+                            >
+                              <Select
+                                placeholder="Chọn nguyên liệu..."
+                                showSearch
+                                optionFilterProp="label"
+                                className="w-full h-10"
+                                options={ingredients.map((ing) => ({
+                                  value: ing.id,
+                                  label: `${ing.name} (${ing.code}) - ĐVT: ${ing.unit}`,
+                                }))}
+                              />
+                            </Form.Item>
 
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'quantity']}
-                            rules={[
-                              { required: true, message: 'Nhập số lượng' },
-                              { type: 'number', min: 0.001, message: 'Phải > 0' },
-                            ]}
-                            className="w-28 sm:w-36 mb-0"
-                          >
-                            <InputNumber
-                              placeholder="Định mức"
-                              className="w-full"
-                              suffix={selectedIng?.unit || 'ĐVT'}
-                              step={1}
-                              precision={3}
+                            {/* Nút xóa trên Mobile (< sm) */}
+                            <Button
+                              type="text"
+                              danger
+                              icon={<Trash size={16} />}
+                              onClick={() => remove(name)}
+                              disabled={fields.length === 1}
+                              className="sm:hidden shrink-0 h-9 w-9 flex items-center justify-center p-0 rounded-lg hover:bg-red-500/10"
+                              title="Xóa nguyên liệu"
                             />
-                          </Form.Item>
+                          </div>
 
-                          <Button
-                            type="text"
-                            danger
-                            icon={<Trash size={18} />}
-                            onClick={() => remove(name)}
-                            disabled={fields.length === 1}
-                            className="shrink-0"
-                          />
+                          {/* Hàng 2 trên Mobile / Khối phải trên Desktop: Nhập định mức & Nút xóa trên desktop */}
+                          <div className="flex items-center gap-2 pl-6 sm:pl-0 sm:w-auto">
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'quantity']}
+                              rules={[
+                                { required: true, message: 'Nhập số lượng' },
+                                { type: 'number', min: 0.001, message: 'Phải > 0' },
+                              ]}
+                              className="flex-1 sm:w-36 mb-0"
+                            >
+                              <InputNumber
+                                placeholder="Định mức"
+                                className="w-full h-10 rounded-xl"
+                                suffix={selectedIng?.unit || 'ĐVT'}
+                                step={1}
+                                precision={3}
+                              />
+                            </Form.Item>
+
+                            {/* Nút xóa trên Desktop (>= sm) */}
+                            <Button
+                              type="text"
+                              danger
+                              icon={<Trash size={18} />}
+                              onClick={() => remove(name)}
+                              disabled={fields.length === 1}
+                              className="hidden sm:flex shrink-0 h-9 w-9 items-center justify-center p-0 rounded-lg hover:bg-red-500/10"
+                              title="Xóa nguyên liệu"
+                            />
+                          </div>
                         </div>
                       );
                     })}
@@ -498,7 +542,7 @@ export function RecipeManagementView({
                       onClick={() => add()}
                       block
                       icon={<Plus size={16} />}
-                      className="border-zinc-700 text-sushi-gold hover:text-amber-400 h-10 rounded-xl"
+                      className="border-dashed border-zinc-700 text-sushi-gold hover:text-amber-400 h-11 rounded-xl flex items-center justify-center gap-1.5 font-medium"
                     >
                       Thêm nguyên liệu
                     </Button>
@@ -508,7 +552,7 @@ export function RecipeManagementView({
             </div>
           </Form>
         </div>
-      </Modal>
+      </ResponsiveModalDrawer>
     </div>
   );
 }
