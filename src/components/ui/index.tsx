@@ -384,7 +384,7 @@ export function SushiPageHeader({ title, subtitle, extra, subtitleClassName, cla
           </p>
         )}
       </div>
-      {extra && <div className="flex items-center space-x-3">{extra}</div>}
+      {extra && <div className="flex items-center space-x-3 w-full sm:w-auto">{extra}</div>}
     </div>
   );
 }

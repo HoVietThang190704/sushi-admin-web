@@ -156,16 +156,18 @@ export default function OrdersPage() {
         title="Quản Lý Đơn Hàng (Take Away)"
         subtitle="Theo dõi vòng đời đơn hàng, điều phối bếp và cập nhật trạng thái theo thời gian thực"
         extra={
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <Input
-              placeholder="Tìm theo mã đơn, tên, SĐT..."
-              prefix={<MagnifyingGlass size={16} className="text-sushi-text-muted" />}
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              allowClear
-              className="w-full sm:w-64"
-            />
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex-1 sm:w-64 min-w-0">
+              <Input
+                placeholder="Tìm mã đơn, tên, SĐT..."
+                prefix={<MagnifyingGlass size={16} className="text-sushi-text-muted shrink-0" />}
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                allowClear
+                className="w-full h-10 rounded-xl"
+              />
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
               <Button
                 icon={
                   <Funnel
@@ -175,22 +177,24 @@ export default function OrdersPage() {
                   />
                 }
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className={`flex-1 sm:flex-initial ${
+                className={`h-10 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm flex items-center justify-center shrink-0 ${
                   hasDateFilter ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
                 }`}
+                title="Lọc đơn hàng theo ngày"
               >
-                <span>Lọc ngày</span>
+                <span className="hidden sm:inline">Lọc ngày</span>
                 {hasDateFilter && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 inline-block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 sm:ml-1 inline-block" />
                 )}
               </Button>
               <Button
                 icon={<ArrowsClockwise size={16} className={isFetching ? 'animate-spin' : ''} />}
                 onClick={() => refetch()}
                 loading={isFetching}
-                className="shrink-0"
+                className="h-10 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm flex items-center justify-center shrink-0"
+                title="Làm mới danh sách đơn hàng"
               >
-                Làm mới
+                <span className="hidden sm:inline">Làm mới</span>
               </Button>
             </div>
           </div>
