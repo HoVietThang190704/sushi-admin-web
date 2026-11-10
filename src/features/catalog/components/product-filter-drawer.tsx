@@ -6,7 +6,7 @@ import {
   Select,
   Button,
 } from '@/components/ui';
-import { Funnel, Check } from '@phosphor-icons/react';
+import { Check } from '@phosphor-icons/react';
 
 export interface ProductFilterDrawerProps {
   open: boolean;
@@ -148,12 +148,7 @@ export function ProductFilterDrawer({
       onClose={onClose}
       destroyOnClose
       destroyOnHidden
-      title={
-        <div className="flex items-center gap-2 text-sushi-text">
-          <Funnel size={18} weight="fill" className="text-sushi-gold" />
-          <span>Bộ Lọc Món Ăn</span>
-        </div>
-      }
+      title="Bộ Lọc Món Ăn"
     >
       {open && (
         <FilterForm
