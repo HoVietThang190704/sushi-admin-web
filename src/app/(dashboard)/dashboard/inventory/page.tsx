@@ -20,7 +20,9 @@ import { X } from '@phosphor-icons/react';
 import {
   Ingredient,
   TransactionType,
+  Recipe,
   useIngredients,
+  useRecipes,
   useInventoryTransactions,
   useCreateIngredient,
   useCreateTransaction,
@@ -31,7 +33,9 @@ import {
   RecipeManagementView,
   WarehouseStockView,
   IngredientFilterDrawer,
+  RecipeFilterDrawer,
 } from '@/features/inventory';
+import { useProducts } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
 export default function InventoryPage() {
@@ -49,16 +53,56 @@ export default function InventoryPage() {
   const [alertFilter, setAlertFilter] = useState<'ALL' | 'ALERTS'>('ALL');
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  const hasActiveFilters = alertFilter !== 'ALL';
+  // Filter States cho Tab Công Thức Món (BOM)
+  const [recipeSearch, setRecipeSearch] = useState('');
+  const [recipeFilterStatus, setRecipeFilterStatus] = useState<'ALL' | 'CONFIGURED' | 'MISSING'>('ALL');
+  const [isRecipeFilterDrawerOpen, setIsRecipeFilterDrawerOpen] = useState(false);
 
+  const hasActiveFilters = alertFilter !== 'ALL';
   const handleResetFilters = () => {
     setAlertFilter('ALL');
+  };
+
+  const hasActiveRecipeFilters = recipeFilterStatus !== 'ALL';
+  const handleResetRecipeFilters = () => {
+    setRecipeFilterStatus('ALL');
   };
 
   // TanStack Query Hooks
   const { data: ingredients = [], isLoading: ingredientsLoading } = useIngredients();
   const { data: stockInTransactions = [], isLoading: inLoading } = useInventoryTransactions('IN');
   const { data: stockOutTransactions = [], isLoading: outLoading } = useInventoryTransactions('OUT');
+  const { data: products = [] } = useProducts();
+  const { data: recipes = [] } = useRecipes();
+
+  // Recipe (BOM) Data Memo
+  const singleProducts = useMemo(() => {
+    return products.filter((p) => p.type === 'SINGLE');
+  }, [products]);
+
+  const recipeMap = useMemo(() => {
+    const map = new Map<string, Recipe>();
+    for (const r of recipes) {
+      map.set(r.productId, r);
+    }
+    return map;
+  }, [recipes]);
+
+  const filteredRecipeProducts = useMemo(() => {
+    return singleProducts.filter((p) => {
+      const recipe = recipeMap.get(p.id);
+      const isConfigured = Boolean(recipe && recipe.items && recipe.items.length > 0);
+
+      if (recipeFilterStatus === 'CONFIGURED' && !isConfigured) return false;
+      if (recipeFilterStatus === 'MISSING' && isConfigured) return false;
+
+      if (recipeSearch.trim()) {
+        const q = recipeSearch.toLowerCase().trim();
+        return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [singleProducts, recipeMap, recipeFilterStatus, recipeSearch]);
 
   // Mutation Hooks
   const createIngredientMutation = useCreateIngredient();
@@ -316,6 +360,78 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* Toolbar Tìm Kiếm & Lọc Nhanh (Tab Công Thức Món BOM) */}
+      {activeTab === 'recipes' && (
+        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex items-center sm:flex-wrap gap-2 sm:gap-3 flex-1 w-full">
+            {/* Ô tìm kiếm theo tên món hoặc mã SKU */}
+            <div className="flex-1 sm:w-80 min-w-0">
+              <Input
+                id="recipe-search-input"
+                name="recipeSearch"
+                prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5 shrink-0" />}
+                placeholder="Tìm theo tên món hoặc mã SKU..."
+                allowClear
+                value={recipeSearch}
+                onChange={(e) => setRecipeSearch(e.target.value)}
+                className="rounded-xl h-10 w-full"
+              />
+            </div>
+
+            {/* Nút Lọc Mobile (< sm) */}
+            <Button
+              icon={
+                <Funnel
+                  size={16}
+                  weight={hasActiveRecipeFilters ? 'fill' : 'regular'}
+                  className={hasActiveRecipeFilters ? 'text-sushi-gold' : ''}
+                />
+              }
+              onClick={() => setIsRecipeFilterDrawerOpen(true)}
+              className={`h-10 rounded-xl px-3 flex items-center justify-center shrink-0 sm:hidden ${
+                hasActiveRecipeFilters ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
+              }`}
+              title="Lọc trạng thái công thức món"
+            >
+              {hasActiveRecipeFilters && (
+                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 inline-block" />
+              )}
+            </Button>
+
+            {/* Dropdown desktop (>= sm) */}
+            <div className="hidden sm:block sm:w-56">
+              <Select
+                className="w-full h-10"
+                value={recipeFilterStatus}
+                onChange={(val) => setRecipeFilterStatus(val)}
+                options={[
+                  { value: 'ALL', label: 'Tất cả trạng thái' },
+                  { value: 'CONFIGURED', label: 'Đã có công thức' },
+                  { value: 'MISSING', label: 'Chưa có công thức' },
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Đếm số lượng & Xóa bộ lọc nhanh trên mobile */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 text-2xs sm:text-xs font-mono text-sushi-text-dim shrink-0">
+            {hasActiveRecipeFilters && (
+              <button
+                type="button"
+                onClick={handleResetRecipeFilters}
+                className="sm:hidden text-2xs text-sushi-gold hover:underline flex items-center gap-1 cursor-pointer font-sans"
+              >
+                <X size={12} />
+                <span>Xóa bộ lọc</span>
+              </button>
+            )}
+            <span>
+              {filteredRecipeProducts.length} / {singleProducts.length} món
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* =========================================================================
           4. Tabs Giao Diện: Tồn Kho & Cảnh Báo / Lịch Sử Nhập / Lịch Sử Xuất
          ========================================================================= */}
@@ -349,7 +465,11 @@ export default function InventoryPage() {
               ),
               children: (
                 <div className="pt-2">
-                  <RecipeManagementView />
+                  <RecipeManagementView
+                    search={recipeSearch}
+                    filterStatus={recipeFilterStatus}
+                    hideToolbar={true}
+                  />
                 </div>
               ),
             },
@@ -435,6 +555,16 @@ export default function InventoryPage() {
         onReset={handleResetFilters}
         totalFilteredCount={filteredIngredients.length}
         alertCount={alertCount}
+      />
+
+      {/* Bottom Sheet Lọc Trạng Thái Công Thức Cho Mobile */}
+      <RecipeFilterDrawer
+        open={isRecipeFilterDrawerOpen}
+        onClose={() => setIsRecipeFilterDrawerOpen(false)}
+        filterStatus={recipeFilterStatus}
+        onSelectFilterStatus={(val) => setRecipeFilterStatus(val)}
+        onReset={handleResetRecipeFilters}
+        totalFilteredCount={filteredRecipeProducts.length}
       />
     </div>
   );

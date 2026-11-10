@@ -33,7 +33,17 @@ import {
   Recipe,
 } from '@/features/inventory';
 
-export function RecipeManagementView() {
+export interface RecipeManagementViewProps {
+  search?: string;
+  filterStatus?: 'ALL' | 'CONFIGURED' | 'MISSING';
+  hideToolbar?: boolean;
+}
+
+export function RecipeManagementView({
+  search: externalSearch,
+  filterStatus: externalFilterStatus,
+  hideToolbar = false,
+}: RecipeManagementViewProps = {}) {
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const { data: recipes = [], isLoading: recipesLoading } = useRecipes();
   const { data: ingredients = [] } = useIngredients();
@@ -41,8 +51,12 @@ export function RecipeManagementView() {
   const upsertMutation = useUpsertRecipe();
   const deleteMutation = useDeleteRecipe();
 
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'CONFIGURED' | 'MISSING'>('ALL');
+  const [internalSearch, setInternalSearch] = useState('');
+  const [internalFilterStatus, setInternalFilterStatus] = useState<'ALL' | 'CONFIGURED' | 'MISSING'>('ALL');
+
+  const search = externalSearch !== undefined ? externalSearch : internalSearch;
+  const filterStatus = externalFilterStatus !== undefined ? externalFilterStatus : internalFilterStatus;
+
   const [editingProduct, setEditingProduct] = useState<{ id: string; name: string; sku: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -232,31 +246,33 @@ export function RecipeManagementView() {
   return (
     <div className="space-y-4">
       {/* Thanh công cụ lọc */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
-        <div className="flex items-center gap-2 flex-1">
-          <Input
-            placeholder="Tìm theo tên món hoặc mã SKU..."
-            prefix={<MagnifyingGlass size={16} className="text-zinc-500" />}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            allowClear
-            className="rounded-xl bg-zinc-900 border-zinc-700 h-10 sm:h-9"
-          />
-        </div>
+      {!hideToolbar && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
+          <div className="flex items-center gap-2 flex-1">
+            <Input
+              placeholder="Tìm theo tên món hoặc mã SKU..."
+              prefix={<MagnifyingGlass size={16} className="text-zinc-500" />}
+              value={search}
+              onChange={(e) => setInternalSearch(e.target.value)}
+              allowClear
+              className="rounded-xl bg-zinc-900 border-zinc-700 h-10 sm:h-9"
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Select
-            value={filterStatus}
-            onChange={setFilterStatus}
-            className="w-full sm:w-48 h-10 sm:h-9"
-            options={[
-              { value: 'ALL', label: 'Tất cả trạng thái' },
-              { value: 'CONFIGURED', label: 'Đã có công thức' },
-              { value: 'MISSING', label: 'Chưa có công thức' },
-            ]}
-          />
+          <div className="flex items-center gap-2">
+            <Select
+              value={filterStatus}
+              onChange={setInternalFilterStatus}
+              className="w-full sm:w-48 h-10 sm:h-9"
+              options={[
+                { value: 'ALL', label: 'Tất cả trạng thái' },
+                { value: 'CONFIGURED', label: 'Đã có công thức' },
+                { value: 'MISSING', label: 'Chưa có công thức' },
+              ]}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
