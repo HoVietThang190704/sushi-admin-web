@@ -9,6 +9,7 @@ import {
   Popconfirm,
   App,
   Pagination,
+  ResponsiveModalDrawer,
   SushiMobileCardList,
   SushiCardItem,
   SushiEmptyState,
@@ -41,6 +42,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const { message } = App.useApp();
   const { formatCurrency } = useFormatCurrency();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [paymentConfirmOrder, setPaymentConfirmOrder] = useState<Order | null>(null);
   const [mobilePage, setMobilePage] = useState(1);
   const mobilePageSize = 10;
 
@@ -207,27 +209,17 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           {/* Quick status progress buttons */}
           {record.status === 'PENDING' && (
             isTransferUnpaid(record) ? (
-              <Popconfirm
-                title="Xác nhận đã nhận tiền chuyển khoản?"
-                description="Sau khi xác nhận thanh toán, bạn có thể duyệt đơn xuống bếp."
-                onConfirm={(e) =>
-                  handleQuickPaymentConfirm(
-                    record,
-                    e as unknown as React.MouseEvent,
-                  )
-                }
-                okText="Đã nhận tiền"
-                cancelText="Chưa"
+              <Button
+                size="small"
+                className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm flex items-center gap-1"
+                icon={<CreditCard size={15} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPaymentConfirmOrder(record);
+                }}
               >
-                <Button
-                  size="small"
-                  className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm"
-                  icon={<CreditCard size={15} />}
-                  loading={updatePaymentMutation.isPending}
-                >
-                  Xác nhận TT
-                </Button>
-              </Popconfirm>
+                Xác nhận TT
+              </Button>
             ) : (
               <Tooltip title="Xác nhận tiếp nhận đơn hàng">
                 <Button
@@ -246,27 +238,17 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
 
           {record.status === 'CONFIRMED' && (
             isTransferUnpaid(record) ? (
-              <Popconfirm
-                title="Xác nhận đã nhận tiền chuyển khoản?"
-                description="Sau khi xác nhận thanh toán, bạn có thể chuyển món xuống bếp."
-                onConfirm={(e) =>
-                  handleQuickPaymentConfirm(
-                    record,
-                    e as unknown as React.MouseEvent,
-                  )
-                }
-                okText="Đã nhận tiền"
-                cancelText="Chưa"
+              <Button
+                size="small"
+                className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm flex items-center gap-1"
+                icon={<CreditCard size={15} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPaymentConfirmOrder(record);
+                }}
               >
-                <Button
-                  size="small"
-                  className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm"
-                  icon={<CreditCard size={15} />}
-                  loading={updatePaymentMutation.isPending}
-                >
-                  Xác nhận TT
-                </Button>
-              </Popconfirm>
+                Xác nhận TT
+              </Button>
             ) : (
               <Tooltip title="Bắt đầu chế biến món (Khấu trừ kho)">
                 <Button
@@ -454,28 +436,18 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   >
                     {order.status === 'PENDING' && (
                       isTransferUnpaid(order) ? (
-                        <Popconfirm
-                          title="Xác nhận đã nhận tiền chuyển khoản?"
-                          description="Sau khi xác nhận thanh toán, bạn có thể duyệt đơn xuống bếp."
-                          onConfirm={(e) =>
-                            handleQuickPaymentConfirm(
-                              order,
-                              e as unknown as React.MouseEvent,
-                            )
-                          }
-                          okText="Đã nhận tiền"
-                          cancelText="Hủy"
+                        <Button
+                          size="small"
+                          type="primary"
+                          className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm flex items-center gap-1"
+                          icon={<CreditCard size={15} />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPaymentConfirmOrder(order);
+                          }}
                         >
-                          <Button
-                            size="small"
-                            type="primary"
-                            className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm"
-                            icon={<CreditCard size={15} />}
-                            loading={updatePaymentMutation.isPending}
-                          >
-                            Xác nhận TT
-                          </Button>
-                        </Popconfirm>
+                          Xác nhận TT
+                        </Button>
                       ) : (
                         <Button
                           size="small"
@@ -494,28 +466,18 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
 
                     {order.status === 'CONFIRMED' && (
                       isTransferUnpaid(order) ? (
-                        <Popconfirm
-                          title="Xác nhận đã nhận tiền chuyển khoản?"
-                          description="Sau khi xác nhận thanh toán, bạn có thể chuyển món xuống bếp."
-                          onConfirm={(e) =>
-                            handleQuickPaymentConfirm(
-                              order,
-                              e as unknown as React.MouseEvent,
-                            )
-                          }
-                          okText="Đã nhận tiền"
-                          cancelText="Hủy"
+                        <Button
+                          size="small"
+                          type="primary"
+                          className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm flex items-center gap-1"
+                          icon={<CreditCard size={15} />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPaymentConfirmOrder(order);
+                          }}
                         >
-                          <Button
-                            size="small"
-                            type="primary"
-                            className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm"
-                            icon={<CreditCard size={15} />}
-                            loading={updatePaymentMutation.isPending}
-                          >
-                            Xác nhận TT
-                          </Button>
-                        </Popconfirm>
+                          Xác nhận TT
+                        </Button>
                       ) : (
                         <Button
                           size="small"
@@ -612,6 +574,91 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           className="bg-sushi-card border border-sushi-border rounded-xl overflow-hidden shadow-sm"
         />
       </div>
+
+      {/* Modal / Bottom Sheet Xác nhận đã nhận tiền chuyển khoản */}
+      <ResponsiveModalDrawer
+        open={Boolean(paymentConfirmOrder)}
+        onClose={() => setPaymentConfirmOrder(null)}
+        destroyOnClose
+        destroyOnHidden
+        title={
+          <div className="flex items-center gap-2 text-sushi-text text-sm sm:text-base">
+            <CreditCard size={18} className="text-sushi-gold shrink-0" />
+            <span className="font-semibold">Xác Nhận Đã Nhận Tiền</span>
+          </div>
+        }
+        width={460}
+        footer={
+          <div className="flex items-center justify-between gap-3 w-full">
+            <Button
+              onClick={() => setPaymentConfirmOrder(null)}
+              className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="primary"
+              onClick={async () => {
+                if (paymentConfirmOrder) {
+                  await handleQuickPaymentConfirm(paymentConfirmOrder);
+                  setPaymentConfirmOrder(null);
+                }
+              }}
+              loading={updatePaymentMutation.isPending}
+              className="rounded-xl flex-1 h-11 bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+            >
+              <CheckCircle size={18} weight="bold" />
+              <span>Đã nhận tiền</span>
+            </Button>
+          </div>
+        }
+      >
+        {paymentConfirmOrder && (
+          <div className="py-1 space-y-4">
+            <div className="p-4 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 space-y-2.5">
+              <div className="flex items-center justify-between pb-2.5 border-b border-sushi-border/60">
+                <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted">
+                  Mã đơn hàng:
+                </span>
+                <span className="font-mono font-bold text-sushi-gold text-sm">
+                  {paymentConfirmOrder.code}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-sushi-text-muted">Khách hàng:</span>
+                <span className="font-semibold text-sushi-text">
+                  {paymentConfirmOrder.customerName} ({paymentConfirmOrder.customerPhone})
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-sushi-text-muted">Phương thức:</span>
+                <span className="font-semibold text-sushi-gold flex items-center gap-1">
+                  <QrCode size={13} />
+                  <span>Chuyển khoản QR</span>
+                </span>
+              </div>
+
+              <div className="pt-2 border-t border-sushi-border/60 flex items-center justify-between">
+                <span className="text-xs font-medium text-sushi-text-muted">
+                  Số tiền cần đối soát:
+                </span>
+                <span className="text-lg font-bold font-mono text-sushi-gold">
+                  {formatCurrency(paymentConfirmOrder.totalAmount)}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2 text-2xs text-amber-200 leading-relaxed">
+              <span className="text-amber-400 font-bold shrink-0">💡 Lưu ý:</span>
+              <span>
+                Vui lòng kiểm tra ứng dụng ngân hàng. Sau khi xác nhận <strong>&quot;Đã nhận tiền&quot;</strong>, hệ thống sẽ mở khóa để bạn duyệt đơn chuyển xuống bếp.
+              </span>
+            </div>
+          </div>
+        )}
+      </ResponsiveModalDrawer>
 
       <OrderDetailModal
         order={selectedOrder}
