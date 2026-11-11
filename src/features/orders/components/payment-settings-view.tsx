@@ -14,7 +14,6 @@ import {
   Check,
   UploadSimple,
   Trash,
-  Info,
   Spinner,
 } from '@phosphor-icons/react';
 import { usePaymentConfig, useUpdatePaymentConfig } from '../hooks/use-orders';
@@ -100,16 +99,6 @@ export function PaymentSettingsView() {
 
   return (
     <div className="space-y-5 max-w-4xl">
-      {/* Banner hướng dẫn nghiệp vụ tinh gọn */}
-      <div className="p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2.5 text-2xs sm:text-xs text-amber-200 leading-relaxed">
-        <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
-        <div className="min-w-0 flex-1">
-          <span>
-            Khách chọn Chuyển khoản sẽ quét ảnh QR bên dưới kèm mã đơn hàng. Nhân viên đối chiếu tiền về tài khoản và bấm <strong>&quot;Đã thanh toán&quot;</strong> thì bếp mới chế biến.
-          </span>
-        </div>
-      </div>
-
       <Form
         form={form}
         layout="vertical"
