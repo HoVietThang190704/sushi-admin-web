@@ -582,10 +582,9 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
         destroyOnClose
         destroyOnHidden
         title={
-          <div className="flex items-center gap-2 text-sushi-text text-sm sm:text-base">
-            <CreditCard size={18} className="text-sushi-gold shrink-0" />
-            <span className="font-semibold">Xác Nhận Đã Nhận Tiền</span>
-          </div>
+          <span className="font-semibold text-sushi-text text-sm sm:text-base">
+            Xác Nhận Đã Nhận Tiền
+          </span>
         }
         width={460}
         footer={
@@ -648,13 +647,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   {formatCurrency(paymentConfirmOrder.totalAmount)}
                 </span>
               </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2 text-2xs text-amber-200 leading-relaxed">
-              <span className="text-amber-400 font-bold shrink-0">💡 Lưu ý:</span>
-              <span>
-                Vui lòng kiểm tra ứng dụng ngân hàng. Sau khi xác nhận <strong>&quot;Đã nhận tiền&quot;</strong>, hệ thống sẽ mở khóa để bạn duyệt đơn chuyển xuống bếp.
-              </span>
             </div>
           </div>
         )}
