@@ -113,6 +113,8 @@
     "ordersSubtitle": "Track delivery orders, shippers and coordinate kitchen dispatch in real time",
     "shipping": "Shipping Rules",
     "settings": "QR Payment Settings",
+    "settingsGroup": "Settings",
+    "paymentSettings": "Payment Settings",
     "ordersComingSoon": "Ordering Service is being prepared. You will manage orders here in the next phase!",
     "productsTitle": "Dishes & Products",
     "productsSubtitle": "Manage sushi dishes and combos across the restaurant chain",

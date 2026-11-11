@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
+import { BOTTOM_NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
 
 export function AdminBottomNav() {
   const { t } = useTranslation();
@@ -93,7 +93,7 @@ export function AdminBottomNav() {
       }}
     >
       <div className="flex items-center justify-around h-14 px-2 rounded-full bg-[#1c1c20]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.55)]">
-        {NAV_ITEMS.map((item) => {
+        {BOTTOM_NAV_ITEMS.map((item) => {
           const IconComponent = item.icon;
           const isActive = selectedKey === item.key;
           const label = t(item.labelKey);

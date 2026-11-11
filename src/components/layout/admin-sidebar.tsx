@@ -13,7 +13,7 @@ import {
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
-import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
+import { NAV_ITEMS, getActiveNavKey, getActiveParentKey } from '@/config/navigation.config';
 
 const { Sider } = Layout;
 
@@ -36,16 +36,56 @@ export function AdminSidebar({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Tự động suy ra active key từ pathname thông qua navigation config
+  // Tự động suy ra active key & parent key từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
+  const activeParentKey = useMemo(() => getActiveParentKey(pathname), [pathname]);
 
-  // Sinh danh sách Menu Items từ NAV_ITEMS (Không hardcode)
+  // Sinh danh sách Menu Items từ NAV_ITEMS (Hỗ trợ mục cha Cấu hình xổ xuống)
   const menuItems = useMemo(
     () =>
       NAV_ITEMS.map((item) => {
         const IconComponent = item.icon;
         const isActive = selectedKey === item.key;
+        const isParentActive = activeParentKey === item.key;
 
+        // Nếu là mục cha có các mục con xổ xuống (như Cấu hình)
+        if (item.children && item.children.length > 0) {
+          return {
+            key: item.key,
+            icon: (
+              <IconComponent
+                size={20}
+                weight={isParentActive ? 'fill' : 'regular'}
+              />
+            ),
+            label: (
+              <span className={`text-sm ${isParentActive ? 'font-semibold text-white' : 'font-medium'}`}>
+                {t(item.labelKey)}
+              </span>
+            ),
+            children: item.children.map((child) => {
+              const isChildActive = selectedKey === child.key;
+              const ChildIcon = child.icon;
+
+              return {
+                key: child.key,
+                icon: ChildIcon ? (
+                  <ChildIcon
+                    size={17}
+                    weight={isChildActive ? 'fill' : 'regular'}
+                  />
+                ) : undefined,
+                label: (
+                  <span className={`text-xs ${isChildActive ? 'font-semibold text-sushi-gold' : 'font-normal'}`}>
+                    {t(child.labelKey)}
+                  </span>
+                ),
+              };
+            }),
+          };
+        }
+
+        // Mục menu đơn cấp 1
         return {
           key: item.key,
           icon: (
@@ -61,12 +101,25 @@ export function AdminSidebar({
           ),
         };
       }),
-    [selectedKey, t]
+    [selectedKey, activeParentKey, t]
   );
 
   const handleMenuClick = ({ key }: { key: string }) => {
+    // 1. Tìm trong các mục con trước
+    for (const item of NAV_ITEMS) {
+      if (item.children) {
+        const child = item.children.find((c) => c.key === key);
+        if (child) {
+          onMobileClose?.();
+          router.push(child.path);
+          return;
+        }
+      }
+    }
+
+    // 2. Tìm trong các mục cấp 1
     const targetItem = NAV_ITEMS.find((item) => item.key === key);
-    if (targetItem) {
+    if (targetItem?.path) {
       onMobileClose?.();
       router.push(targetItem.path);
     }
@@ -110,6 +163,7 @@ export function AdminSidebar({
         <Menu
           theme="dark"
           selectedKeys={[selectedKey]}
+          defaultOpenKeys={activeParentKey ? [activeParentKey] : ['settings']}
           mode="inline"
           onClick={handleMenuClick}
           items={menuItems}

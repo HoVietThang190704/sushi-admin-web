@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { NAV_ITEMS, getNavIndex } from '@/config/navigation.config';
+import { BOTTOM_NAV_ITEMS, getNavIndex } from '@/config/navigation.config';
 
 export interface UseDashboardSwipeResult {
   contentRef: React.RefObject<HTMLDivElement | null>;
@@ -34,11 +34,11 @@ export function useDashboardSwipe(): UseDashboardSwipeResult {
 
   // Tải trước (prefetch) các tab liền kề để chuyển route tức thì
   useEffect(() => {
-    if (currentIndex < NAV_ITEMS.length - 1) {
-      router.prefetch(NAV_ITEMS[currentIndex + 1].path);
+    if (currentIndex < BOTTOM_NAV_ITEMS.length - 1) {
+      router.prefetch(BOTTOM_NAV_ITEMS[currentIndex + 1].path);
     }
     if (currentIndex > 0) {
-      router.prefetch(NAV_ITEMS[currentIndex - 1].path);
+      router.prefetch(BOTTOM_NAV_ITEMS[currentIndex - 1].path);
     }
   }, [currentIndex, router]);
 
@@ -148,7 +148,7 @@ export function useDashboardSwipe(): UseDashboardSwipeResult {
       // Cản lực lò xo (rubber-band) nếu vuốt vượt mép ngoài cùng của tab đầu hoặc tab cuối
       if (
         (currentIndex === 0 && deltaX > 0) ||
-        (currentIndex === NAV_ITEMS.length - 1 && deltaX < 0)
+        (currentIndex === BOTTOM_NAV_ITEMS.length - 1 && deltaX < 0)
       ) {
         offset = deltaX * 0.22;
       }
@@ -187,20 +187,20 @@ export function useDashboardSwipe(): UseDashboardSwipeResult {
     // Ngưỡng chuyển tab: vuốt xa > 50px hoặc vuốt nhanh (flick) > 20px
     const shouldSwitch = Math.abs(deltaX) > 50 || (Math.abs(deltaX) > 20 && velocity > 0.3);
 
-    if (shouldSwitch && deltaX < 0 && currentIndex < NAV_ITEMS.length - 1) {
+    if (shouldSwitch && deltaX < 0 && currentIndex < BOTTOM_NAV_ITEMS.length - 1) {
       // Vuốt sang trái -> Chuyển sang Tab tiếp theo bên phải tức thì
       isNavigating.current = true;
       contentRef.current.style.transition = 'transform 0.16s ease-out, opacity 0.16s ease-out';
       contentRef.current.style.transform = 'translate3d(-80px, 0, 0)';
       contentRef.current.style.opacity = '0';
-      router.push(NAV_ITEMS[currentIndex + 1].path);
+      router.push(BOTTOM_NAV_ITEMS[currentIndex + 1].path);
     } else if (shouldSwitch && deltaX > 0 && currentIndex > 0) {
       // Vuốt sang phải -> Chuyển về Tab trước đó bên trái tức thì
       isNavigating.current = true;
       contentRef.current.style.transition = 'transform 0.16s ease-out, opacity 0.16s ease-out';
       contentRef.current.style.transform = 'translate3d(80px, 0, 0)';
       contentRef.current.style.opacity = '0';
-      router.push(NAV_ITEMS[currentIndex - 1].path);
+      router.push(BOTTOM_NAV_ITEMS[currentIndex - 1].path);
     } else {
       // Không đủ ngưỡng vuốt hoặc ở mép biên -> Bung hồi về vị trí cũ bằng spring curve mượt mà
       const targetEl = contentRef.current;
