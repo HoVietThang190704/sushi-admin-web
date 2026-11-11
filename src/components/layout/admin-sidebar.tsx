@@ -76,7 +76,7 @@ export function AdminSidebar({
                   />
                 ) : undefined,
                 label: (
-                  <span className={`text-xs ${isChildActive ? 'font-semibold text-sushi-gold' : 'font-normal'}`}>
+                  <span className={`text-xs ${isChildActive ? 'font-semibold text-white' : 'font-medium text-sushi-text-muted'}`}>
                     {t(child.labelKey)}
                   </span>
                 ),

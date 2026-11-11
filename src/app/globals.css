@@ -81,20 +81,54 @@ input:-webkit-autofill:active {
   border-inline-end: none !important;
 }
 
-.sushi-admin-menu .ant-menu-item {
+.sushi-admin-menu .ant-menu-item,
+.sushi-admin-menu .ant-menu-submenu-title {
   height: 46px !important;
   line-height: 46px !important;
   border-radius: 10px !important;
   margin-inline: 10px !important;
-  margin-block: 6px !important;
+  margin-block: 4px !important;
   padding-inline: 14px !important;
   border: 1px solid transparent !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.sushi-admin-menu .ant-menu-item:hover {
+.sushi-admin-menu .ant-menu-item:hover,
+.sushi-admin-menu .ant-menu-submenu-title:hover {
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Mục cha khi đang mở: nền trong suốt, không nổi khối đè lên mục con */
+.sushi-admin-menu .ant-menu-submenu-open > .ant-menu-submenu-title,
+.sushi-admin-menu .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.sushi-admin-menu .ant-menu-submenu-open > .ant-menu-submenu-title .ant-menu-item-icon {
+  color: #f1f5f9 !important;
+}
+
+/* Danh sách submenu con: Thụt lề sang phải và có đường chỉ dẫn cây thư mục */
+.sushi-admin-menu .ant-menu-sub {
+  background: transparent !important;
+  position: relative !important;
+  margin-left: 24px !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-left: 6px !important;
+  margin-block: 2px 6px !important;
+}
+
+/* Từng mục con bên trong submenu: Cao 40px gọn gàng, thụt lề */
+.sushi-admin-menu .ant-menu-sub .ant-menu-item {
+  height: 40px !important;
+  line-height: 40px !important;
+  margin-inline: 4px 8px !important;
+  margin-block: 2px !important;
+  padding-inline: 12px !important;
+  border-radius: 8px !important;
 }
 
 .sushi-admin-menu .ant-menu-item-selected {
@@ -109,12 +143,14 @@ input:-webkit-autofill:active {
   filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.4));
 }
 
-.sushi-admin-menu .ant-menu-item:not(.ant-menu-item-selected) .ant-menu-item-icon {
+.sushi-admin-menu .ant-menu-item:not(.ant-menu-item-selected) .ant-menu-item-icon,
+.sushi-admin-menu .ant-menu-submenu-title:not(.ant-menu-item-selected) .ant-menu-item-icon {
   color: #94a3b8 !important;
   transition: color 0.2s ease;
 }
 
-.sushi-admin-menu .ant-menu-item:hover:not(.ant-menu-item-selected) .ant-menu-item-icon {
+.sushi-admin-menu .ant-menu-item:hover:not(.ant-menu-item-selected) .ant-menu-item-icon,
+.sushi-admin-menu .ant-menu-submenu-title:hover .ant-menu-item-icon {
   color: #cbd5e1 !important;
 }
 
