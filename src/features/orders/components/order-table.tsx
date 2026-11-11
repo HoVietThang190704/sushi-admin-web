@@ -6,7 +6,6 @@ import {
   Button,
   Space,
   Tooltip,
-  Popconfirm,
   App,
   Pagination,
   ResponsiveModalDrawer,
@@ -43,6 +42,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const { formatCurrency } = useFormatCurrency();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [paymentConfirmOrder, setPaymentConfirmOrder] = useState<Order | null>(null);
+  const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
   const [mobilePage, setMobilePage] = useState(1);
   const mobilePageSize = 10;
 
@@ -86,9 +86,9 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const handleQuickStatusChange = async (
     order: Order,
     toStatus: OrderStatus,
-    e: React.MouseEvent,
+    e?: React.MouseEvent,
   ) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     try {
       await updateStatusMutation.mutateAsync({
         orderId: order.id,
@@ -283,28 +283,20 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           )}
 
           {record.status === 'READY_FOR_PICKUP' && (
-            <Popconfirm
-              title="Khách đã lấy món và thanh toán xong?"
-              onConfirm={(e) =>
-                handleQuickStatusChange(
-                  record,
-                  'COMPLETED',
-                  e as unknown as React.MouseEvent,
-                )
-              }
-              okText="Đã giao"
-              cancelText="Chưa"
-            >
+            <Tooltip title="Xác nhận hoàn tất giao đơn hàng">
               <Button
                 size="small"
                 type="primary"
-                className="bg-emerald-600 hover:bg-emerald-500 text-xs px-2"
+                className="bg-emerald-600 hover:bg-emerald-500 text-xs px-2.5 font-semibold border-none shadow-sm flex items-center gap-1"
                 icon={<CheckCircle size={15} />}
-                loading={updateStatusMutation.isPending}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCompletingOrder(record);
+                }}
               >
                 Giao khách
               </Button>
-            </Popconfirm>
+            </Tooltip>
           )}
 
           <Tooltip title="Xem chi tiết đơn">
@@ -510,28 +502,18 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     )}
 
                     {order.status === 'READY_FOR_PICKUP' && (
-                      <Popconfirm
-                        title="Khách đã lấy món và thanh toán xong?"
-                        onConfirm={(e) =>
-                          handleQuickStatusChange(
-                            order,
-                            'COMPLETED',
-                            e as unknown as React.MouseEvent,
-                          )
-                        }
-                        okText="Đã giao"
-                        cancelText="Chưa"
+                      <Button
+                        size="small"
+                        type="primary"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm flex items-center gap-1"
+                        icon={<CheckCircle size={15} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCompletingOrder(order);
+                        }}
                       >
-                        <Button
-                          size="small"
-                          type="primary"
-                          className="bg-emerald-600 hover:bg-emerald-500 text-xs px-2.5"
-                          icon={<CheckCircle size={15} />}
-                          loading={updateStatusMutation.isPending}
-                        >
-                          Giao khách
-                        </Button>
-                      </Popconfirm>
+                        Giao khách
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -648,6 +630,103 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                 </span>
               </div>
             </div>
+          </div>
+        )}
+      </ResponsiveModalDrawer>
+
+      {/* Modal / Bottom Sheet Xác nhận hoàn tất đơn hàng (Giao khách) */}
+      <ResponsiveModalDrawer
+        open={Boolean(completingOrder)}
+        onClose={() => setCompletingOrder(null)}
+        destroyOnClose
+        destroyOnHidden
+        title={
+          <span className="font-semibold text-sushi-text text-sm sm:text-base">
+            Xác Nhận Hoàn Tất Đơn Hàng
+          </span>
+        }
+        width={460}
+        footer={
+          <div className="flex items-center justify-between gap-3 w-full">
+            <Button
+              onClick={() => setCompletingOrder(null)}
+              className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="primary"
+              onClick={async () => {
+                if (completingOrder) {
+                  await handleQuickStatusChange(completingOrder, 'COMPLETED');
+                  setCompletingOrder(null);
+                }
+              }}
+              loading={updateStatusMutation.isPending}
+              className="rounded-xl flex-1 h-11 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold border-none flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+            >
+              <CheckCircle size={18} weight="bold" />
+              <span>Xác nhận đã giao</span>
+            </Button>
+          </div>
+        }
+      >
+        {completingOrder && (
+          <div className="py-1 space-y-4">
+            <div className="p-4 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 space-y-2.5">
+              <div className="flex items-center justify-between pb-2.5 border-b border-sushi-border/60">
+                <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted">
+                  Mã đơn hàng:
+                </span>
+                <span className="font-mono font-bold text-sushi-gold text-sm">
+                  {completingOrder.code}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-sushi-text-muted">Khách hàng:</span>
+                <span className="font-semibold text-sushi-text">
+                  {completingOrder.customerName} ({completingOrder.customerPhone})
+                </span>
+              </div>
+
+              {completingOrder.address && (
+                <div className="flex items-start justify-between text-xs gap-3">
+                  <span className="text-sushi-text-muted shrink-0">Địa chỉ:</span>
+                  <span className="font-medium text-sushi-text text-right leading-relaxed">
+                    {completingOrder.address}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-sushi-text-muted">Hình thức:</span>
+                <span className="font-semibold text-sushi-text">
+                  {completingOrder.paymentMethod === 'VIETQR' || completingOrder.paymentMethod === 'BANK_TRANSFER'
+                    ? 'Chuyển khoản QR'
+                    : 'Tiền mặt khi nhận hàng (COD)'}
+                </span>
+              </div>
+
+              <div className="pt-2 border-t border-sushi-border/60 flex items-center justify-between">
+                <span className="text-xs font-medium text-sushi-text-muted">
+                  Trạng thái thanh toán:
+                </span>
+                {completingOrder.paymentStatus === 'PAID' ? (
+                  <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    Đã thanh toán ({formatCurrency(completingOrder.totalAmount)})
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    Thu tiền mặt COD: {formatCurrency(completingOrder.totalAmount)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <p className="text-xs text-sushi-text-muted leading-relaxed px-1">
+              Bạn có chắc chắn muốn xác nhận đã bàn giao thành công toàn bộ món ăn của đơn hàng này cho khách không?
+            </p>
           </div>
         )}
       </ResponsiveModalDrawer>
