@@ -190,16 +190,16 @@ export function PaymentSettingsView() {
           {/* Khối Thông tin ngân hàng: Trên Mobile hiển thị THỨ HAI (order-2), Trên Desktop hiển thị CỘT TRÁI (md:order-1 md:col-span-7) */}
           <div className="order-2 md:order-1 md:col-span-7 space-y-4">
             <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-sushi-border/60">
-                <div className="flex items-center gap-2">
-                  <Bank size={18} className="text-sushi-gold" />
-                  <span className="font-semibold text-sm text-sushi-text">
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-sushi-border/60">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Bank size={18} className="text-sushi-gold shrink-0" />
+                  <span className="font-semibold text-sm text-sushi-text truncate">
                     Thông Tin Tài Khoản Ngân Hàng
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <span className="text-2xs text-sushi-text-muted hidden sm:inline">Nhận chuyển khoản:</span>
-                  <Form.Item name="isActive" valuePropName="checked" className="mb-0">
+                  <Form.Item name="isActive" valuePropName="checked" noStyle>
                     <Switch
                       checkedChildren="Bật"
                       unCheckedChildren="Tắt"
