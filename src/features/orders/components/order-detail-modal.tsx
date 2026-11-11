@@ -21,6 +21,7 @@ import {
   CreditCard,
   Truck,
   MapPin,
+  WarningCircle,
 } from '@phosphor-icons/react';
 import { Order, OrderItem, OrderStatus } from '../types';
 import { OrderStatusBadge } from './order-status-badge';
@@ -63,6 +64,11 @@ export function OrderDetailModal({
     order.items?.reduce((sum, item) => sum + item.quantity, 0) ||
     order.items?.length ||
     0;
+
+  const isTransferMethod =
+    order.paymentMethod?.toUpperCase() === 'VIETQR' ||
+    order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER';
+  const isTransferUnpaid = isTransferMethod && order.paymentStatus !== 'PAID';
 
   const handleUpdateStatus = async (toStatus: OrderStatus, reason?: string) => {
     try {
@@ -209,6 +215,30 @@ export function OrderDetailModal({
               </Button>
             </div>
 
+            {isTransferUnpaid && (
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2">
+                <WarningCircle size={16} className="text-amber-400 shrink-0 mt-0.5" weight="fill" />
+                <div className="min-w-0 flex-1 leading-relaxed text-2xs">
+                  <span className="font-semibold text-amber-300 block">Đơn chuyển khoản chưa thanh toán:</span>
+                  <span>Kiểm tra tài khoản ngân hàng và bấm <strong>&quot;Đổi sang Đã TT&quot;</strong> để mở khóa duyệt đơn/chế biến.</span>
+                </div>
+              </div>
+            )}
+
+            {order.paymentQrUrl && (
+              <div className="p-2.5 rounded-xl bg-zinc-900 border border-sushi-border/60 flex items-center gap-3">
+                <img
+                  src={order.paymentQrUrl}
+                  alt="QR thanh toán của đơn"
+                  className="w-12 h-12 object-contain rounded-lg border border-sushi-border/80 bg-zinc-950 p-1 shrink-0"
+                />
+                <div className="min-w-0 flex-1 text-2xs">
+                  <span className="text-sushi-text-muted block">Mã QR đính kèm đơn:</span>
+                  <span className="font-semibold text-sushi-gold">Đã lưu ảnh QR tại thời điểm đặt hàng</span>
+                </div>
+              </div>
+            )}
+
             {order.note && (
               <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-start gap-2">
                 <FileText size={15} className="text-amber-400 shrink-0 mt-0.5" />
@@ -319,9 +349,15 @@ export function OrderDetailModal({
                   icon={<CheckCircle size={20} />}
                   onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
                   loading={updateStatusMutation.isPending}
-                  className="flex-1 h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 border-none shadow-md text-white cursor-pointer"
+                  disabled={isTransferUnpaid}
+                  className={`flex-1 h-12 rounded-xl font-bold border-none shadow-md text-white cursor-pointer ${
+                    isTransferUnpaid
+                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
+                      : 'bg-blue-600 hover:bg-blue-500'
+                  }`}
+                  title={isTransferUnpaid ? 'Cần xác nhận thanh toán trước khi duyệt đơn' : undefined}
                 >
-                  Xác nhận đơn
+                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}
                 </Button>
               </div>
             )}
@@ -341,9 +377,15 @@ export function OrderDetailModal({
                   icon={<CookingPot size={20} />}
                   onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
                   loading={updateStatusMutation.isPending}
-                  className="flex-1 h-12 rounded-xl font-bold bg-amber-600 hover:bg-amber-500 border-none shadow-md text-white cursor-pointer"
+                  disabled={isTransferUnpaid}
+                  className={`flex-1 h-12 rounded-xl font-bold border-none shadow-md text-white cursor-pointer ${
+                    isTransferUnpaid
+                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
+                      : 'bg-amber-600 hover:bg-amber-500'
+                  }`}
+                  title={isTransferUnpaid ? 'Cần xác nhận thanh toán trước khi chế biến' : undefined}
                 >
-                  Bắt đầu chế biến
+                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}
                 </Button>
               </div>
             )}
@@ -495,9 +537,15 @@ export function OrderDetailModal({
                   icon={<CheckCircle size={18} />}
                   onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
                   loading={updateStatusMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-500 font-semibold h-9 px-4 border-none shadow-sm"
+                  disabled={isTransferUnpaid}
+                  className={`font-semibold h-9 px-4 border-none shadow-sm ${
+                    isTransferUnpaid
+                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
+                      : 'bg-blue-600 hover:bg-blue-500'
+                  }`}
+                  title={isTransferUnpaid ? 'Cần bấm "Đổi sang Đã TT" trước khi duyệt đơn' : undefined}
                 >
-                  Xác nhận đơn
+                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}
                 </Button>
               </>
             )}
@@ -516,9 +564,15 @@ export function OrderDetailModal({
                   icon={<CookingPot size={18} />}
                   onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
                   loading={updateStatusMutation.isPending}
-                  className="bg-amber-600 hover:bg-amber-500 font-semibold h-9 px-4 border-none shadow-sm"
+                  disabled={isTransferUnpaid}
+                  className={`font-semibold h-9 px-4 border-none shadow-sm ${
+                    isTransferUnpaid
+                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
+                      : 'bg-amber-600 hover:bg-amber-500'
+                  }`}
+                  title={isTransferUnpaid ? 'Cần bấm "Đổi sang Đã TT" trước khi chế biến' : undefined}
                 >
-                  Bắt đầu chế biến
+                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}
                 </Button>
               </>
             )}
@@ -623,6 +677,30 @@ export function OrderDetailModal({
             </Button>
           </div>
         </div>
+
+        {isTransferUnpaid && (
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+            <WarningCircle size={18} className="text-amber-400 shrink-0 mt-0.5" weight="fill" />
+            <div className="min-w-0 flex-1 leading-relaxed">
+              <strong className="text-amber-300 block mb-0.5">Đơn hàng thanh toán chuyển khoản cần xác nhận:</strong>
+              <span>Vui lòng kiểm tra tài khoản ngân hàng. Sau khi nhận được tiền, hãy bấm <strong>&quot;Đánh dấu Đã TT&quot;</strong> để mở khóa duyệt đơn hoặc chế biến.</span>
+            </div>
+          </div>
+        )}
+
+        {order.paymentQrUrl && (
+          <div className="p-3 rounded-xl bg-zinc-900 border border-sushi-border/60 flex items-center gap-3 text-xs">
+            <img
+              src={order.paymentQrUrl}
+              alt="Mã QR thanh toán của đơn"
+              className="w-14 h-14 object-contain rounded-lg border border-sushi-border/80 bg-zinc-950 p-1 shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <span className="text-2xs text-sushi-text-muted block">Mã QR đính kèm đơn:</span>
+              <span className="font-semibold text-sushi-gold text-xs">Ảnh mã QR được chụp tại thời điểm khách đặt hàng</span>
+            </div>
+          </div>
+        )}
 
         {/* Địa chỉ giao hàng tận nơi */}
         {order.address && (

@@ -4,6 +4,8 @@ import {
   GetOrdersFilter,
   UpdateOrderStatusInput,
   UpdatePaymentStatusInput,
+  PaymentConfig,
+  UpdatePaymentConfigInput,
 } from '../types';
 
 export const ordersApi = {
@@ -27,6 +29,15 @@ export const ordersApi = {
 
   updatePaymentStatus: (orderId: string, input: UpdatePaymentStatusInput) =>
     fetchApi<Order>(`/api/orders/${orderId}/payment`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    }),
+
+  getPaymentConfig: () =>
+    fetchApi<PaymentConfig>('/api/orders/payment-config'),
+
+  updatePaymentConfig: (input: UpdatePaymentConfigInput) =>
+    fetchApi<PaymentConfig>('/api/orders/payment-config', {
       method: 'PATCH',
       body: JSON.stringify(input),
     }),

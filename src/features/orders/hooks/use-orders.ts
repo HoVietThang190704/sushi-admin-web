@@ -5,12 +5,14 @@ import {
   GetOrdersFilter,
   UpdateOrderStatusInput,
   UpdatePaymentStatusInput,
+  UpdatePaymentConfigInput,
 } from '../types';
 
 export const orderKeys = {
   all: ['orders'] as const,
   lists: () => [...orderKeys.all, 'list'] as const,
   list: (filters?: GetOrdersFilter) => [...orderKeys.lists(), filters] as const,
+  paymentConfig: ['payment-config'] as const,
 };
 
 export function useOrders(filters?: GetOrdersFilter) {
@@ -51,6 +53,25 @@ export function useUpdatePaymentStatus() {
     }) => ordersApi.updatePaymentStatus(orderId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
+    },
+  });
+}
+
+export function usePaymentConfig() {
+  return useQuery({
+    queryKey: orderKeys.paymentConfig,
+    queryFn: () => ordersApi.getPaymentConfig(),
+  });
+}
+
+export function useUpdatePaymentConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdatePaymentConfigInput) =>
+      ordersApi.updatePaymentConfig(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.paymentConfig });
     },
   });
 }

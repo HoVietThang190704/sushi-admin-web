@@ -45,6 +45,8 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
+  paymentQrUrl?: string | null;
+  paymentBankInfo?: string | null;
   shippingFee?: number;
   totalAmount: number;
   note?: string | null;
@@ -69,4 +71,27 @@ export interface UpdateOrderStatusInput {
 
 export interface UpdatePaymentStatusInput {
   paymentStatus: PaymentStatus;
+}
+
+export interface PaymentConfig {
+  id: string;
+  key: string;
+  bankName?: string | null;
+  accountNumber?: string | null;
+  accountHolder?: string | null;
+  qrImageUrl?: string | null;
+  transferSyntax?: string | null;
+  note?: string | null;
+  isActive: boolean;
+  updatedAt: string;
+}
+
+export interface UpdatePaymentConfigInput {
+  bankName?: string;
+  accountNumber?: string;
+  accountHolder?: string;
+  qrImageUrl?: string;
+  transferSyntax?: string;
+  note?: string;
+  isActive?: boolean;
 }

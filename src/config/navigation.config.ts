@@ -6,6 +6,7 @@ import {
   Package,
   CookingPot,
   Truck,
+  QrCode,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -63,6 +64,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: '/dashboard/shipping',
     labelKey: 'dashboard.shipping',
     icon: Truck,
+  },
+  {
+    key: 'settings',
+    path: '/dashboard/settings',
+    labelKey: 'dashboard.settings',
+    icon: QrCode,
   },
 ] as const;
 

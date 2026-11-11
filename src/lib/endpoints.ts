@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
   ORDERS: {
     ROOT: '/api/orders',
     BY_ID: (id: string) => `/api/orders/${id}`,
+    PAYMENT_CONFIG: '/api/orders/payment-config',
   },
   INVENTORY: {
     BALANCES: '/api/inventory/balances',
