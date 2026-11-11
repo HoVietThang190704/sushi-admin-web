@@ -153,7 +153,7 @@ export default function OrdersPage() {
   return (
     <div className="space-y-4">
       <SushiPageHeader
-        title="Quản Lý Đơn Hàng (Take Away)"
+        title="Quản Lý Đơn Hàng"
         subtitle="Theo dõi vòng đời đơn hàng, điều phối bếp và cập nhật trạng thái theo thời gian thực"
         extra={
           <div className="flex items-center gap-2 w-full sm:w-auto">

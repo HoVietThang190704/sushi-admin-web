@@ -22,12 +22,14 @@ import {
   User,
   Phone,
   Clock,
+  CreditCard,
+  QrCode,
 } from '@phosphor-icons/react';
 import { Order, OrderStatus } from '../types';
 import { OrderStatusBadge } from './order-status-badge';
 import { OrderPaymentBadge } from './order-payment-badge';
 import { OrderDetailModal } from './order-detail-modal';
-import { useUpdateOrderStatus } from '../hooks/use-orders';
+import { useUpdateOrderStatus, useUpdatePaymentStatus } from '../hooks/use-orders';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 
 interface OrderTableProps {
@@ -43,6 +45,32 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   const mobilePageSize = 10;
 
   const updateStatusMutation = useUpdateOrderStatus();
+  const updatePaymentMutation = useUpdatePaymentStatus();
+
+  const isTransferUnpaid = (order: Order) => {
+    const isTransfer =
+      order.paymentMethod?.toUpperCase() === 'VIETQR' ||
+      order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER';
+    return isTransfer && order.paymentStatus !== 'PAID';
+  };
+
+  const handleQuickPaymentConfirm = async (
+    order: Order,
+    e?: React.MouseEvent,
+  ) => {
+    e?.stopPropagation();
+    try {
+      await updatePaymentMutation.mutateAsync({
+        orderId: order.id,
+        input: { paymentStatus: 'PAID' },
+      });
+      message.success(`Đơn ${order.code} đã xác nhận thanh toán thành công!`);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Xác nhận thanh toán thất bại';
+      message.error(msg);
+    }
+  };
 
   // Đảm bảo trang hiển thị hợp lệ khi danh sách thay đổi mà không cần effect
   const totalPages = Math.max(1, Math.ceil(orders.length / mobilePageSize));
@@ -134,9 +162,26 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       title: 'Thanh toán',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
-      render: (paymentStatus: Order['paymentStatus']) => (
-        <OrderPaymentBadge status={paymentStatus} />
-      ),
+      render: (paymentStatus: Order['paymentStatus'], record: Order) => {
+        const isTransfer =
+          record.paymentMethod?.toUpperCase() === 'VIETQR' ||
+          record.paymentMethod?.toUpperCase() === 'BANK_TRANSFER';
+
+        return (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <OrderPaymentBadge status={paymentStatus} />
+            <span
+              className={`px-1.5 py-0.5 rounded text-3xs font-semibold border ${
+                isTransfer
+                  ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
+                  : 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
+              }`}
+            >
+              {isTransfer ? 'QR' : 'COD'}
+            </span>
+          </div>
+        );
+      },
     },
     {
       title: 'Thời gian',
@@ -161,33 +206,81 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
         <Space onClick={(e) => e.stopPropagation()}>
           {/* Quick status progress buttons */}
           {record.status === 'PENDING' && (
-            <Tooltip title="Xác nhận tiếp nhận đơn hàng">
-              <Button
-                size="small"
-                type="primary"
-                className="bg-blue-600 hover:bg-blue-500 text-xs px-2"
-                icon={<CheckCircle size={15} />}
-                loading={updateStatusMutation.isPending}
-                onClick={(e) => handleQuickStatusChange(record, 'CONFIRMED', e)}
+            isTransferUnpaid(record) ? (
+              <Popconfirm
+                title="Xác nhận đã nhận tiền chuyển khoản?"
+                description="Sau khi xác nhận thanh toán, bạn có thể duyệt đơn xuống bếp."
+                onConfirm={(e) =>
+                  handleQuickPaymentConfirm(
+                    record,
+                    e as unknown as React.MouseEvent,
+                  )
+                }
+                okText="Đã nhận tiền"
+                cancelText="Chưa"
               >
-                Nhận đơn
-              </Button>
-            </Tooltip>
+                <Button
+                  size="small"
+                  className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm"
+                  icon={<CreditCard size={15} />}
+                  loading={updatePaymentMutation.isPending}
+                >
+                  Xác nhận TT
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Tooltip title="Xác nhận tiếp nhận đơn hàng">
+                <Button
+                  size="small"
+                  type="primary"
+                  className="bg-blue-600 hover:bg-blue-500 text-xs px-2"
+                  icon={<CheckCircle size={15} />}
+                  loading={updateStatusMutation.isPending}
+                  onClick={(e) => handleQuickStatusChange(record, 'CONFIRMED', e)}
+                >
+                  Nhận đơn
+                </Button>
+              </Tooltip>
+            )
           )}
 
           {record.status === 'CONFIRMED' && (
-            <Tooltip title="Bắt đầu chế biến món (Khấu trừ kho)">
-              <Button
-                size="small"
-                type="primary"
-                className="bg-amber-600 hover:bg-amber-500 text-xs px-2"
-                icon={<CookingPot size={15} />}
-                loading={updateStatusMutation.isPending}
-                onClick={(e) => handleQuickStatusChange(record, 'PREPARING', e)}
+            isTransferUnpaid(record) ? (
+              <Popconfirm
+                title="Xác nhận đã nhận tiền chuyển khoản?"
+                description="Sau khi xác nhận thanh toán, bạn có thể chuyển món xuống bếp."
+                onConfirm={(e) =>
+                  handleQuickPaymentConfirm(
+                    record,
+                    e as unknown as React.MouseEvent,
+                  )
+                }
+                okText="Đã nhận tiền"
+                cancelText="Chưa"
               >
-                Làm món
-              </Button>
-            </Tooltip>
+                <Button
+                  size="small"
+                  className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 border-none font-semibold shadow-sm"
+                  icon={<CreditCard size={15} />}
+                  loading={updatePaymentMutation.isPending}
+                >
+                  Xác nhận TT
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Tooltip title="Bắt đầu chế biến món (Khấu trừ kho)">
+                <Button
+                  size="small"
+                  type="primary"
+                  className="bg-amber-600 hover:bg-amber-500 text-xs px-2"
+                  icon={<CookingPot size={15} />}
+                  loading={updateStatusMutation.isPending}
+                  onClick={(e) => handleQuickStatusChange(record, 'PREPARING', e)}
+                >
+                  Làm món
+                </Button>
+              </Tooltip>
+            )
           )}
 
           {record.status === 'PREPARING' && (
@@ -277,6 +370,17 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                      {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
+                      order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER' ? (
+                        <span className="px-1.5 py-0.5 rounded text-3xs font-semibold bg-sushi-gold/15 text-sushi-gold border border-sushi-gold/30 flex items-center gap-1">
+                          <QrCode size={11} />
+                          <span>QR</span>
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-3xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+                          COD
+                        </span>
+                      )}
                       <OrderStatusBadge status={order.status} />
                       <OrderPaymentBadge status={order.paymentStatus} />
                     </div>
@@ -349,33 +453,83 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     {order.status === 'PENDING' && (
-                      <Button
-                        size="small"
-                        type="primary"
-                        className="bg-blue-600 hover:bg-blue-500 text-xs px-2.5"
-                        icon={<CheckCircle size={15} />}
-                        loading={updateStatusMutation.isPending}
-                        onClick={(e) =>
-                          handleQuickStatusChange(order, 'CONFIRMED', e)
-                        }
-                      >
-                        Nhận đơn
-                      </Button>
+                      isTransferUnpaid(order) ? (
+                        <Popconfirm
+                          title="Xác nhận đã nhận tiền chuyển khoản?"
+                          description="Sau khi xác nhận thanh toán, bạn có thể duyệt đơn xuống bếp."
+                          onConfirm={(e) =>
+                            handleQuickPaymentConfirm(
+                              order,
+                              e as unknown as React.MouseEvent,
+                            )
+                          }
+                          okText="Đã nhận tiền"
+                          cancelText="Hủy"
+                        >
+                          <Button
+                            size="small"
+                            type="primary"
+                            className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm"
+                            icon={<CreditCard size={15} />}
+                            loading={updatePaymentMutation.isPending}
+                          >
+                            Xác nhận TT
+                          </Button>
+                        </Popconfirm>
+                      ) : (
+                        <Button
+                          size="small"
+                          type="primary"
+                          className="bg-blue-600 hover:bg-blue-500 text-xs px-2.5"
+                          icon={<CheckCircle size={15} />}
+                          loading={updateStatusMutation.isPending}
+                          onClick={(e) =>
+                            handleQuickStatusChange(order, 'CONFIRMED', e)
+                          }
+                        >
+                          Nhận đơn
+                        </Button>
+                      )
                     )}
 
                     {order.status === 'CONFIRMED' && (
-                      <Button
-                        size="small"
-                        type="primary"
-                        className="bg-amber-600 hover:bg-amber-500 text-xs px-2.5"
-                        icon={<CookingPot size={15} />}
-                        loading={updateStatusMutation.isPending}
-                        onClick={(e) =>
-                          handleQuickStatusChange(order, 'PREPARING', e)
-                        }
-                      >
-                        Làm món
-                      </Button>
+                      isTransferUnpaid(order) ? (
+                        <Popconfirm
+                          title="Xác nhận đã nhận tiền chuyển khoản?"
+                          description="Sau khi xác nhận thanh toán, bạn có thể chuyển món xuống bếp."
+                          onConfirm={(e) =>
+                            handleQuickPaymentConfirm(
+                              order,
+                              e as unknown as React.MouseEvent,
+                            )
+                          }
+                          okText="Đã nhận tiền"
+                          cancelText="Hủy"
+                        >
+                          <Button
+                            size="small"
+                            type="primary"
+                            className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2.5 font-semibold border-none shadow-sm"
+                            icon={<CreditCard size={15} />}
+                            loading={updatePaymentMutation.isPending}
+                          >
+                            Xác nhận TT
+                          </Button>
+                        </Popconfirm>
+                      ) : (
+                        <Button
+                          size="small"
+                          type="primary"
+                          className="bg-amber-600 hover:bg-amber-500 text-xs px-2.5"
+                          icon={<CookingPot size={15} />}
+                          loading={updateStatusMutation.isPending}
+                          onClick={(e) =>
+                            handleQuickStatusChange(order, 'PREPARING', e)
+                          }
+                        >
+                          Làm món
+                        </Button>
+                      )
                     )}
 
                     {order.status === 'PREPARING' && (
