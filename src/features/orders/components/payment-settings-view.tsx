@@ -6,7 +6,7 @@ import {
   Input,
   Switch,
   Button,
-  message,
+  App,
 } from 'antd';
 import {
   QrCode,
@@ -20,6 +20,7 @@ import { usePaymentConfig, useUpdatePaymentConfig } from '../hooks/use-orders';
 import { catalogApi } from '@/features/catalog/api/catalog.api';
 
 export function PaymentSettingsView() {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
