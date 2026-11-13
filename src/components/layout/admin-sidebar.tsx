@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -39,6 +39,23 @@ export function AdminSidebar({
   // Tự động suy ra active key & parent key từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
   const activeParentKey = useMemo(() => getActiveParentKey(pathname), [pathname]);
+
+  // Quản lý trạng thái mở/đóng của các submenu, đồng bộ khi chuyển route theo chuẩn React 19
+  const [openKeys, setOpenKeys] = useState<string[]>(() =>
+    activeParentKey ? [activeParentKey] : ['settings']
+  );
+  const [prevParentKey, setPrevParentKey] = useState<string | null>(activeParentKey);
+
+  if (activeParentKey !== prevParentKey) {
+    setPrevParentKey(activeParentKey);
+    if (activeParentKey && !openKeys.includes(activeParentKey)) {
+      setOpenKeys((prev) => [...prev, activeParentKey]);
+    }
+  }
+
+  const handleOpenChange = (keys: string[]) => {
+    setOpenKeys(keys);
+  };
 
   // Sinh danh sách Menu Items từ NAV_ITEMS (Hỗ trợ mục cha Cấu hình xổ xuống)
   const menuItems = useMemo(
@@ -163,7 +180,8 @@ export function AdminSidebar({
         <Menu
           theme="dark"
           selectedKeys={[selectedKey]}
-          defaultOpenKeys={activeParentKey ? [activeParentKey] : ['settings']}
+          openKeys={collapsed && !isDrawer ? [] : openKeys}
+          onOpenChange={handleOpenChange}
           mode="inline"
           onClick={handleMenuClick}
           items={menuItems}
