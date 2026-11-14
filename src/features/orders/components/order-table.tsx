@@ -346,37 +346,25 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
             return (
               <SushiCardItem className="cursor-pointer hover:border-sushi-gold/50 transition-all active:scale-[0.99] border-sushi-border/90">
                 <div onClick={() => setSelectedOrder(order)} className="space-y-2.5">
-                  {/* Hàng 1: Mã đơn & Huy hiệu trạng thái */}
+                  {/* Hàng 1: Mã đơn, Nguồn & Trạng thái đơn hàng */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <Receipt size={17} className="text-sushi-gold shrink-0" />
+                      <Receipt size={16} className="text-sushi-gold shrink-0" />
                       <span className="font-mono font-bold text-sushi-gold text-sm truncate">
-                        {order.code}
+                        {order.code || 'ORD'}
                       </span>
                       {order.source === 'STAFF' ? (
-                        <span className="px-1.5 py-0.5 rounded text-3xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-2xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30 shrink-0">
                           Nhân viên
                         </span>
                       ) : (
-                        <span className="px-1.5 py-0.5 rounded text-3xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-2xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                           Website
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
-                      {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
-                      order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER' ? (
-                        <span className="px-1.5 py-0.5 rounded text-3xs font-semibold bg-sushi-gold/15 text-sushi-gold border border-sushi-gold/30 flex items-center gap-1">
-                          <QrCode size={11} />
-                          <span>QR</span>
-                        </span>
-                      ) : (
-                        <span className="px-1.5 py-0.5 rounded text-3xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/60">
-                          COD
-                        </span>
-                      )}
+                    <div className="shrink-0 flex items-center justify-end">
                       <OrderStatusBadge status={order.status} />
-                      <OrderPaymentBadge status={order.paymentStatus} />
                     </div>
                   </div>
 
@@ -400,15 +388,27 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     </div>
                   </div>
 
-                  {/* Hàng 3: Số món & Tổng tiền */}
-                  <div className="flex items-center justify-between gap-2 text-xs pt-1 border-t border-sushi-border/40">
-                    <div className="flex items-center gap-1.5 text-sushi-text-muted">
-                      <Package size={15} className="shrink-0" />
-                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium text-3xs">
-                        {itemsCount} món
+                  {/* Hàng 3: Số món, Hình thức & Trạng thái thanh toán, Tổng tiền */}
+                  <div className="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-sushi-border/40">
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium text-2xs flex items-center gap-1 shrink-0">
+                        <Package size={13} className="shrink-0" />
+                        <span>{itemsCount} món</span>
                       </span>
+                      {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
+                      order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER' ? (
+                        <span className="px-1.5 py-0.5 rounded text-2xs font-semibold bg-sushi-gold/15 text-sushi-gold border border-sushi-gold/30 flex items-center gap-1 shrink-0">
+                          <QrCode size={11} />
+                          <span>QR</span>
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-2xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/60 shrink-0">
+                          COD
+                        </span>
+                      )}
+                      <OrderPaymentBadge status={order.paymentStatus} />
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <span className="font-bold text-sm text-sushi-text-primary font-mono">
                         {formatCurrency(order.totalAmount)}
                       </span>
@@ -416,7 +416,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   </div>
 
                   {/* Hàng 4: Thời gian tạo đơn */}
-                  <div className="flex items-center gap-1 text-3xs text-sushi-text-muted">
+                  <div className="flex items-center gap-1 text-2xs text-sushi-text-muted">
                     <Clock size={13} className="shrink-0" />
                     <span>
                       {new Date(order.createdAt).toLocaleTimeString('vi-VN', {
