@@ -141,7 +141,6 @@ export function RecipeFilterDrawer({
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
-      destroyOnClose
       destroyOnHidden
       title="Lọc Trạng Thái Công Thức"
     >

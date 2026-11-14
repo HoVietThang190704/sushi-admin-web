@@ -14,7 +14,6 @@ import {
   CheckCircle,
   WarningCircle,
   FloppyDisk,
-  Eye,
 } from '@phosphor-icons/react';
 import { useStoreConfig, useUpdateStoreConfig } from '../hooks/use-orders';
 
@@ -29,7 +28,6 @@ export function StoreSettingsView() {
 
   // Watch values for live preview
   const isOrderingEnabled = Form.useWatch('customerOrderingEnabled', form);
-  const contactPhone = Form.useWatch('contactPhone', form);
 
   useEffect(() => {
     if (config) {
@@ -157,52 +155,6 @@ export function StoreSettingsView() {
               <p className="text-2xs sm:text-xs text-sushi-text-muted leading-relaxed">
                 Số điện thoại này sẽ được dùng khi khách bấm vào các nút gọi điện thoại trực tiếp (<code className="text-sushi-gold font-mono">tel:</code>) trên website Storefront khi tắt đặt món.
               </p>
-            </div>
-          </div>
-
-          {/* Card 3: Live Preview Info */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 pb-2 border-b border-sushi-border/60">
-              <Eye size={18} className="text-sushi-gold" />
-              <span className="font-semibold text-sm text-sushi-text">
-                Trạng Thái Hiển Thị Thực Tế Trên Storefront
-              </span>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-sushi-border/60 space-y-2 text-xs">
-              <div className="flex items-start gap-2 text-sushi-text">
-                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
-                <span>
-                  <strong>Trang chủ & Thực đơn:</strong>{' '}
-                  <span className="text-sushi-text-muted">
-                    {isOrderingEnabled
-                      ? 'Hiển thị nút "Chọn món" thêm vào giỏ hàng.'
-                      : `Ẩn nút chọn món, hiển thị nút "Gọi đặt" gọi số ${contactPhone || '(chưa nhập)'}.`}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex items-start gap-2 text-sushi-text">
-                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
-                <span>
-                  <strong>Thanh điều hướng & Giỏ hàng:</strong>{' '}
-                  <span className="text-sushi-text-muted">
-                    {isOrderingEnabled
-                      ? 'Hiển thị icon giỏ hàng và số lượng món trên Header & Bottom Nav.'
-                      : 'Ẩn giỏ hàng, thay thế bằng tab Gọi Hotline trên thanh điều hướng di động.'}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex items-start gap-2 text-sushi-text">
-                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
-                <span>
-                  <strong>Đơn nhân viên (Admin):</strong>{' '}
-                  <span className="text-sushi-text-muted">
-                    Luôn tạo đơn giao tận nơi bình thường qua nút &quot;+ Tạo đơn qua điện thoại&quot; trong trang Quản lý đơn hàng.
-                  </span>
-                </span>
-              </div>
             </div>
           </div>
 

@@ -589,7 +589,7 @@ export function CreateStaffOrderModal({
       }
       footer={null}
       width={780}
-      destroyOnClose
+      destroyOnHidden
       className="max-w-[95vw]"
     >
       {open && <StaffOrderForm onCancel={onCancel} onSuccess={onSuccess} />}

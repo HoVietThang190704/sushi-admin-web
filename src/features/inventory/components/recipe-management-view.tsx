@@ -406,7 +406,6 @@ export function RecipeManagementView({
       <ResponsiveModalDrawer
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        destroyOnClose
         destroyOnHidden
         title={
           <span className="truncate font-semibold text-sushi-text text-sm sm:text-base">

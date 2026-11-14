@@ -141,7 +141,6 @@ export function IngredientFilterDrawer({
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
-      destroyOnClose
       destroyOnHidden
       title="Lọc Trạng Thái Nguyên Liệu"
     >

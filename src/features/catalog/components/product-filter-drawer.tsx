@@ -146,7 +146,6 @@ export function ProductFilterDrawer({
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
-      destroyOnClose
       destroyOnHidden
       title="Bộ Lọc Món Ăn"
     >

@@ -581,7 +581,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       <ResponsiveModalDrawer
         open={Boolean(paymentConfirmOrder)}
         onClose={() => setPaymentConfirmOrder(null)}
-        destroyOnClose
         destroyOnHidden
         title={
           <span className="font-semibold text-sushi-text text-sm sm:text-base">
@@ -658,7 +657,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       <ResponsiveModalDrawer
         open={Boolean(completingOrder)}
         onClose={() => setCompletingOrder(null)}
-        destroyOnClose
         destroyOnHidden
         title={
           <span className="font-semibold text-sushi-text text-sm sm:text-base">
