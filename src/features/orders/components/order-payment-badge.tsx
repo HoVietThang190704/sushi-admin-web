@@ -13,7 +13,7 @@ export function OrderPaymentBadge({ status }: OrderPaymentBadgeProps) {
 
   return (
     <Tag
-      className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border leading-normal ${
         isPaid
           ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
           : 'bg-amber-500/10 border-amber-500/30 text-amber-400'

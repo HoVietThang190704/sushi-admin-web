@@ -349,7 +349,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   {/* Hàng 1: Mã đơn, Nguồn & Trạng thái đơn hàng */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <Receipt size={16} className="text-sushi-gold shrink-0" />
+                      <Receipt size={15} className="text-sushi-gold shrink-0" />
                       <span className="font-mono font-bold text-sushi-gold text-sm truncate">
                         {order.code || 'ORD'}
                       </span>
@@ -388,21 +388,21 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     </div>
                   </div>
 
-                  {/* Hàng 3: Số món, Hình thức & Trạng thái thanh toán, Tổng tiền */}
+                  {/* Hàng 3: Chi tiết món, Hình thức & Trạng thái thanh toán, Tổng tiền */}
                   <div className="flex items-center justify-between gap-2 text-xs pt-1.5 border-t border-sushi-border/40">
                     <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium text-2xs flex items-center gap-1 shrink-0">
-                        <Package size={13} className="shrink-0" />
-                        <span>{itemsCount} món</span>
-                      </span>
+                      <div className="flex items-center gap-1 text-sushi-text-muted shrink-0 mr-0.5">
+                        <Package size={15} className="shrink-0" />
+                        <span className="font-medium text-sushi-text-primary">{itemsCount} món</span>
+                      </div>
                       {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
                       order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER' ? (
-                        <span className="px-1.5 py-0.5 rounded text-2xs font-semibold bg-sushi-gold/15 text-sushi-gold border border-sushi-gold/30 flex items-center gap-1 shrink-0">
-                          <QrCode size={11} />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sushi-gold/15 text-sushi-gold border border-sushi-gold/30 shrink-0 leading-normal">
+                          <QrCode size={12} className="shrink-0" />
                           <span>QR</span>
                         </span>
                       ) : (
-                        <span className="px-1.5 py-0.5 rounded text-2xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/60 shrink-0">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700/60 shrink-0 leading-normal">
                           COD
                         </span>
                       )}
@@ -416,8 +416,8 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   </div>
 
                   {/* Hàng 4: Thời gian tạo đơn */}
-                  <div className="flex items-center gap-1 text-2xs text-sushi-text-muted">
-                    <Clock size={13} className="shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-sushi-text-muted">
+                    <Clock size={15} className="shrink-0" />
                     <span>
                       {new Date(order.createdAt).toLocaleTimeString('vi-VN', {
                         hour: '2-digit',
