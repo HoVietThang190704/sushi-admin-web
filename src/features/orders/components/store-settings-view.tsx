@@ -173,7 +173,7 @@ export function StoreSettingsView() {
               icon={<Info size={20} />}
               showIcon
               type={isOrderingEnabled ? 'info' : 'warning'}
-              message={
+              title={
                 <span className="font-semibold text-sm">
                   Trải nghiệm Storefront hiện tại:{' '}
                   {isOrderingEnabled ? 'Chế độ Đặt hàng trực tuyến' : 'Chế độ Gọi hotline đặt món'}
