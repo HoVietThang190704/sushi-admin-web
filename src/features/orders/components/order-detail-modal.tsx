@@ -152,6 +152,15 @@ export function OrderDetailModal({
               </div>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 <OrderStatusBadge status={order.status} />
+                {order.source === 'STAFF' ? (
+                  <span className="px-2 py-0.5 rounded-full text-2xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                    Nhân viên tạo
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-2xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    Website
+                  </span>
+                )}
                 <span className="text-xs text-sushi-text-muted">
                   {new Date(order.createdAt).toLocaleString('vi-VN', {
                     hour: '2-digit',
@@ -506,6 +515,15 @@ export function OrderDetailModal({
                 {order.code}
               </span>
               <OrderStatusBadge status={order.status} />
+              {order.source === 'STAFF' ? (
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                  Nhân viên tạo qua điện thoại
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Khách đặt trực tuyến
+                </span>
+              )}
             </div>
             <div className="text-xs text-sushi-text-muted mt-0.5 font-sans">
               Thời gian đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}

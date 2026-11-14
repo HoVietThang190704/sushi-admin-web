@@ -18,6 +18,7 @@ import {
   List as ListIcon,
   Funnel,
   X,
+  PhoneCall,
 } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 import {
@@ -25,6 +26,7 @@ import {
   OrderTable,
   OrderStatus,
   OrderDateFilterDrawer,
+  CreateStaffOrderModal,
 } from '@/features/orders';
 
 export default function OrdersPage() {
@@ -35,6 +37,7 @@ export default function OrdersPage() {
     endDate?: string;
   }>({});
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isCreateStaffOrderModalOpen, setIsCreateStaffOrderModalOpen] = useState(false);
 
   const filterStatus = activeTab === 'ALL' ? undefined : (activeTab as OrderStatus);
   const hasDateFilter = Boolean(
@@ -196,6 +199,15 @@ export default function OrdersPage() {
               >
                 <span className="hidden sm:inline">Làm mới</span>
               </Button>
+              <Button
+                type="primary"
+                icon={<PhoneCall size={16} weight="fill" />}
+                onClick={() => setIsCreateStaffOrderModalOpen(true)}
+                className="h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-semibold flex items-center justify-center shrink-0"
+              >
+                <span className="hidden sm:inline">+ Tạo đơn qua điện thoại</span>
+                <span className="sm:hidden">+ Đơn mới</span>
+              </Button>
             </div>
           </div>
         }
@@ -242,6 +254,12 @@ export default function OrdersPage() {
         endDate={filterDateRange.endDate}
         onApply={(filter) => setFilterDateRange(filter)}
         onReset={() => setFilterDateRange({})}
+      />
+
+      <CreateStaffOrderModal
+        open={isCreateStaffOrderModalOpen}
+        onCancel={() => setIsCreateStaffOrderModalOpen(false)}
+        onSuccess={() => refetch()}
       />
     </div>
   );

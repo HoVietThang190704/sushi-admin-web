@@ -108,12 +108,23 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       dataIndex: 'code',
       key: 'code',
       render: (code: string, record: Order) => (
-        <span
-          className="font-mono font-bold text-sushi-gold cursor-pointer hover:underline"
-          onClick={() => setSelectedOrder(record)}
-        >
-          {code}
-        </span>
+        <div className="flex flex-col gap-1 items-start">
+          <span
+            className="font-mono font-bold text-sushi-gold cursor-pointer hover:underline"
+            onClick={() => setSelectedOrder(record)}
+          >
+            {code}
+          </span>
+          {record.source === 'STAFF' ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-3xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+              Nhân viên
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-3xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              Website
+            </span>
+          )}
+        </div>
       ),
     },
     {
@@ -342,6 +353,15 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       <span className="font-mono font-bold text-sushi-gold text-sm truncate">
                         {order.code}
                       </span>
+                      {order.source === 'STAFF' ? (
+                        <span className="px-1.5 py-0.5 rounded text-3xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30 shrink-0">
+                          Nhân viên
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-3xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                          Website
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
                       {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
