@@ -7,10 +7,6 @@ import {
   Switch,
   Button,
   App,
-  Card,
-  Alert,
-  Tag,
-  Divider,
 } from 'antd';
 import {
   Storefront,
@@ -18,7 +14,7 @@ import {
   CheckCircle,
   WarningCircle,
   FloppyDisk,
-  Info,
+  Eye,
 } from '@phosphor-icons/react';
 import { useStoreConfig, useUpdateStoreConfig } from '../hooks/use-orders';
 
@@ -61,164 +57,170 @@ export function StoreSettingsView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header card */}
-      <div className="bg-card border border-border/80 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-            <Storefront size={28} weight="duotone" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Cấu hình Cửa Hàng & Đặt Món Trực Tuyến
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Quản lý trạng thái nhận đơn trên Storefront và thông tin hotline liên hệ của nhà hàng
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Main form */}
-      <Card
-        loading={isLoading}
-        className="border border-border/80 shadow-sm rounded-xl overflow-hidden"
+    <div className="space-y-4 max-w-4xl">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        disabled={isLoading}
+        initialValues={{
+          customerOrderingEnabled: true,
+          contactPhone: '0988888888',
+        }}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSave}
-          initialValues={{
-            customerOrderingEnabled: true,
-            contactPhone: '0988888888',
-          }}
-        >
-          {/* Section 1: Ordering Switch */}
-          <div className="p-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/40 border border-border/60">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-base text-foreground">
-                    Cho phép khách đặt hàng trên Storefront
-                  </span>
-                  {isOrderingEnabled ? (
-                    <Tag color="success" icon={<CheckCircle size={13} className="inline mr-1" />}>
-                      Đang nhận đơn
-                    </Tag>
-                  ) : (
-                    <Tag color="warning" icon={<WarningCircle size={13} className="inline mr-1" />}>
-                      Chỉ gọi điện
-                    </Tag>
-                  )}
+        <div className="space-y-4">
+          {/* Card 1: Trạng thái đặt hàng Storefront */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between pb-3 border-b border-sushi-border/60">
+              <div className="flex items-center gap-2">
+                <Storefront size={18} className="text-sushi-gold" />
+                <span className="font-semibold text-sm text-sushi-text">
+                  Đặt Món Trực Tuyến Storefront
+                </span>
+              </div>
+
+              {isOrderingEnabled ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                  <CheckCircle size={13} weight="fill" />
+                  Đang nhận đơn
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">
+                  <WarningCircle size={13} weight="fill" />
+                  Chỉ gọi điện
+                </span>
+              )}
+            </div>
+
+            {/* Switch container on mobile */}
+            <div className="flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl bg-zinc-900/60 border border-sushi-border/60">
+              <div className="space-y-1 min-w-0 pr-2">
+                <div className="text-sm font-semibold text-sushi-text">
+                  Cho phép khách tự đặt món trên website
                 </div>
-                <p className="text-sm text-muted-foreground max-w-xl">
+                <p className="text-xs text-sushi-text-muted leading-relaxed">
                   {isOrderingEnabled
-                    ? 'Khách hàng có thể thêm món vào giỏ, chọn địa chỉ và thanh toán/gửi đơn trực tuyến trên website.'
-                    : 'Storefront sẽ ẩn giỏ hàng và các nút thêm món, chuyển thành nút "Gọi đặt món" trực tiếp đến hotline. Nhân viên vẫn có thể tạo đơn giao tận nơi trong Admin.'}
+                    ? 'Khách hàng có thể thêm món vào giỏ, chọn địa chỉ nhận hàng và tạo đơn trực tuyến.'
+                    : 'Storefront sẽ ẩn giỏ hàng, chuyển nút đặt món thành nút gọi hotline trực tiếp. Nhân viên vẫn tạo được đơn trong Admin.'}
                 </p>
               </div>
 
               <Form.Item
                 name="customerOrderingEnabled"
                 valuePropName="checked"
-                className="mb-0"
+                className="mb-0 shrink-0"
               >
                 <Switch
                   checkedChildren="Bật"
                   unCheckedChildren="Tắt"
-                  className={isOrderingEnabled ? 'bg-primary' : 'bg-muted-foreground/30'}
                 />
               </Form.Item>
             </div>
           </div>
 
-          <Divider className="my-5" />
-
-          {/* Section 2: Contact Hotline */}
-          <div className="px-2">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <PhoneCall size={18} className="text-primary" />
-              Thông tin liên hệ nhận đơn
-            </h3>
-
-            <Form.Item
-              name="contactPhone"
-              label={
-                <span className="font-medium text-sm">
-                  Số điện thoại Hotline nhận đơn
+          {/* Card 2: Hotline nhận đơn */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between pb-3 border-b border-sushi-border/60">
+              <div className="flex items-center gap-2">
+                <PhoneCall size={18} className="text-sushi-gold" />
+                <span className="font-semibold text-sm text-sushi-text">
+                  Hotline Nhận Đơn Hàng
                 </span>
-              }
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại hotline' },
-                {
-                  pattern: VIETNAM_PHONE_REGEX,
-                  message:
-                    'Số điện thoại không hợp lệ (hỗ trợ số di động 10 số, đầu số 1800/1900 hoặc số cố định)',
-                },
-              ]}
-              extra="Số điện thoại này sẽ được dùng khi khách bấm vào các nút gọi điện thoại trực tiếp (tel:) trên website Storefront."
-            >
-              <Input
-                size="large"
-                placeholder="Ví dụ: 0988888888 hoặc 19006868"
-                prefix={<PhoneCall size={18} className="text-muted-foreground mr-1" />}
-                className="max-w-md"
-              />
-            </Form.Item>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Form.Item
+                name="contactPhone"
+                label={
+                  <span className="font-medium text-xs sm:text-sm text-sushi-text">
+                    Số điện thoại Hotline của cửa hàng
+                  </span>
+                }
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số điện thoại hotline' },
+                  {
+                    pattern: VIETNAM_PHONE_REGEX,
+                    message:
+                      'Số điện thoại không hợp lệ (hỗ trợ số di động 10 số, đầu số 1800/1900 hoặc số cố định)',
+                  },
+                ]}
+                className="mb-1"
+              >
+                <Input
+                  size="large"
+                  placeholder="Ví dụ: 0988888888 hoặc 19006868"
+                  prefix={<PhoneCall size={18} className="text-sushi-text-muted mr-1" />}
+                  className="w-full sm:max-w-md h-11 rounded-xl bg-zinc-900/80 border-sushi-border text-sushi-text"
+                />
+              </Form.Item>
+              <p className="text-2xs sm:text-xs text-sushi-text-muted leading-relaxed">
+                Số điện thoại này sẽ được dùng khi khách bấm vào các nút gọi điện thoại trực tiếp (<code className="text-sushi-gold font-mono">tel:</code>) trên website Storefront khi tắt đặt món.
+              </p>
+            </div>
           </div>
 
-          {/* Live Preview Box */}
-          <div className="px-2 mt-4">
-            <Alert
-              icon={<Info size={20} />}
-              showIcon
-              type={isOrderingEnabled ? 'info' : 'warning'}
-              title={
-                <span className="font-semibold text-sm">
-                  Trải nghiệm Storefront hiện tại:{' '}
-                  {isOrderingEnabled ? 'Chế độ Đặt hàng trực tuyến' : 'Chế độ Gọi hotline đặt món'}
+          {/* Card 3: Live Preview Info */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-sushi-border/60">
+              <Eye size={18} className="text-sushi-gold" />
+              <span className="font-semibold text-sm text-sushi-text">
+                Trạng Thái Hiển Thị Thực Tế Trên Storefront
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-sushi-border/60 space-y-2 text-xs">
+              <div className="flex items-start gap-2 text-sushi-text">
+                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
+                <span>
+                  <strong>Trang chủ & Thực đơn:</strong>{' '}
+                  <span className="text-sushi-text-muted">
+                    {isOrderingEnabled
+                      ? 'Hiển thị nút "Chọn món" thêm vào giỏ hàng.'
+                      : `Ẩn nút chọn món, hiển thị nút "Gọi đặt" gọi số ${contactPhone || '(chưa nhập)'}.`}
+                  </span>
                 </span>
-              }
-              description={
-                <div className="text-xs space-y-1.5 mt-1 text-muted-foreground">
-                  <div>
-                    • <strong>Trang chủ & Thực đơn:</strong>{' '}
+              </div>
+
+              <div className="flex items-start gap-2 text-sushi-text">
+                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
+                <span>
+                  <strong>Thanh điều hướng & Giỏ hàng:</strong>{' '}
+                  <span className="text-sushi-text-muted">
                     {isOrderingEnabled
-                      ? 'Hiển thị nút "Thêm vào giỏ hàng", mở popup giỏ hàng, cho chọn số lượng.'
-                      : `Ẩn nút thêm giỏ, hiển thị nút "Gọi đặt món" gọi trực tiếp tới số: ${contactPhone || '(chưa nhập)'}.`}
-                  </div>
-                  <div>
-                    • <strong>Thanh điều hướng & Giỏ hàng:</strong>{' '}
-                    {isOrderingEnabled
-                      ? 'Hiển thị biểu tượng giỏ hàng và số lượng món trên Header và Bottom Navigation.'
+                      ? 'Hiển thị icon giỏ hàng và số lượng món trên Header & Bottom Nav.'
                       : 'Ẩn giỏ hàng, thay thế bằng tab Gọi Hotline trên thanh điều hướng di động.'}
-                  </div>
-                  <div>
-                    • <strong>Đơn nhân viên (Admin):</strong> Luôn hoạt động bình thường qua chức năng Tạo đơn giao hàng qua điện thoại.
-                  </div>
-                </div>
-              }
-              className="rounded-xl"
-            />
+                  </span>
+                </span>
+              </div>
+
+              <div className="flex items-start gap-2 text-sushi-text">
+                <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold mt-1.5 shrink-0" />
+                <span>
+                  <strong>Đơn nhân viên (Admin):</strong>{' '}
+                  <span className="text-sushi-text-muted">
+                    Luôn tạo đơn giao tận nơi bình thường qua nút &quot;+ Tạo đơn qua điện thoại&quot; trong trang Quản lý đơn hàng.
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
 
-          <Divider className="my-5" />
-
-          {/* Submit */}
-          <div className="flex justify-end gap-3 px-2">
+          {/* Save Button */}
+          <div className="pt-2">
             <Button
               type="primary"
               htmlType="submit"
               size="large"
               loading={updateMutation.isPending}
               icon={<FloppyDisk size={18} weight="bold" />}
-              className="px-6 rounded-lg font-medium"
+              className="w-full sm:w-auto h-12 sm:h-11 px-8 rounded-xl bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-2 text-sm shadow-md cursor-pointer"
             >
-              Lưu Cấu Hình
+              Lưu Cấu Hình Cửa Hàng
             </Button>
           </div>
-        </Form>
-      </Card>
+        </div>
+      </Form>
     </div>
   );
 }
