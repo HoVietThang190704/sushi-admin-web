@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Layout,
@@ -15,7 +14,6 @@ import {
   ListIcon,
 } from '@/components/ui';
 import type { MenuProps } from '@/components/ui';
-import { SUSHICOLORS } from '@/lib/theme';
 import { useAuth } from '@/features/auth';
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
 import { NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
@@ -32,11 +30,20 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  // Xác định NavItem hiện tại để render Breadcrumb
+  // Xác định NavItem hiện tại để render Breadcrumb & Mobile Header Title (hỗ trợ cả các mục con)
   const currentNav = useMemo(() => {
     const activeKey = getActiveNavKey(pathname);
-    return NAV_ITEMS.find((item) => item.key === activeKey);
+    for (const item of NAV_ITEMS) {
+      if (item.key === activeKey) return item;
+      if (item.children) {
+        const child = item.children.find((c) => c.key === activeKey);
+        if (child) return child;
+      }
+    }
+    return NAV_ITEMS[0];
   }, [pathname]);
+
+  const CurrentNavIcon = currentNav?.icon;
 
   // Chữ cái đại diện cho avatar
   const userInitial = useMemo(() => {
@@ -106,41 +113,36 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
   return (
     <Header
-      className={`border-b border-sushi-border/80 !px-4 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none ${className || ''}`}
+      className={`border-b border-white/[0.08] !px-3.5 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none !h-[52px] md:!h-16 bg-[#141417]/90 backdrop-blur-md ${className || ''}`}
       style={{
-        background: SUSHICOLORS.card,
-        height: 64,
         lineHeight: 'normal',
       }}
     >
       {/* =========================================================================
-          1. Left: Mobile Brand / Desktop Breadcrumbs
+          1. Left: Mobile Page Title / Desktop Breadcrumbs
          ========================================================================= */}
       <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-        {/* Mobile: Hamburger Button */}
+        {/* Mobile: Hamburger Button (Ghost style, không viền hộp thô) */}
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface border border-sushi-border/70 shrink-0 cursor-pointer transition-colors"
+          className="md:hidden w-8 h-8 -ml-1 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-white/5 active:scale-95 shrink-0 cursor-pointer transition-all focus:outline-none"
           aria-label="Open mobile menu"
         >
-          <ListIcon size={18} />
+          <ListIcon size={20} />
         </button>
 
-        {/* Mobile: Logo & Brand Name */}
-        <div className="flex md:hidden items-center space-x-2">
-          <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-sushi-border flex items-center justify-center shrink-0 bg-sushi-surface shadow-sm">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={22}
-              height={22}
-              className="w-[22px] h-[22px] object-contain"
-              priority
-            />
+        {/* Mobile: Page Icon & Current Page Title */}
+        <div className="flex md:hidden items-center space-x-2 min-w-0">
+          <div className="w-6 h-6 rounded-md bg-sushi-primary/10 border border-sushi-primary/25 flex items-center justify-center shrink-0 text-sushi-primary">
+            {CurrentNavIcon ? (
+              <CurrentNavIcon size={14} weight="fill" />
+            ) : (
+              <House size={14} weight="fill" />
+            )}
           </div>
-          <span className="font-bold text-sushi-text tracking-wider text-xs font-sans">
-            SUSHI ADMIN
+          <span className="font-semibold text-white tracking-wide text-sm truncate font-sans">
+            {currentNav ? t(currentNav.labelKey) : t('dashboard.overview')}
           </span>
         </div>
 
@@ -195,13 +197,17 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
         >
           <button
             type="button"
-            className="flex items-center space-x-2 sm:space-x-2.5 p-1 sm:px-3 sm:py-1.5 rounded-xl bg-sushi-surface/70 border border-sushi-border/70 hover:bg-sushi-surface hover:border-sushi-border transition-all duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-1 focus:ring-sushi-primary/40"
+            className="flex items-center space-x-0 md:space-x-2.5 p-0 md:px-3 md:py-1.5 rounded-full md:rounded-xl md:bg-sushi-surface/70 md:border md:border-sushi-border/70 hover:opacity-90 md:hover:bg-sushi-surface transition-all duration-200 cursor-pointer md:shadow-sm group focus:outline-none focus:ring-2 focus:ring-sushi-primary/40"
             aria-label="User menu"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1px] shadow-sm flex items-center justify-center shrink-0">
-              <div className="w-full h-full rounded-full bg-sushi-surface flex items-center justify-center text-xs font-bold text-sushi-text">
-                {userInitial}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1.5px] shadow-sm flex items-center justify-center shrink-0">
+                <div className="w-full h-full rounded-full bg-[#18181b] flex items-center justify-center text-xs font-bold text-white">
+                  {userInitial}
+                </div>
               </div>
+              {/* Online Indicator Dot */}
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#18181b]" />
             </div>
 
             <span className="text-xs font-medium text-sushi-text max-w-[120px] truncate hidden md:inline">
