@@ -6,6 +6,8 @@ import {
   UpdateOrderStatusInput,
   UpdatePaymentStatusInput,
   UpdatePaymentConfigInput,
+  UpdateStoreConfigInput,
+  CreateStaffOrderInput,
 } from '../types';
 
 export const orderKeys = {
@@ -13,6 +15,7 @@ export const orderKeys = {
   lists: () => [...orderKeys.all, 'list'] as const,
   list: (filters?: GetOrdersFilter) => [...orderKeys.lists(), filters] as const,
   paymentConfig: ['payment-config'] as const,
+  storeConfig: ['store-config'] as const,
 };
 
 export function useOrders(filters?: GetOrdersFilter) {
@@ -72,6 +75,37 @@ export function useUpdatePaymentConfig() {
       ordersApi.updatePaymentConfig(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.paymentConfig });
+    },
+  });
+}
+
+export function useStoreConfig() {
+  return useQuery({
+    queryKey: orderKeys.storeConfig,
+    queryFn: () => ordersApi.getStoreConfig(),
+  });
+}
+
+export function useUpdateStoreConfig() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateStoreConfigInput) =>
+      ordersApi.updateStoreConfig(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.storeConfig });
+    },
+  });
+}
+
+export function useCreateStaffOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateStaffOrderInput) =>
+      ordersApi.createStaffOrder(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
     },
   });
 }

@@ -8,6 +8,7 @@ import {
   Truck,
   QrCode,
   Gear,
+  Storefront,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -79,6 +80,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Gear,
     hideInBottomNav: true,
     children: [
+      {
+        key: 'store-settings',
+        path: '/dashboard/store-settings',
+        labelKey: 'dashboard.storeSettings',
+        icon: Storefront,
+      },
       {
         key: 'shipping',
         path: '/dashboard/shipping',

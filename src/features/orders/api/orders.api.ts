@@ -6,6 +6,9 @@ import {
   UpdatePaymentStatusInput,
   PaymentConfig,
   UpdatePaymentConfigInput,
+  StoreConfig,
+  UpdateStoreConfigInput,
+  CreateStaffOrderInput,
 } from '../types';
 
 export const ordersApi = {
@@ -41,4 +44,22 @@ export const ordersApi = {
       method: 'PATCH',
       body: JSON.stringify(input),
     }),
+
+  getStoreConfig: () =>
+    fetchApi<StoreConfig>('/api/orders/store-config'),
+
+  updateStoreConfig: (input: UpdateStoreConfigInput) =>
+    fetchApi<StoreConfig>('/api/orders/store-config', {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    }),
+
+  createStaffOrder: (input: CreateStaffOrderInput) =>
+    fetchApi<{ order: Order; trackingToken: string | null; isDuplicate: boolean }>(
+      '/api/orders/staff',
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    ),
 };

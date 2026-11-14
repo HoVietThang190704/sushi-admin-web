@@ -7,8 +7,6 @@ import {
   Layout,
   House,
   SignOut,
-  User,
-  Gear,
   CaretDown,
   Dropdown,
   ListIcon,
@@ -88,17 +86,6 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
             )}
           </div>
         ),
-      },
-      { type: 'divider' },
-      {
-        key: 'profile',
-        icon: <User size={16} className="text-sushi-text-muted" />,
-        label: <span>{t('dashboard.accountProfile')}</span>,
-      },
-      {
-        key: 'settings',
-        icon: <Gear size={16} className="text-sushi-text-muted" />,
-        label: <span>{t('dashboard.accountSettings')}</span>,
       },
       { type: 'divider' },
       {

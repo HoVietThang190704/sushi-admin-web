@@ -45,6 +45,7 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
+  source?: 'STOREFRONT' | 'STAFF';
   paymentQrUrl?: string | null;
   paymentBankInfo?: string | null;
   shippingFee?: number;
@@ -94,4 +95,37 @@ export interface UpdatePaymentConfigInput {
   transferSyntax?: string;
   note?: string;
   isActive?: boolean;
+}
+
+export interface StoreConfig {
+  id: string;
+  key: string;
+  customerOrderingEnabled: boolean;
+  contactPhone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateStoreConfigInput {
+  customerOrderingEnabled?: boolean;
+  contactPhone?: string;
+}
+
+export interface CreateStaffOrderItemInput {
+  productId: string;
+  quantity: number;
+}
+
+export interface CreateStaffOrderInput {
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  address: string;
+  province?: string;
+  district: string;
+  ward: string;
+  branchId: string;
+  note?: string;
+  paymentMethod?: string;
+  items: CreateStaffOrderItemInput[];
 }
