@@ -1,8 +1,9 @@
 import { fetchApi } from '@/lib/api';
+import { API_ENDPOINTS } from '@/lib/endpoints';
 import { Branch, ShippingRule, UpsertShippingRuleInput } from '../types';
 
 export async function fetchBranches(): Promise<Branch[]> {
-  const res = await fetchApi<Branch[]>('/api/shipping/branches');
+  const res = await fetchApi<Branch[]>(API_ENDPOINTS.SHIPPING.BRANCHES);
   return res || [];
 }
 
@@ -15,7 +16,7 @@ export async function fetchShippingRules(params?: {
   if (params?.branchId) query.set('branchId', params.branchId);
 
   const res = await fetchApi<ShippingRule[]>(
-    `/api/shipping/rules${query.toString() ? `?${query.toString()}` : ''}`
+    `${API_ENDPOINTS.SHIPPING.RULES}${query.toString() ? `?${query.toString()}` : ''}`
   );
   return res || [];
 }
@@ -37,21 +38,21 @@ export async function fetchShippingLocations(): Promise<
       formerWards?: string;
       isSupported: boolean;
     }>
-  >('/api/shipping/locations');
+  >(API_ENDPOINTS.SHIPPING.LOCATIONS);
   return res || [];
 }
 
 export async function upsertShippingRule(
   input: UpsertShippingRuleInput
 ): Promise<ShippingRule> {
-  return fetchApi<ShippingRule>('/api/shipping/rules', {
+  return fetchApi<ShippingRule>(API_ENDPOINTS.SHIPPING.RULES, {
     method: 'POST',
     body: JSON.stringify(input),
   });
 }
 
 export async function deleteShippingRule(id: string): Promise<void> {
-  await fetchApi(`/api/shipping/rules/${id}`, {
+  await fetchApi(API_ENDPOINTS.SHIPPING.RULE_BY_ID(id), {
     method: 'DELETE',
   });
 }
@@ -71,5 +72,5 @@ export async function calculateShippingFee(params: {
   if (params.ward) query.set('ward', params.ward);
   if (params.branchId) query.set('branchId', params.branchId);
 
-  return fetchApi(`/api/shipping/calculate?${query.toString()}`);
+  return fetchApi(`${API_ENDPOINTS.SHIPPING.CALCULATE}?${query.toString()}`);
 }

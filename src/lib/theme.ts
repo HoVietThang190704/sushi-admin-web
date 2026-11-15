@@ -101,6 +101,9 @@ export const antdThemeConfig: ThemeConfig = {
       colorPrimary: SUSHICOLORS.primary,
       colorPrimaryHover: SUSHICOLORS.primaryHover,
       colorPrimaryActive: SUSHICOLORS.primaryDark,
+      defaultShadow: 'none',
+      primaryShadow: 'none',
+      dangerShadow: 'none',
       fontSize: SUSHITYPO.fontSize.sm,
     },
     Menu: {

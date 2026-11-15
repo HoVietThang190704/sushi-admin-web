@@ -32,6 +32,7 @@ import {
   useDeleteRecipe,
   Recipe,
 } from '@/features/inventory';
+import { useTranslation } from '@/lib/i18n';
 
 export interface RecipeManagementViewProps {
   search?: string;
@@ -44,6 +45,7 @@ export function RecipeManagementView({
   filterStatus: externalFilterStatus,
   hideToolbar = false,
 }: RecipeManagementViewProps = {}) {
+  const { t } = useTranslation();
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const { data: recipes = [], isLoading: recipesLoading } = useRecipes();
   const { data: ingredients = [] } = useIngredients();
@@ -145,7 +147,7 @@ export function RecipeManagementView({
 
   const columns = [
     {
-      title: 'Món ăn / SKU',
+      title: t('recipeView.colProduct'),
       key: 'product',
       render: (_: unknown, record: { id: string; name: string; sku: string }) => (
         <div>
@@ -155,7 +157,7 @@ export function RecipeManagementView({
       ),
     },
     {
-      title: 'Trạng thái định mức',
+      title: t('recipeView.colStatus'),
       key: 'status',
       width: 220,
       render: (_: unknown, record: { id: string }) => {
@@ -166,25 +168,25 @@ export function RecipeManagementView({
           return (
             <Tag color="success" className="px-2.5 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1.5">
               <CheckCircle size={14} weight="fill" />
-              <span>Đã có công thức ({recipe?.items?.length} NL)</span>
+              <span>{t('recipeView.statusConfigured')} ({recipe?.items?.length} {t('recipeView.ingredientsShort')})</span>
             </Tag>
           );
         }
         return (
           <Tag color="error" className="px-2.5 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1.5">
             <WarningCircle size={14} weight="fill" />
-            <span>Chưa có (Chặn bếp)</span>
+            <span>{t('recipeView.statusMissing')}</span>
           </Tag>
         );
       },
     },
     {
-      title: 'Định mức nguyên vật liệu (1 phần)',
+      title: t('recipeView.colItems'),
       key: 'items',
       render: (_: unknown, record: { id: string }) => {
         const recipe = recipeMap.get(record.id);
         if (!recipe || !recipe.items || recipe.items.length === 0) {
-          return <span className="text-xs text-zinc-500 italic">Chưa khai báo</span>;
+          return <span className="text-xs text-zinc-500 italic">{t('recipeView.notDeclared')}</span>;
         }
 
         return (
@@ -205,7 +207,7 @@ export function RecipeManagementView({
       },
     },
     {
-      title: 'Hành động',
+      title: t('recipeView.colActions'),
       key: 'actions',
       width: 140,
       render: (_: unknown, record: { id: string; name: string; sku: string }) => {
@@ -219,15 +221,15 @@ export function RecipeManagementView({
               onClick={() => handleOpenConfig(record.id, record.name, record.sku)}
               className="text-sushi-gold hover:bg-sushi-gold/10"
             >
-              Cấu hình
+              {t('recipeView.configBtn')}
             </Button>
             {recipe && (
               <Popconfirm
-                title="Xác nhận xóa công thức?"
-                description="Khi xóa, bếp sẽ bị chặn chế biến món này cho đến khi có công thức mới."
+                title={t('recipeView.deleteConfirmTitle')}
+                description={t('recipeView.deleteConfirmDesc')}
                 onConfirm={() => handleDeleteRecipe(recipe.id)}
-                okText="Xóa"
-                cancelText="Hủy"
+                okText={t('common.delete')}
+                cancelText={t('common.cancel')}
                 okButtonProps={{ danger: true }}
               >
                 <Button
@@ -251,7 +253,7 @@ export function RecipeManagementView({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 bg-sushi-card/60 border border-sushi-border/80 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl">
           <div className="flex items-center gap-2 flex-1">
             <Input
-              placeholder="Tìm theo tên món hoặc mã SKU..."
+              placeholder={t('dashboard.searchRecipePlaceholder')}
               prefix={<MagnifyingGlass size={16} className="text-zinc-500" />}
               value={search}
               onChange={(e) => setInternalSearch(e.target.value)}
@@ -266,9 +268,9 @@ export function RecipeManagementView({
               onChange={setInternalFilterStatus}
               className="w-full sm:w-48 h-10 sm:h-9"
               options={[
-                { value: 'ALL', label: 'Tất cả trạng thái' },
-                { value: 'CONFIGURED', label: 'Đã có công thức' },
-                { value: 'MISSING', label: 'Chưa có công thức' },
+                { value: 'ALL', label: t('dashboard.recipeFilterAll') },
+                { value: 'CONFIGURED', label: t('dashboard.recipeFilterConfigured') },
+                { value: 'MISSING', label: t('dashboard.recipeFilterMissing') },
               ]}
             />
           </div>
@@ -284,8 +286,8 @@ export function RecipeManagementView({
           <SushiEmptyState
             isCard
             icon={<CookingPot size={24} />}
-            title="Không tìm thấy món ăn phù hợp"
-            description="Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc trạng thái."
+            title={t('recipeView.emptyTitle')}
+            description={t('recipeView.emptyDesc')}
           />
         }
         renderItem={(item) => {
@@ -312,16 +314,16 @@ export function RecipeManagementView({
                     onClick={() => handleOpenConfig(item.id, item.name, item.sku)}
                     className="h-8 px-2.5 rounded-lg text-xs text-sushi-gold border-sushi-gold/30 hover:bg-sushi-gold/10 font-medium"
                   >
-                    Cấu hình
+                    {t('recipeView.configBtn')}
                   </Button>
 
                   {recipe && (
                     <Popconfirm
-                      title="Xác nhận xóa công thức?"
-                      description="Khi xóa, bếp sẽ bị chặn chế biến món này cho đến khi có công thức mới."
+                      title={t('recipeView.deleteConfirmTitle')}
+                      description={t('recipeView.deleteConfirmDesc')}
                       onConfirm={() => handleDeleteRecipe(recipe.id)}
-                      okText="Xóa"
-                      cancelText="Hủy"
+                      okText={t('common.delete')}
+                      cancelText={t('common.cancel')}
                       okButtonProps={{ danger: true }}
                     >
                       <Button
@@ -344,7 +346,7 @@ export function RecipeManagementView({
                     className="px-2 py-0.5 text-3xs rounded-full font-medium inline-flex items-center gap-1"
                   >
                     <CheckCircle size={12} weight="fill" />
-                    <span>Đã có công thức ({recipe?.items?.length} NL)</span>
+                    <span>{t('recipeView.statusConfigured')} ({recipe?.items?.length} {t('recipeView.ingredientsShort')})</span>
                   </Tag>
                 ) : (
                   <Tag
@@ -352,7 +354,7 @@ export function RecipeManagementView({
                     className="px-2 py-0.5 text-3xs rounded-full font-medium inline-flex items-center gap-1"
                   >
                     <WarningCircle size={12} weight="fill" />
-                    <span>Chưa có (Chặn bếp)</span>
+                    <span>{t('recipeView.statusMissing')}</span>
                   </Tag>
                 )}
               </div>
@@ -360,7 +362,7 @@ export function RecipeManagementView({
               {/* Danh sách định mức nguyên liệu */}
               <div className="mt-2.5 pt-2 border-t border-sushi-border/60">
                 <div className="text-3xs text-sushi-text-dim uppercase tracking-wider font-mono mb-1.5">
-                  Định mức cho 1 phần:
+                  {t('recipeView.colItems')}:
                 </div>
                 {hasRecipe ? (
                   <div className="flex flex-wrap gap-1.5">
@@ -378,7 +380,7 @@ export function RecipeManagementView({
                   </div>
                 ) : (
                   <span className="text-2xs text-zinc-500 italic">
-                    Chưa khai báo nguyên vật liệu
+                    {t('recipeView.notDeclared')}
                   </span>
                 )}
               </div>
@@ -397,7 +399,7 @@ export function RecipeManagementView({
           pagination={{ pageSize: 10, showSizeChanger: true }}
           scroll={{ x: 'max-content' }}
           locale={{
-            emptyText: <Empty description="Không tìm thấy món ăn nào phù hợp" />,
+            emptyText: <Empty description={t('recipeView.emptyTitle')} />,
           }}
         />
       </div>
@@ -409,7 +411,7 @@ export function RecipeManagementView({
         destroyOnHidden
         title={
           <span className="truncate font-semibold text-sushi-text text-sm sm:text-base">
-            Cấu hình BOM: {editingProduct?.name}
+            {t('recipeView.modalTitle')}: {editingProduct?.name}
           </span>
         }
         width={640}
@@ -419,7 +421,7 @@ export function RecipeManagementView({
               onClick={() => setIsModalOpen(false)}
               className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
             >
-              Hủy
+              {t('common.cancel')}
             </Button>
             <Button
               type="primary"
@@ -427,23 +429,23 @@ export function RecipeManagementView({
               loading={upsertMutation.isPending}
               className="rounded-xl flex-1 h-11 bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-1.5"
             >
-              <span>Lưu công thức</span>
+              <span>{t('recipeView.saveRecipe')}</span>
             </Button>
           </div>
         }
       >
         <div className="py-1 space-y-4">
           <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-300 leading-relaxed">
-            💡 Định mức được tính cho <strong>1 phần phục vụ chuẩn</strong>. Khi khách đặt món (hoặc gọi combo chứa món này), kho của chi nhánh sẽ tự động nhân số lượng để trừ tồn khi bếp bấm <strong>Bắt đầu chế biến</strong>.
+            {t('recipeView.bomNotice')}
           </div>
 
           <Form form={form} layout="vertical">
             <Form.Item
               name="notes"
-              label={<span className="text-xs font-medium text-zinc-400">Ghi chú kỹ thuật chế biến (tùy chọn)</span>}
+              label={<span className="text-xs font-medium text-zinc-400">{t('recipeView.notesLabel')}</span>}
             >
               <Input.TextArea
-                placeholder="Ví dụ: Cắt phi lê 6 miếng đều tay, ăn kèm wasabi tươi..."
+                placeholder={t('recipeView.notesPlaceholder')}
                 rows={2}
                 className="rounded-xl"
               />
@@ -451,7 +453,7 @@ export function RecipeManagementView({
 
             <div className="space-y-2.5">
               <span className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-                Danh sách nguyên vật liệu tiêu hao:
+                {t('recipeView.ingredientsListLabel')}
               </span>
 
               <Form.List name="items">
@@ -473,7 +475,7 @@ export function RecipeManagementView({
                                 {index + 1}
                               </span>
                               <span className="text-xs font-semibold text-sushi-text">
-                                Nguyên liệu #{index + 1}
+                                {t('recipeView.ingredientItem')} #{index + 1}
                               </span>
                             </div>
 
@@ -482,10 +484,10 @@ export function RecipeManagementView({
                                 type="button"
                                 onClick={() => remove(name)}
                                 className="text-2xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer font-medium"
-                                title="Xóa nguyên liệu"
+                                title={t('common.delete')}
                               >
                                 <Trash size={13} />
-                                <span>Xóa</span>
+                                <span>{t('common.delete')}</span>
                               </button>
                             )}
                           </div>
@@ -496,17 +498,17 @@ export function RecipeManagementView({
                               <Form.Item
                                 {...restField}
                                 name={[name, 'ingredientId']}
-                                rules={[{ required: true, message: 'Vui lòng chọn nguyên liệu' }]}
+                                rules={[{ required: true, message: t('recipeView.selectIngredientPlaceholder') }]}
                                 className="mb-0"
                               >
                                 <Select
-                                  placeholder="Chọn nguyên liệu..."
+                                  placeholder={t('recipeView.selectIngredientPlaceholder')}
                                   showSearch
                                   optionFilterProp="label"
                                   className="w-full h-10"
                                   options={ingredients.map((ing) => ({
                                     value: ing.id,
-                                    label: `${ing.name} (${ing.code}) - ĐVT: ${ing.unit}`,
+                                    label: `${ing.name} (${ing.code}) - ${ing.unit}`,
                                   }))}
                                 />
                               </Form.Item>
@@ -517,13 +519,13 @@ export function RecipeManagementView({
                                 {...restField}
                                 name={[name, 'quantity']}
                                 rules={[
-                                  { required: true, message: 'Nhập số lượng' },
-                                  { type: 'number', min: 0.001, message: 'Phải > 0' },
+                                  { required: true, message: t('recipeView.quantityPlaceholder') },
+                                  { type: 'number', min: 0.001, message: '> 0' },
                                 ]}
                                 className="mb-0"
                               >
                                 <InputNumber
-                                  placeholder="Định mức (1 phần)"
+                                  placeholder={t('recipeView.quantityPlaceholder')}
                                   className="w-full h-10 rounded-xl"
                                   suffix={
                                     <span className="text-xs font-semibold text-sushi-gold">
@@ -547,7 +549,7 @@ export function RecipeManagementView({
                       icon={<Plus size={16} />}
                       className="border-dashed border-sushi-border hover:border-sushi-gold text-sushi-text hover:text-sushi-gold bg-sushi-surface/20 hover:bg-sushi-gold/5 h-11 rounded-xl flex items-center justify-center gap-1.5 font-medium transition-colors"
                     >
-                      Thêm nguyên liệu
+                      {t('recipeView.addIngredientBtn')}
                     </Button>
                   </div>
                 )}

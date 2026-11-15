@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ConfigProvider, App } from 'antd';
 import { antdThemeConfig } from '@/lib/theme';
+import { AntdAppBridge } from '@/components/ui';
 import { I18nProvider } from '@/lib/i18n';
 import { QueryProvider } from '@/providers/query-provider';
 import { AuthProvider } from '@/features/auth';
@@ -38,6 +39,7 @@ export default function RootLayout({
         <AntdRegistry>
           <ConfigProvider theme={antdThemeConfig}>
             <App>
+              <AntdAppBridge />
               <I18nProvider>
                 <QueryProvider>
                   <AuthProvider>{children}</AuthProvider>

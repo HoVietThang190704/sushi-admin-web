@@ -6,6 +6,7 @@ import {
   Button,
 } from '@/components/ui';
 import { Check, WarningCircle } from '@phosphor-icons/react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface IngredientFilterDrawerProps {
   open: boolean;
@@ -16,23 +17,6 @@ export interface IngredientFilterDrawerProps {
   totalFilteredCount: number;
   alertCount: number;
 }
-
-const FILTER_OPTIONS: Array<{
-  value: 'ALL' | 'ALERTS';
-  label: string;
-  description: string;
-}> = [
-  {
-    value: 'ALL',
-    label: 'Tất cả trạng thái',
-    description: 'Hiển thị toàn bộ danh mục nguyên vật liệu trong kho',
-  },
-  {
-    value: 'ALERTS',
-    label: 'Cảnh báo thiếu hụt / Sắp hết',
-    description: 'Chỉ hiển thị nguyên liệu chạm ngưỡng tồn an toàn tối thiểu',
-  },
-];
 
 function FilterForm({
   alertFilter,
@@ -49,8 +33,26 @@ function FilterForm({
   onApply: (filter: 'ALL' | 'ALERTS') => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const [tempFilter, setTempFilter] = useState<'ALL' | 'ALERTS'>(alertFilter);
   const hasActiveFilters = tempFilter !== 'ALL';
+
+  const filterOptions: Array<{
+    value: 'ALL' | 'ALERTS';
+    label: string;
+    description: string;
+  }> = [
+    {
+      value: 'ALL',
+      label: t('dashboard.filterAlertAll'),
+      description: t('dashboard.filterAlertAllDesc'),
+    },
+    {
+      value: 'ALERTS',
+      label: t('dashboard.filterAlertOnly'),
+      description: t('dashboard.filterAlertOnlyDesc'),
+    },
+  ];
 
   const handleApply = () => {
     onApply(tempFilter);
@@ -67,10 +69,10 @@ function FilterForm({
     <div className="space-y-6">
       <div className="space-y-3">
         <label className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-          Trạng Thái Tồn Kho
+          {t('common.status')}
         </label>
         <div className="grid grid-cols-1 gap-2.5">
-          {FILTER_OPTIONS.map((item) => {
+          {filterOptions.map((item) => {
             const isSelected = tempFilter === item.value;
             const isAlertOption = item.value === 'ALERTS';
 
@@ -91,7 +93,7 @@ function FilterForm({
                     {isAlertOption && alertCount > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-3xs font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
                         <WarningCircle size={12} weight="fill" />
-                        <span>{alertCount} món</span>
+                        <span>{alertCount} {t('common.itemsCount')}</span>
                       </span>
                     )}
                   </div>
@@ -113,7 +115,7 @@ function FilterForm({
           disabled={!hasActiveFilters}
           className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
         >
-          Xóa bộ lọc
+          {t('dashboard.clearFilter')}
         </Button>
         <Button
           type="primary"
@@ -121,7 +123,7 @@ function FilterForm({
           className="rounded-xl flex-1 h-11 bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-1.5"
         >
           <Check size={16} weight="bold" />
-          <span>Áp dụng ({totalFilteredCount})</span>
+          <span>{t('dashboard.applyFilter')} ({totalFilteredCount})</span>
         </Button>
       </div>
     </div>
@@ -137,12 +139,13 @@ export function IngredientFilterDrawer({
   totalFilteredCount,
   alertCount,
 }: IngredientFilterDrawerProps) {
+  const { t } = useTranslation();
   return (
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
       destroyOnHidden
-      title="Lọc Trạng Thái Nguyên Liệu"
+      title={t('dashboard.filterIngredientsTitle')}
     >
       {open && (
         <FilterForm

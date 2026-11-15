@@ -201,14 +201,13 @@ export function StockBalanceTable({
                   <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border text-emerald-400 flex items-center justify-center shrink-0 shadow-inner">
                     <CookingPot size={19} weight="fill" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h4 className="text-sm font-bold text-sushi-text truncate">
                       {item.name}
                     </h4>
-                    <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                      <span>Mã: {item.code}</span>
-                      <span>·</span>
-                      <span>Min: {item.minStock} {item.unit}</span>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                      <span className="truncate">{t('dashboard.codeShort')}: {item.code}</span>
+                      <span className="shrink-0">· Min: {item.minStock} {item.unit}</span>
                     </div>
                   </div>
                 </div>
@@ -244,7 +243,7 @@ export function StockBalanceTable({
 
               <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
                 <div className="flex items-baseline space-x-1 font-mono">
-                  <span className="text-sushi-text-dim text-3xs uppercase mr-0.5">Tồn kho:</span>
+                  <span className="text-sushi-text-dim text-3xs uppercase mr-0.5">{t('dashboard.currentStock')}:</span>
                   <span className={`text-sm ${colorClass}`}>{item.currentStock}</span>
                   <span className="text-sushi-text-dim">{item.unit}</span>
                 </div>

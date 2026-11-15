@@ -14,6 +14,7 @@ import {
 import { SUSHICOLORS } from '@/lib/theme';
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
 import { NAV_ITEMS, getActiveNavKey, getActiveParentKey } from '@/config/navigation.config';
+import { useRealtime } from '@/providers/realtime-provider';
 
 const { Sider } = Layout;
 
@@ -35,6 +36,7 @@ export function AdminSidebar({
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const { isConnected } = useRealtime();
 
   // Tự động suy ra active key & parent key từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
@@ -197,11 +199,17 @@ export function AdminSidebar({
           <div className="flex items-center justify-between px-2 gap-2">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                {isConnected && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                )}
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${
+                    isConnected ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                ></span>
               </span>
               <span className="text-2xs text-sushi-text-dim font-mono">
-                Online · v1.0
+                {isConnected ? 'Realtime · Online' : 'Realtime · Offline'}
               </span>
             </div>
             <LanguageSwitcher />
@@ -210,11 +218,17 @@ export function AdminSidebar({
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                {isConnected && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                )}
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${
+                    isConnected ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}
+                ></span>
               </span>
               <span className="text-2xs text-sushi-text-dim font-mono">
-                Online · v1.0
+                {isConnected ? 'Realtime · Online' : 'Realtime · Offline'}
               </span>
             </div>
 

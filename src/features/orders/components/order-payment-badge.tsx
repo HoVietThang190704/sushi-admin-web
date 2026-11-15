@@ -3,12 +3,14 @@
 import React from 'react';
 import { Tag } from '@/components/ui';
 import { PaymentStatus } from '../types';
+import { useTranslation } from '@/lib/i18n';
 
 interface OrderPaymentBadgeProps {
   status: PaymentStatus;
 }
 
 export function OrderPaymentBadge({ status }: OrderPaymentBadgeProps) {
+  const { t } = useTranslation();
   const isPaid = status === 'PAID';
 
   return (
@@ -20,7 +22,7 @@ export function OrderPaymentBadge({ status }: OrderPaymentBadgeProps) {
       }`}
       style={{ margin: 0 }}
     >
-      {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+      {isPaid ? t('ordersPage.paymentPaid') : t('ordersPage.paymentUnpaid')}
     </Tag>
   );
 }

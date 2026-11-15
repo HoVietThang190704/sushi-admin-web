@@ -17,6 +17,7 @@ import {
 } from '@/components/ui';
 import { useCategories, useProducts } from '@/features/catalog';
 import { useIngredients, useInventoryAlerts } from '@/features/inventory';
+import { useOrders } from '@/features/orders';
 import { useTranslation } from '@/lib/i18n';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 
@@ -27,7 +28,12 @@ export default function DashboardOverviewPage() {
   const { data: products = [] } = useProducts();
   const { data: ingredients = [] } = useIngredients();
   const { data: alerts = [] } = useInventoryAlerts();
+  const { data: ordersData } = useOrders({ page: 1, limit: 50 });
   const { formatCurrency } = useFormatCurrency();
+
+  const totalOrders = ordersData?.total ?? 0;
+  const pendingOrdersCount =
+    ordersData?.items?.filter((o) => o.status === 'PENDING').length ?? 0;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -176,7 +182,7 @@ export default function DashboardOverviewPage() {
               {t('dashboard.categoriesTitle')}
             </span>
             <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              {categories.length} nhóm
+              {categories.length} {t('dashboard.groupsCountUnit')}
             </span>
           </button>
 
@@ -193,7 +199,7 @@ export default function DashboardOverviewPage() {
               {t('dashboard.productsTitle')}
             </span>
             <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              {products.length} món
+              {products.length} {t('common.itemsCount')}
             </span>
           </button>
 
@@ -210,24 +216,26 @@ export default function DashboardOverviewPage() {
               {t('dashboard.menuInventory')}
             </span>
             <span className="text-3xs text-blue-400/90 font-mono mt-0.5 truncate w-full">
-              {ingredients.length} items
+              {ingredients.length} {t('common.itemsCount')}
             </span>
           </button>
 
-          {/* Action 4: Đơn Hàng & Bếp (Sắp ra mắt) */}
+          {/* Action 4: Đơn Hàng & Bếp */}
           <button
             type="button"
             onClick={() => router.push('/dashboard/orders')}
             className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
           >
-            <div className="w-8 h-8 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-muted mb-1.5 shrink-0 group-active:scale-95 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
               <Package size={17} weight="fill" />
             </div>
             <span className="text-xs font-semibold text-sushi-text truncate w-full">
               {t('dashboard.ordersTitle')}
             </span>
-            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              Sắp ra mắt
+            <span className="text-3xs text-cyan-400/90 font-mono mt-0.5 truncate w-full">
+              {pendingOrdersCount > 0
+                ? `${pendingOrdersCount} ${t('dashboard.pendingApprovalCount')}`
+                : `${totalOrders} ${t('dashboard.ordersCountUnit')}`}
             </span>
           </button>
         </div>
@@ -311,11 +319,16 @@ export default function DashboardOverviewPage() {
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-muted shadow-inner">
+                <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-cyan-400 shadow-inner">
                   <Package size={20} />
                 </div>
-                <Tag color="default" className="font-mono text-2xs mr-0">
-                  Coming Soon
+                <Tag
+                  color={pendingOrdersCount > 0 ? 'gold' : 'cyan'}
+                  className="font-mono text-2xs mr-0"
+                >
+                  {pendingOrdersCount > 0
+                    ? `${pendingOrdersCount} ${t('dashboard.pendingApprovalCount')}`
+                    : `${totalOrders} ${t('dashboard.ordersCountUnit')}`}
                 </Tag>
               </div>
               <h3 className="text-sm font-bold text-sushi-text group-hover:text-cyan-400 transition-colors">

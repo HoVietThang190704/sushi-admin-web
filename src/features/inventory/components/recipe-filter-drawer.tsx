@@ -6,6 +6,7 @@ import {
   Button,
 } from '@/components/ui';
 import { Check, CheckCircle, WarningCircle } from '@phosphor-icons/react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface RecipeFilterDrawerProps {
   open: boolean;
@@ -15,31 +16,6 @@ export interface RecipeFilterDrawerProps {
   onReset: () => void;
   totalFilteredCount?: number;
 }
-
-const FILTER_OPTIONS: Array<{
-  value: 'ALL' | 'CONFIGURED' | 'MISSING';
-  label: string;
-  description: string;
-  icon?: React.ReactNode;
-}> = [
-  {
-    value: 'ALL',
-    label: 'Tất cả trạng thái',
-    description: 'Hiển thị toàn bộ danh sách món đơn',
-  },
-  {
-    value: 'CONFIGURED',
-    label: 'Đã có công thức định mức',
-    description: 'Món đã sẵn sàng chế biến, không bị chặn bếp',
-    icon: <CheckCircle size={14} weight="fill" className="text-emerald-400" />,
-  },
-  {
-    value: 'MISSING',
-    label: 'Chưa có công thức (Chặn bếp)',
-    description: 'Bếp sẽ bị chặn chế biến món này cho đến khi có BOM',
-    icon: <WarningCircle size={14} weight="fill" className="text-red-400" />,
-  },
-];
 
 function FilterForm({
   filterStatus,
@@ -54,8 +30,34 @@ function FilterForm({
   onApply: (status: 'ALL' | 'CONFIGURED' | 'MISSING') => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const [tempStatus, setTempStatus] = useState<'ALL' | 'CONFIGURED' | 'MISSING'>(filterStatus);
   const hasActiveFilters = tempStatus !== 'ALL';
+
+  const filterOptions: Array<{
+    value: 'ALL' | 'CONFIGURED' | 'MISSING';
+    label: string;
+    description: string;
+    icon?: React.ReactNode;
+  }> = [
+    {
+      value: 'ALL',
+      label: t('dashboard.recipeFilterAll'),
+      description: t('dashboard.recipeFilterAllDesc'),
+    },
+    {
+      value: 'CONFIGURED',
+      label: t('dashboard.recipeFilterConfigured'),
+      description: t('dashboard.recipeFilterConfiguredDesc'),
+      icon: <CheckCircle size={14} weight="fill" className="text-emerald-400" />,
+    },
+    {
+      value: 'MISSING',
+      label: t('dashboard.recipeFilterMissing'),
+      description: t('dashboard.recipeFilterMissingDesc'),
+      icon: <WarningCircle size={14} weight="fill" className="text-red-400" />,
+    },
+  ];
 
   const handleApply = () => {
     onApply(tempStatus);
@@ -72,10 +74,10 @@ function FilterForm({
     <div className="space-y-6">
       <div className="space-y-3">
         <label className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-          Trạng Thái Công Thức Món
+          {t('recipeView.colStatus')}
         </label>
         <div className="grid grid-cols-1 gap-2.5">
-          {FILTER_OPTIONS.map((item) => {
+          {filterOptions.map((item) => {
             const isSelected = tempStatus === item.value;
 
             return (
@@ -112,7 +114,7 @@ function FilterForm({
           disabled={!hasActiveFilters}
           className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
         >
-          Xóa bộ lọc
+          {t('dashboard.clearFilter')}
         </Button>
         <Button
           type="primary"
@@ -121,7 +123,7 @@ function FilterForm({
         >
           <Check size={16} weight="bold" />
           <span>
-            Áp dụng {typeof totalFilteredCount === 'number' && `(${totalFilteredCount})`}
+            {t('dashboard.applyFilter')} {typeof totalFilteredCount === 'number' && `(${totalFilteredCount})`}
           </span>
         </Button>
       </div>
@@ -137,12 +139,13 @@ export function RecipeFilterDrawer({
   onReset,
   totalFilteredCount,
 }: RecipeFilterDrawerProps) {
+  const { t } = useTranslation();
   return (
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
       destroyOnHidden
-      title="Lọc Trạng Thái Công Thức"
+      title={t('dashboard.filterRecipesTitle')}
     >
       {open && (
         <FilterForm

@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   Table,
-  Tag,
   Typography,
   ForkKnife,
+  Eye,
   PencilSimple,
   Trash,
   Tooltip,
@@ -16,6 +16,7 @@ import {
   SushiEmptyState,
 } from '@/components/ui';
 import { Product } from '../types';
+import { ProductDetailModal } from './product-detail-modal';
 import { useTranslation } from '@/lib/i18n';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 
@@ -31,6 +32,7 @@ interface ProductTableProps {
 export function ProductTable({ products, loading, onEdit, onDelete }: ProductTableProps) {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const columns = [
     {
@@ -92,12 +94,15 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       key: 'type',
       width: 120,
       render: (type: string) => (
-        <Tag
-          color={type === 'COMBO' ? 'gold' : 'blue'}
-          className="text-2xs font-mono font-semibold"
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-mono font-semibold border ${
+            type === 'COMBO'
+              ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
+              : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+          }`}
         >
           {type}
-        </Tag>
+        </span>
       ),
     },
     {
@@ -136,31 +141,49 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
     {
       title: t('common.actions'),
       key: 'actions',
-      width: 110,
+      width: 140,
       align: 'right' as const,
       render: (_: unknown, record: Product) => (
-        <div className="flex items-center justify-end space-x-1">
-          <Tooltip title={t('dashboard.edit')}>
+        <div
+          className="flex items-center justify-end space-x-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Tooltip title={t('ordersPage.detailBtn')}>
             <button
               type="button"
-              onClick={() => onEdit?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
-              aria-label={t('dashboard.edit')}
+              onClick={() => setSelectedProduct(record)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-sushi-gold hover:bg-sushi-gold/10 transition-colors cursor-pointer border border-transparent hover:border-sushi-gold/30"
+              aria-label={t('ordersPage.detailBtn')}
             >
-              <PencilSimple size={16} />
+              <Eye size={16} />
             </button>
           </Tooltip>
 
-          <Tooltip title={t('dashboard.delete')}>
-            <button
-              type="button"
-              onClick={() => onDelete?.(record)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
-              aria-label={t('dashboard.delete')}
-            >
-              <Trash size={16} />
-            </button>
-          </Tooltip>
+          {onEdit && (
+            <Tooltip title={t('dashboard.edit')}>
+              <button
+                type="button"
+                onClick={() => onEdit(record)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors cursor-pointer border border-transparent hover:border-sushi-border"
+                aria-label={t('dashboard.edit')}
+              >
+                <PencilSimple size={16} />
+              </button>
+            </Tooltip>
+          )}
+
+          {onDelete && (
+            <Tooltip title={t('dashboard.delete')}>
+              <button
+                type="button"
+                onClick={() => onDelete(record)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
+                aria-label={t('dashboard.delete')}
+              >
+                <Trash size={16} />
+              </button>
+            </Tooltip>
+          )}
         </div>
       ),
     },
@@ -171,6 +194,7 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={products}
+        pageSize={8}
         loading={loading}
         emptyState={
           <SushiEmptyState
@@ -181,72 +205,91 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           />
         }
         renderItem={(product) => (
-          <SushiCardItem>
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start space-x-3 min-w-0">
-                <div className="w-12 h-12 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                  {product.imageUrl ? (
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      width={48}
-                      height={48}
-                      className="object-cover w-full h-full"
-                      unoptimized
-                    />
-                  ) : (
-                    <ForkKnife size={20} className="text-sushi-text-dim" />
-                  )}
-                </div>
-
-                <div className="min-w-0">
-                  <h4 className="text-sm font-bold text-sushi-text truncate">
-                    {product.name}
-                  </h4>
-                  <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                    <span>SKU: {product.sku}</span>
-                    {product.category?.name && (
-                      <span className="text-sushi-text-muted truncate">
-                        · {product.category.name}
-                      </span>
+          <SushiCardItem className="cursor-pointer hover:border-sushi-gold/50 transition-all active:scale-[0.99]">
+            <div onClick={() => setSelectedProduct(product)}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden border border-sushi-border/80 bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
+                    {product.imageUrl ? (
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        width={56}
+                        height={56}
+                        className="object-cover w-full h-full"
+                        unoptimized
+                      />
+                    ) : (
+                      <ForkKnife size={22} className="text-sushi-text-dim" />
                     )}
                   </div>
+
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <h4 className="text-sm font-bold text-sushi-text truncate leading-snug">
+                      {product.name}
+                    </h4>
+                    <div className="text-2xs text-sushi-text-muted truncate">
+                      {product.category?.name || t('common.uncategorized')}
+                    </div>
+                    <div className="text-2xs text-sushi-text-dim font-mono truncate">
+                      SKU: {product.sku}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="flex items-center gap-1 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProduct(product)}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-sushi-gold hover:bg-sushi-gold/10 transition-colors border border-sushi-border/60 cursor-pointer"
+                    aria-label={t('ordersPage.detailBtn')}
+                    title={t('ordersPage.detailBtn')}
+                  >
+                    <Eye size={14} />
+                  </button>
+                  <SushiCardActions
+                    onEdit={onEdit ? () => onEdit(product) : undefined}
+                    onDelete={onDelete ? () => onDelete(product) : undefined}
+                    editLabel={t('dashboard.edit')}
+                    deleteLabel={t('dashboard.delete')}
+                  />
                 </div>
               </div>
 
-              <SushiCardActions
-                onEdit={onEdit ? () => onEdit(product) : undefined}
-                onDelete={onDelete ? () => onDelete(product) : undefined}
-                editLabel={t('dashboard.edit')}
-                deleteLabel={t('dashboard.delete')}
-              />
-            </div>
-
-            <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
-              <div className="flex items-center space-x-2">
-                <Tag
-                  color={product.type === 'COMBO' ? 'gold' : 'blue'}
-                  className="text-3xs font-mono font-semibold !px-1.5 !py-0 !leading-none mr-0"
-                >
-                  {product.type}
-                </Tag>
-                <span
-                  className={`inline-flex items-center space-x-1 text-2xs ${
-                    product.isActive ? 'text-emerald-400' : 'text-zinc-400'
-                  }`}
-                >
+              <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      product.isActive ? 'bg-emerald-500' : 'bg-zinc-500'
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-3xs font-mono font-semibold border ${
+                      product.type === 'COMBO'
+                        ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
+                        : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
                     }`}
-                  />
-                  <span>{product.isActive ? t('common.active') : t('common.inactive')}</span>
+                  >
+                    {product.type}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-3xs font-medium border ${
+                      product.isActive
+                        ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                        : 'bg-zinc-500/10 border-zinc-500/25 text-zinc-400'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        product.isActive ? 'bg-emerald-500' : 'bg-zinc-500'
+                      }`}
+                    />
+                    <span>{product.isActive ? t('common.active') : t('common.inactive')}</span>
+                  </span>
+                </div>
+
+                <span className="text-sm font-bold text-sushi-gold font-mono shrink-0">
+                  {formatCurrency(product.sellingPrice)}
                 </span>
               </div>
-
-              <span className="text-sm font-bold text-sushi-text font-sans">
-                {formatCurrency(product.sellingPrice)}
-              </span>
             </div>
           </SushiCardItem>
         )}
@@ -259,9 +302,14 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           dataSource={products}
           columns={columns}
           rowKey="id"
+          onRow={(record) => ({
+            onClick: () => setSelectedProduct(record),
+            className: 'cursor-pointer hover:bg-zinc-900/60 transition-colors',
+          })}
           pagination={{
             pageSize: 8,
-            showSizeChanger: false,
+            showSizeChanger: true,
+            pageSizeOptions: ['8', '16', '32'],
             className: 'py-3 px-4',
           }}
           scroll={{ x: 'max-content' }}
@@ -277,6 +325,14 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           }}
         />
       </div>
+
+      {/* 3. Modal / Bottom Sheet Chi tiết món ăn */}
+      <ProductDetailModal
+        product={selectedProduct}
+        open={Boolean(selectedProduct)}
+        onClose={() => setSelectedProduct(null)}
+        onEdit={onEdit}
+      />
     </>
   );
 }

@@ -40,11 +40,12 @@ export const createProductSchemaFactory = (t: (key: TranslationKey) => string) =
       .min(2, t('validation.productNameMin'))
       .max(160, t('validation.productNameMax')),
     type: z.enum(['SINGLE', 'COMBO']).default('SINGLE'),
-    categoryId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional().nullable(),
     sellingPrice: z.coerce
       .number({ error: t('validation.productPriceRequired') })
       .positive(t('validation.productPricePositive')),
     imageUrl: z.string().url(t('validation.productImageInvalid')).optional().or(z.literal('')),
+    isActive: z.boolean().optional(),
   });
 
 export const createProductSchema = z.object({
@@ -60,11 +61,12 @@ export const createProductSchema = z.object({
     .min(2, 'Tên sản phẩm phải có ít nhất 2 ký tự')
     .max(160, 'Tên sản phẩm không được vượt quá 160 ký tự'),
   type: z.enum(['SINGLE', 'COMBO']).default('SINGLE'),
-  categoryId: z.string().uuid('Category ID phải là UUID hợp lệ').optional(),
+  categoryId: z.string().uuid('Category ID phải là UUID hợp lệ').optional().nullable(),
   sellingPrice: z.coerce
     .number({ error: 'Vui lòng nhập giá bán' })
     .positive('Giá bán phải lớn hơn 0'),
   imageUrl: z.string().url('Đường dẫn ảnh không hợp lệ').optional().or(z.literal('')),
+  isActive: z.boolean().optional(),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;

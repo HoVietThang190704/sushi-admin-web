@@ -9,13 +9,14 @@ import {
   InputNumber,
   Select,
   Radio,
+  Switch,
   Button,
   ImageSquare,
   Trash,
   Spin,
   message,
 } from '@/components/ui';
-import { CreateProductInput } from '../types';
+import { Product, CreateProductInput } from '../types';
 import { createProductSchemaFactory } from '../schemas/catalog.schema';
 import { catalogApi } from '../api/catalog.api';
 import { createZodRule } from '@/lib/zod-validator';
@@ -26,12 +27,14 @@ interface CreateProductModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (dto: CreateProductInput) => Promise<unknown>;
+  initialData?: Product | null;
 }
 
 export function CreateProductModal({
   open,
   onClose,
   onSubmit,
+  initialData,
 }: CreateProductModalProps) {
   const { t, locale } = useTranslation();
   const [form] = Form.useForm();
@@ -40,8 +43,30 @@ export function CreateProductModal({
   const [imageUrl, setImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { options: categoryOptions } = useCategoryOptions();
+  const isEditing = Boolean(initialData);
 
   const schema = useMemo(() => createProductSchemaFactory(t), [t]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (initialData) {
+      const initialImg = initialData.imageUrl || '';
+      setImageUrl(initialImg);
+      form.setFieldsValue({
+        name: initialData.name,
+        sku: initialData.sku,
+        barcode: initialData.barcode || undefined,
+        categoryId: initialData.categoryId || undefined,
+        type: initialData.type,
+        sellingPrice: Number(initialData.sellingPrice),
+        imageUrl: initialImg,
+        isActive: initialData.isActive,
+      });
+    } else {
+      setImageUrl('');
+      form.resetFields();
+    }
+  }, [open, initialData, form]);
 
   useEffect(() => {
     if (!open) return;
@@ -116,7 +141,7 @@ export function CreateProductModal({
 
   return (
     <ResponsiveModalDrawer
-      title={t('dashboard.modalCreateProductTitle')}
+      title={isEditing ? t('dashboard.modalEditProductTitle') : t('dashboard.modalCreateProductTitle')}
       open={open}
       onClose={handleModalClose}
       destroyOnHidden
@@ -126,7 +151,7 @@ export function CreateProductModal({
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={{ type: 'SINGLE', sellingPrice: 50000 }}
+        initialValues={{ type: 'SINGLE', sellingPrice: 50000, isActive: true }}
       >
         {/* Tên món */}
         <Form.Item
@@ -297,6 +322,23 @@ export function CreateProductModal({
           </div>
         </Form.Item>
 
+        {/* Trạng thái kinh doanh (Hiển thị khi chỉnh sửa món ăn) */}
+        {isEditing && (
+          <div className="mb-4 p-3 rounded-xl bg-sushi-surface/60 border border-sushi-border/80 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold text-sushi-text">
+                {t('dashboard.productStatusLabel')}
+              </div>
+              <div className="text-2xs text-sushi-text-dim mt-0.5">
+                {t('common.active')} / {t('common.inactive')}
+              </div>
+            </div>
+            <Form.Item name="isActive" valuePropName="checked" noStyle>
+              <Switch />
+            </Form.Item>
+          </div>
+        )}
+
         {/* Buttons */}
         <Form.Item style={{ marginBottom: 0, marginTop: 20 }}>
           <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
@@ -309,7 +351,7 @@ export function CreateProductModal({
               loading={submitting}
               className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
             >
-              {t('common.create')}
+              {isEditing ? t('dashboard.saveChanges') : t('common.create')}
             </Button>
           </div>
         </Form.Item>

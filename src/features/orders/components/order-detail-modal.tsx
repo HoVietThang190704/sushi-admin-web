@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   Modal,
   Drawer,
-  Button,
   Table,
   Space,
   App,
@@ -18,10 +17,12 @@ import {
   Phone,
   FileText,
   X,
+  XCircle,
   CreditCard,
   Truck,
   MapPin,
   WarningCircle,
+  CircleNotch,
 } from '@phosphor-icons/react';
 import { Order, OrderItem, OrderStatus } from '../types';
 import { OrderStatusBadge } from './order-status-badge';
@@ -214,14 +215,17 @@ export function OrderDetailModal({
                   <span className="text-2xs text-sushi-text-muted">({order.paymentMethod})</span>
                 </div>
               </div>
-              <Button
-                size="small"
+              <button
+                type="button"
                 onClick={handleTogglePayment}
-                loading={updatePaymentMutation.isPending}
-                className="text-xs rounded-lg border-sushi-border/80 text-sushi-gold hover:border-sushi-gold hover:text-sushi-gold shrink-0 h-8 px-2.5"
+                disabled={updatePaymentMutation.isPending}
+                className="h-8 px-3 rounded-lg border border-sushi-gold/35 bg-sushi-gold/10 hover:bg-sushi-gold/20 text-sushi-gold font-semibold text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 disabled:opacity-50"
               >
-                {order.paymentStatus === 'PAID' ? 'Đổi sang Chưa TT' : 'Đổi sang Đã TT'}
-              </Button>
+                {updatePaymentMutation.isPending && (
+                  <CircleNotch size={13} className="animate-spin" />
+                )}
+                <span>{order.paymentStatus === 'PAID' ? 'Đổi sang Chưa TT' : 'Đổi sang Đã TT'}</span>
+              </button>
             </div>
 
             {isTransferUnpaid && (
@@ -330,12 +334,13 @@ export function OrderDetailModal({
           {/* Nút đóng nội dung nếu đơn đã hoàn tất/đã hủy */}
           {!hasActiveWorkflow && (
             <div className="pt-1">
-              <Button
+              <button
+                type="button"
                 onClick={onClose}
-                className="w-full h-11 rounded-xl text-sm font-semibold border-sushi-border text-sushi-text hover:bg-zinc-800"
+                className="w-full h-11 rounded-xl text-sm font-semibold border border-sushi-border bg-sushi-surface/80 text-sushi-text hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Đóng
-              </Button>
+              </button>
             </div>
           )}
         </div>
@@ -344,98 +349,113 @@ export function OrderDetailModal({
         {hasActiveWorkflow && (
           <div className="sticky bottom-0 z-20 bg-sushi-card/95 backdrop-blur-md px-4 py-3 border-t border-sushi-border/80 shrink-0 space-y-2">
             {order.status === 'PENDING' && (
-              <div className="flex items-center gap-2">
-                <Button
-                  danger
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
                   onClick={() => setShowCancelInput(!showCancelInput)}
-                  className="h-12 px-4 rounded-xl text-xs font-semibold shrink-0"
+                  className="h-11 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
                 >
-                  Hủy đơn
-                </Button>
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<CheckCircle size={20} />}
+                  <XCircle size={16} weight="bold" />
+                  <span>Hủy đơn</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
-                  loading={updateStatusMutation.isPending}
-                  disabled={isTransferUnpaid}
-                  className={`flex-1 h-12 rounded-xl font-bold border-none shadow-md text-white cursor-pointer ${
+                  disabled={isTransferUnpaid || updateStatusMutation.isPending}
+                  className={`flex-1 h-11 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
                     isTransferUnpaid
-                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
-                      : 'bg-blue-600 hover:bg-blue-500'
+                      ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                      : 'bg-linear-to-r from-[#e53935] to-[#f43f5e] hover:brightness-110 text-white shadow-lg shadow-red-950/40 cursor-pointer disabled:opacity-60'
                   }`}
                   title={isTransferUnpaid ? 'Cần xác nhận thanh toán trước khi duyệt đơn' : undefined}
                 >
-                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}
-                </Button>
+                  {updateStatusMutation.isPending ? (
+                    <CircleNotch size={18} className="animate-spin" />
+                  ) : (
+                    <CheckCircle size={18} weight="bold" />
+                  )}
+                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}</span>
+                </button>
               </div>
             )}
 
             {order.status === 'CONFIRMED' && (
-              <div className="flex items-center gap-2">
-                <Button
-                  danger
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
                   onClick={() => setShowCancelInput(!showCancelInput)}
-                  className="h-12 px-4 rounded-xl text-xs font-semibold shrink-0"
+                  className="h-11 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
                 >
-                  Hủy đơn
-                </Button>
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<CookingPot size={20} />}
+                  <XCircle size={16} weight="bold" />
+                  <span>Hủy đơn</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
-                  loading={updateStatusMutation.isPending}
-                  disabled={isTransferUnpaid}
-                  className={`flex-1 h-12 rounded-xl font-bold border-none shadow-md text-white cursor-pointer ${
+                  disabled={isTransferUnpaid || updateStatusMutation.isPending}
+                  className={`flex-1 h-11 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
                     isTransferUnpaid
-                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
-                      : 'bg-amber-600 hover:bg-amber-500'
+                      ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-950/40 cursor-pointer disabled:opacity-60'
                   }`}
                   title={isTransferUnpaid ? 'Cần xác nhận thanh toán trước khi chế biến' : undefined}
                 >
-                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}
-                </Button>
+                  {updateStatusMutation.isPending ? (
+                    <CircleNotch size={18} className="animate-spin" />
+                  ) : (
+                    <CookingPot size={18} weight="bold" />
+                  )}
+                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}</span>
+                </button>
               </div>
             )}
 
             {order.status === 'PREPARING' && (
-              <Button
-                type="primary"
-                size="large"
-                icon={<Package size={20} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('READY_FOR_PICKUP')}
-                loading={updateStatusMutation.isPending}
-                className="w-full h-12 rounded-xl font-bold bg-purple-600 hover:bg-purple-500 border-none shadow-md text-white cursor-pointer"
+                disabled={updateStatusMutation.isPending}
+                className="w-full h-11 px-4 rounded-xl font-bold text-sm bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/40 inline-flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Sẵn sàng lấy món
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <Package size={18} weight="bold" />
+                )}
+                <span>Sẵn sàng lấy món</span>
+              </button>
             )}
 
             {order.status === 'READY_FOR_PICKUP' && (
-              <Button
-                type="primary"
-                size="large"
-                icon={<Truck size={20} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('DELIVERING')}
-                loading={updateStatusMutation.isPending}
-                className="w-full h-12 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-500 border-none shadow-md text-white cursor-pointer"
+                disabled={updateStatusMutation.isPending}
+                className="w-full h-11 px-4 rounded-xl font-bold text-sm bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-950/40 inline-flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Bắt đầu giao hàng (Shipper lấy)
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <Truck size={18} weight="bold" />
+                )}
+                <span>Bắt đầu giao hàng (Shipper lấy)</span>
+              </button>
             )}
 
             {order.status === 'DELIVERING' && (
-              <Button
-                type="primary"
-                size="large"
-                icon={<CheckCircle size={20} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('COMPLETED')}
-                loading={updateStatusMutation.isPending}
-                className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 border-none shadow-md text-white cursor-pointer"
+                disabled={updateStatusMutation.isPending}
+                className="w-full h-11 px-4 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 inline-flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Xác nhận đã giao thành công
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={18} weight="bold" />
+                )}
+                <span>Xác nhận đã giao thành công</span>
+              </button>
             )}
           </div>
         )}
@@ -533,102 +553,123 @@ export function OrderDetailModal({
       }
       footer={
         <div className="flex items-center justify-between pt-2">
-          <Button
+          <button
+            type="button"
             onClick={onClose}
-            className="border-sushi-border text-sushi-text hover:bg-zinc-800"
+            className="h-10 px-4 rounded-xl border border-sushi-border bg-sushi-surface/80 text-sushi-text hover:bg-zinc-800 text-sm font-semibold transition-colors cursor-pointer"
           >
             Đóng
-          </Button>
+          </button>
 
-          <Space size="middle">
+          <Space size="small">
             {order.status === 'PENDING' && (
               <>
-                <Button
-                  danger
+                <button
+                  type="button"
                   onClick={() => setShowCancelInput(!showCancelInput)}
-                  className="font-semibold"
+                  className="h-10 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  Hủy đơn
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<CheckCircle size={18} />}
+                  <XCircle size={16} weight="bold" />
+                  <span>Hủy đơn</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
-                  loading={updateStatusMutation.isPending}
-                  disabled={isTransferUnpaid}
-                  className={`font-semibold h-9 px-4 border-none shadow-sm ${
+                  disabled={isTransferUnpaid || updateStatusMutation.isPending}
+                  className={`h-10 px-5 rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all ${
                     isTransferUnpaid
-                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
-                      : 'bg-blue-600 hover:bg-blue-500'
+                      ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                      : 'bg-linear-to-r from-[#e53935] to-[#f43f5e] hover:brightness-110 text-white shadow-lg shadow-red-950/40 cursor-pointer disabled:opacity-60'
                   }`}
-                  title={isTransferUnpaid ? 'Cần bấm "Đổi sang Đã TT" trước khi duyệt đơn' : undefined}
+                  title={isTransferUnpaid ? 'Cần bấm "Đánh dấu Đã TT" trước khi duyệt đơn' : undefined}
                 >
-                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}
-                </Button>
+                  {updateStatusMutation.isPending ? (
+                    <CircleNotch size={18} className="animate-spin" />
+                  ) : (
+                    <CheckCircle size={18} weight="bold" />
+                  )}
+                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}</span>
+                </button>
               </>
             )}
 
             {order.status === 'CONFIRMED' && (
               <>
-                <Button
-                  danger
+                <button
+                  type="button"
                   onClick={() => setShowCancelInput(!showCancelInput)}
-                  className="font-semibold"
+                  className="h-10 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  Hủy đơn
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<CookingPot size={18} />}
+                  <XCircle size={16} weight="bold" />
+                  <span>Hủy đơn</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
-                  loading={updateStatusMutation.isPending}
-                  disabled={isTransferUnpaid}
-                  className={`font-semibold h-9 px-4 border-none shadow-sm ${
+                  disabled={isTransferUnpaid || updateStatusMutation.isPending}
+                  className={`h-10 px-5 rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all ${
                     isTransferUnpaid
-                      ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60'
-                      : 'bg-amber-600 hover:bg-amber-500'
+                      ? 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-950/40 cursor-pointer disabled:opacity-60'
                   }`}
-                  title={isTransferUnpaid ? 'Cần bấm "Đổi sang Đã TT" trước khi chế biến' : undefined}
+                  title={isTransferUnpaid ? 'Cần bấm "Đánh dấu Đã TT" trước khi chế biến' : undefined}
                 >
-                  {isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}
-                </Button>
+                  {updateStatusMutation.isPending ? (
+                    <CircleNotch size={18} className="animate-spin" />
+                  ) : (
+                    <CookingPot size={18} weight="bold" />
+                  )}
+                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}</span>
+                </button>
               </>
             )}
 
             {order.status === 'PREPARING' && (
-              <Button
-                type="primary"
-                icon={<Package size={18} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('READY_FOR_PICKUP')}
-                loading={updateStatusMutation.isPending}
-                className="bg-purple-600 hover:bg-purple-500 font-semibold h-9 px-4 border-none shadow-sm"
+                disabled={updateStatusMutation.isPending}
+                className="h-10 px-5 rounded-xl font-bold text-sm bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/40 inline-flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Sẵn sàng lấy món
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <Package size={18} weight="bold" />
+                )}
+                <span>Sẵn sàng lấy món</span>
+              </button>
             )}
 
             {order.status === 'READY_FOR_PICKUP' && (
-              <Button
-                type="primary"
-                icon={<Truck size={18} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('DELIVERING')}
-                loading={updateStatusMutation.isPending}
-                className="bg-cyan-600 hover:bg-cyan-500 font-semibold h-9 px-4 border-none shadow-sm"
+                disabled={updateStatusMutation.isPending}
+                className="h-10 px-5 rounded-xl font-bold text-sm bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-950/40 inline-flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Bắt đầu giao hàng
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <Truck size={18} weight="bold" />
+                )}
+                <span>Bắt đầu giao hàng</span>
+              </button>
             )}
 
             {order.status === 'DELIVERING' && (
-              <Button
-                type="primary"
-                icon={<CheckCircle size={18} />}
+              <button
+                type="button"
                 onClick={() => handleUpdateStatus('COMPLETED')}
-                loading={updateStatusMutation.isPending}
-                className="bg-emerald-600 hover:bg-emerald-500 font-semibold h-9 px-4 border-none shadow-sm"
+                disabled={updateStatusMutation.isPending}
+                className="h-10 px-5 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-950/40 inline-flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
-                Xác nhận đã giao
-              </Button>
+                {updateStatusMutation.isPending ? (
+                  <CircleNotch size={18} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={18} weight="bold" />
+                )}
+                <span>Xác nhận đã giao</span>
+              </button>
             )}
           </Space>
         </div>
@@ -685,14 +726,17 @@ export function OrderDetailModal({
                 <span className="text-xs text-sushi-text-muted">({order.paymentMethod})</span>
               </div>
             </div>
-            <Button
-              size="small"
+            <button
+              type="button"
               onClick={handleTogglePayment}
-              loading={updatePaymentMutation.isPending}
-              className="text-xs rounded-lg border-sushi-border/80 text-sushi-gold hover:border-sushi-gold hover:text-sushi-gold shrink-0 mt-0.5"
+              disabled={updatePaymentMutation.isPending}
+              className="h-8 px-3 rounded-lg border border-sushi-gold/35 bg-sushi-gold/10 hover:bg-sushi-gold/20 text-sushi-gold font-semibold text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 mt-0.5 disabled:opacity-50"
             >
-              {order.paymentStatus === 'PAID' ? 'Hủy đánh dấu Đã TT' : 'Đánh dấu Đã TT'}
-            </Button>
+              {updatePaymentMutation.isPending && (
+                <CircleNotch size={13} className="animate-spin" />
+              )}
+              <span>{order.paymentStatus === 'PAID' ? 'Hủy đánh dấu Đã TT' : 'Đánh dấu Đã TT'}</span>
+            </button>
           </div>
         </div>
 

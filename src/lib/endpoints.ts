@@ -19,11 +19,32 @@ export const API_ENDPOINTS = {
   },
   ORDERS: {
     ROOT: '/api/orders',
+    STAFF: '/api/orders/staff',
     BY_ID: (id: string) => `/api/orders/${id}`,
+    STATUS: (id: string) => `/api/orders/${id}/status`,
+    PAYMENT: (id: string) => `/api/orders/${id}/payment`,
     PAYMENT_CONFIG: '/api/orders/payment-config',
+    STORE_CONFIG: '/api/orders/store-config',
   },
   INVENTORY: {
-    BALANCES: '/api/inventory/balances',
-    MOVEMENTS: '/api/inventory/movements',
+    INGREDIENTS: '/api/inventory/ingredients',
+    ALERTS: '/api/inventory/alerts',
+    TRANSACTIONS: '/api/inventory/transactions',
+    WAREHOUSES: '/api/inventory/warehouses',
+    WAREHOUSE_STOCKS: (warehouseId: string) =>
+      `/api/inventory/warehouses/${warehouseId}/stocks`,
+    ADJUST_WAREHOUSE_STOCK: (warehouseId: string, ingredientId: string) =>
+      `/api/inventory/warehouses/${warehouseId}/stocks/${ingredientId}`,
+    RECIPES: '/api/inventory/recipes',
+    RECIPE_BY_ID: (id: string) => `/api/inventory/recipes/${id}`,
+    RECIPE_BY_PRODUCT: (productId: string) =>
+      `/api/inventory/recipes/product/${productId}`,
+  },
+  SHIPPING: {
+    BRANCHES: '/api/shipping/branches',
+    RULES: '/api/shipping/rules',
+    RULE_BY_ID: (id: string) => `/api/shipping/rules/${id}`,
+    LOCATIONS: '/api/shipping/locations',
+    CALCULATE: '/api/shipping/calculate',
   },
 } as const;

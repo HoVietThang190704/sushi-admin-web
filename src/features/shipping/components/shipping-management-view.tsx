@@ -4,6 +4,13 @@ import React, { useState } from 'react';
 import {
   Table,
   Button,
+  SushiButton,
+  SushiFloatingButton,
+  SushiPageHeader,
+  SushiMobileCardList,
+  SushiCardItem,
+  SushiCardActions,
+  SushiEmptyState,
   Modal,
   ResponsiveModalDrawer,
   Form,
@@ -17,11 +24,6 @@ import {
   Card,
   Row,
   Col,
-  Pagination,
-  Empty,
-  Spin,
-} from '@/components/ui';
-import {
   Truck,
   Plus,
   PencilSimple,
@@ -39,18 +41,18 @@ import {
 } from '../api/shipping.api';
 import { ShippingRule, UpsertShippingRuleInput } from '../types';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
+import { useTranslation } from '@/lib/i18n';
 
 export function ShippingManagementView() {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
   const { formatCurrency } = useFormatCurrency();
+  const { t } = useTranslation();
 
-  const [districtFilter, setDistrictFilter] = useState<string>('');
-  const [branchFilter, setBranchFilter] = useState<string>('');
+  const [districtFilter] = useState<string>('');
+  const [branchFilter] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ShippingRule | null>(null);
-  const [mobilePage, setMobilePage] = useState<number>(1);
-  const mobilePageSize = 10;
 
   const [form] = Form.useForm();
 
@@ -104,7 +106,7 @@ export function ShippingManagementView() {
     setEditingRule(null);
     form.resetFields();
     form.setFieldsValue({
-      fee: 20000,
+      fee: undefined,
       isDefault: true,
       isActive: true,
       branchId: branches[0]?.id,
@@ -143,7 +145,7 @@ export function ShippingManagementView() {
 
   const columns = [
     {
-      title: 'KHU VỰC / QUẬN THAM CHIẾU',
+      title: t('shippingPage.colDistrict'),
       dataIndex: 'district',
       key: 'district',
       render: (text: string) => (
@@ -151,7 +153,7 @@ export function ShippingManagementView() {
       ),
     },
     {
-      title: 'PHƯỜNG / XÃ (TP.HCM)',
+      title: t('shippingPage.colWard'),
       dataIndex: 'ward',
       key: 'ward',
       render: (text: string, record: ShippingRule) => (
@@ -159,14 +161,14 @@ export function ShippingManagementView() {
           <span className="font-medium text-sushi-text block">{text}</span>
           {record.isDefault && (
             <Tag color="gold" className="text-2xs font-semibold mt-0.5">
-              Chi nhánh mặc định
+              {t('shippingPage.defaultBranch')}
             </Tag>
           )}
         </div>
       ),
     },
     {
-      title: 'CHI NHÁNH PHỤC VỤ',
+      title: t('shippingPage.colBranch'),
       dataIndex: 'branch',
       key: 'branch',
       render: (_: unknown, record: ShippingRule) => (
@@ -181,7 +183,7 @@ export function ShippingManagementView() {
       ),
     },
     {
-      title: 'MỨC PHÍ SHIP',
+      title: t('shippingPage.colFee'),
       dataIndex: 'fee',
       key: 'fee',
       align: 'right' as const,
@@ -192,18 +194,18 @@ export function ShippingManagementView() {
       ),
     },
     {
-      title: 'TRẠNG THÁI',
+      title: t('shippingPage.colStatus'),
       dataIndex: 'isActive',
       key: 'isActive',
       align: 'center' as const,
       render: (isActive: boolean) => (
         <Tag color={isActive ? 'green' : 'default'}>
-          {isActive ? 'Đang phục vụ' : 'Tạm dừng'}
+          {isActive ? t('shippingPage.statusActive') : t('shippingPage.statusPaused')}
         </Tag>
       ),
     },
     {
-      title: 'THAO TÁC',
+      title: t('shippingPage.colActions'),
       key: 'actions',
       align: 'center' as const,
       render: (_: unknown, record: ShippingRule) => (
@@ -220,10 +222,10 @@ export function ShippingManagementView() {
             icon={<Trash size={16} />}
             onClick={() => {
               Modal.confirm({
-                title: 'Xóa cấu hình phí ship?',
-                content: `Bạn có chắc muốn xóa phí ship cho ${record.ward}, ${record.district}?`,
-                okText: 'Xác nhận xóa',
-                cancelText: 'Hủy',
+                title: t('shippingPage.deleteConfirmTitle'),
+                content: `${record.ward}, ${record.district}?`,
+                okText: t('shippingPage.deleteConfirmOk'),
+                cancelText: t('common.cancel'),
                 okType: 'danger',
                 onOk: () => deleteMutation.mutate(record.id),
               });
@@ -234,10 +236,16 @@ export function ShippingManagementView() {
     },
   ];
 
-  const paginatedRulesMobile = React.useMemo(() => {
-    const start = (mobilePage - 1) * mobilePageSize;
-    return rules.slice(start, start + mobilePageSize);
-  }, [rules, mobilePage]);
+  const handleDeleteRule = (rule: ShippingRule) => {
+    Modal.confirm({
+      title: t('shippingPage.deleteConfirmTitle'),
+      content: `${rule.ward}, ${rule.district}?`,
+      okText: t('shippingPage.deleteConfirmOk'),
+      cancelText: t('common.cancel'),
+      okType: 'danger',
+      onOk: () => deleteMutation.mutate(rule.id),
+    });
+  };
 
   const handleWardSelect = (selectedWardName: string) => {
     const loc = locations.find((l) => l.ward === selectedWardName);
@@ -279,152 +287,119 @@ export function ShippingManagementView() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-sushi-border/70">
-        <div>
-          <h1 className="text-2xl font-bold font-sans text-sushi-text tracking-normal flex items-center gap-2.5">
-            <Truck size={28} className="text-sushi-gold" />
-            <span>Cấu Hình Phí Giao Hàng (TP.HCM)</span>
-          </h1>
-          <p className="text-xs text-sushi-text-muted mt-1">
-            Thiết lập bảng giá ship và chỉ định chi nhánh mặc định theo từng Xã/Phường
-          </p>
-        </div>
+      {/* Header chuẩn dùng chung SushiPageHeader */}
+      <SushiPageHeader
+        title={t('shippingPage.title')}
+        subtitle={t('shippingPage.subtitle')}
+        extra={
+          <div className="hidden md:block">
+            <SushiButton
+              type="primary"
+              icon={<Plus size={16} weight="bold" />}
+              onClick={handleOpenCreate}
+            >
+              {t('shippingPage.addRuleButton')}
+            </SushiButton>
+          </div>
+        }
+      />
 
-        <Button
-          type="primary"
-          icon={<Plus size={16} />}
-          onClick={handleOpenCreate}
-          className="bg-sushi-gold hover:bg-amber-500 text-zinc-950 font-bold h-10 rounded-xl"
-        >
-          Thêm Mức Phí Phường/Xã
-        </Button>
-      </div>
-
-      {/* Bảng dữ liệu (Desktop & Tablet ngang) */}
-      <Card className="hidden sm:block rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
+      {/* Bảng dữ liệu (Desktop >= md) */}
+      <Card className="hidden md:block rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
         <Table
           dataSource={rules}
           columns={columns}
           rowKey="id"
           loading={loadingRules || loadingBranches}
           pagination={{ pageSize: 15 }}
+          locale={{
+            emptyText: (
+              <SushiEmptyState
+                icon={<Truck size={24} />}
+                title={t('shippingPage.emptyTitle')}
+                description={t('shippingPage.emptyDescDesktop')}
+              />
+            ),
+          }}
           className="[&_.ant-table]:bg-transparent [&_.ant-table-thead_th]:bg-zinc-900/80 [&_.ant-table-thead_th]:text-sushi-text-muted [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:font-semibold"
         />
       </Card>
 
-      {/* Danh sách Dạng Card (Tối ưu riêng cho Mobile) */}
-      <div className="block sm:hidden space-y-3">
-        {loadingRules || loadingBranches ? (
-          <div className="py-12 flex justify-center items-center">
-            <Spin size="large" />
-          </div>
-        ) : rules.length === 0 ? (
-          <Card className="rounded-2xl border-sushi-border/80 bg-sushi-card/90 p-6 text-center">
-            <Empty description="Chưa có cấu hình phí giao hàng nào" />
-          </Card>
-        ) : (
-          <>
-            <div className="space-y-3">
-              {paginatedRulesMobile.map((rule) => (
-                <div
-                  key={rule.id}
-                  className="rounded-2xl border border-sushi-border/80 bg-sushi-card/95 p-4 shadow-sm space-y-3 transition-colors hover:border-sushi-gold/50"
-                >
-                  {/* Phường/Xã + Giá ship */}
-                  <div className="flex items-start justify-between gap-2 border-b border-sushi-border/60 pb-2.5">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-sm text-sushi-text">
-                          {rule.ward}
-                        </span>
-                        {rule.isDefault && (
-                          <Tag color="gold" className="text-2xs font-semibold m-0">
-                            Mặc định
-                          </Tag>
-                        )}
-                      </div>
-                      <span className="text-2xs text-sushi-text-muted flex items-center gap-1">
-                        <MapPin size={12} className="text-sushi-gold shrink-0" />
-                        <span>{rule.district || 'TP.HCM'}</span>
-                      </span>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="font-mono font-extrabold text-base text-sushi-gold block">
-                        {formatCurrency(Number(rule.fee))}
-                      </span>
-                      <Tag
-                        color={rule.isActive ? 'green' : 'default'}
-                        className="text-2xs m-0 mt-0.5"
-                      >
-                        {rule.isActive ? 'Đang phục vụ' : 'Tạm dừng'}
-                      </Tag>
-                    </div>
-                  </div>
-
-                  {/* Chi nhánh phục vụ */}
-                  <div className="rounded-xl bg-zinc-900/60 p-2.5 flex items-start gap-2 border border-sushi-border/40">
-                    <Storefront size={15} className="text-sushi-gold mt-0.5 shrink-0" />
-                    <div className="min-w-0 text-xs">
-                      <span className="font-semibold text-sushi-text block truncate">
-                        {rule.branch?.name || rule.branchId}
-                      </span>
-                      <span className="text-2xs text-sushi-text-muted block truncate">
-                        {rule.branch?.address || 'Chưa cập nhật địa chỉ'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Hành động */}
-                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-sushi-border/40">
-                    <Button
-                      size="small"
-                      icon={<PencilSimple size={14} />}
-                      onClick={() => handleOpenEdit(rule)}
-                      className="rounded-lg text-xs font-medium border-sushi-border/70 text-sushi-gold hover:text-amber-400 h-8"
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      size="small"
-                      danger
-                      icon={<Trash size={14} />}
-                      onClick={() => {
-                        Modal.confirm({
-                          title: 'Xóa cấu hình phí ship?',
-                          content: `Bạn có chắc muốn xóa phí ship cho ${rule.ward}, ${rule.district}?`,
-                          okText: 'Xác nhận xóa',
-                          cancelText: 'Hủy',
-                          okType: 'danger',
-                          onOk: () => deleteMutation.mutate(rule.id),
-                        });
-                      }}
-                      className="rounded-lg text-xs font-medium h-8"
-                    >
-                      Xóa
-                    </Button>
-                  </div>
+      {/* Danh sách Dạng Card chuẩn dùng chung SushiMobileCardList (< md) */}
+      <SushiMobileCardList
+        items={rules}
+        pageSize={10}
+        loading={loadingRules || loadingBranches}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<Truck size={24} />}
+            title={t('shippingPage.emptyTitle')}
+            description={t('shippingPage.emptyDescMobile')}
+          />
+        }
+        renderItem={(rule) => (
+          <SushiCardItem className="space-y-3 hover:border-sushi-gold/50 transition-colors">
+            {/* Phường/Xã + Giá ship */}
+            <div className="flex items-start justify-between gap-2 border-b border-sushi-border/60 pb-2.5">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-sm text-sushi-text">
+                    {rule.ward}
+                  </span>
+                  {rule.isDefault && (
+                    <Tag color="gold" className="text-2xs font-semibold m-0">
+                      {t('shippingPage.defaultShort')}
+                    </Tag>
+                  )}
                 </div>
-              ))}
+                <span className="text-2xs text-sushi-text-muted flex items-center gap-1">
+                  <MapPin size={12} className="text-sushi-gold shrink-0" />
+                  <span>{rule.district || 'TP.HCM'}</span>
+                </span>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span className="font-mono font-extrabold text-base text-sushi-gold block">
+                  {formatCurrency(Number(rule.fee))}
+                </span>
+                <Tag
+                  color={rule.isActive ? 'green' : 'default'}
+                  className="text-2xs m-0 mt-0.5"
+                >
+                  {rule.isActive ? t('shippingPage.statusActive') : t('shippingPage.statusPaused')}
+                </Tag>
+              </div>
             </div>
 
-            {/* Phân trang Mobile */}
-            {rules.length > mobilePageSize && (
-              <div className="flex justify-center pt-2">
-                <Pagination
-                  current={mobilePage}
-                  pageSize={mobilePageSize}
-                  total={rules.length}
-                  onChange={(page) => setMobilePage(page)}
-                  size="small"
-                  showSizeChanger={false}
-                />
+            {/* Chi nhánh phục vụ & Nút thao tác chuẩn SushiCardActions */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="rounded-xl bg-zinc-900/60 p-2.5 flex items-start gap-2 border border-sushi-border/40 flex-1 min-w-0">
+                <Storefront size={15} className="text-sushi-gold mt-0.5 shrink-0" />
+                <div className="min-w-0 text-xs">
+                  <span className="font-semibold text-sushi-text block truncate">
+                    {rule.branch?.name || rule.branchId}
+                  </span>
+                  <span className="text-2xs text-sushi-text-muted block truncate">
+                    {rule.branch?.address || t('shippingPage.noAddress')}
+                  </span>
+                </div>
               </div>
-            )}
-          </>
+
+              <SushiCardActions
+                onEdit={() => handleOpenEdit(rule)}
+                onDelete={() => handleDeleteRule(rule)}
+              />
+            </div>
+          </SushiCardItem>
         )}
-      </div>
+      />
+
+      {/* Nút Floating Action Button trên Mobile */}
+      <SushiFloatingButton
+        onClick={handleOpenCreate}
+        ariaLabel={t('shippingPage.addRuleButton')}
+      />
 
       {/* Modal / Bottom Sheet Thêm / Sửa */}
       <ResponsiveModalDrawer
@@ -434,8 +409,8 @@ export function ShippingManagementView() {
             <Truck size={20} className="text-sushi-gold" />
             <span>
               {editingRule
-                ? 'Chỉnh Sửa Phí Giao Hàng'
-                : 'Thêm Cấu Hình Phí Giao Hàng Mới'}
+                ? t('shippingPage.modalEditTitle')
+                : t('shippingPage.modalCreateTitle')}
             </span>
           </div>
         }
@@ -446,7 +421,7 @@ export function ShippingManagementView() {
               onClick={() => setIsModalOpen(false)}
               className="w-full sm:w-auto h-10 sm:h-auto rounded-xl"
             >
-              Hủy
+              {t('common.cancel')}
             </Button>
             <Button
               type="primary"
@@ -454,7 +429,7 @@ export function ShippingManagementView() {
               loading={upsertMutation.isPending}
               className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
             >
-              Lưu cấu hình
+              {t('shippingPage.saveConfig')}
             </Button>
           </div>
         }
@@ -463,11 +438,11 @@ export function ShippingManagementView() {
         <Form form={form} layout="vertical" className="pt-1 space-y-1">
           <Form.Item
             name="branchId"
-            label={<span className="text-xs font-semibold text-sushi-text">Chi Nhánh Phục Vụ</span>}
-            rules={[{ required: true, message: 'Vui lòng chọn chi nhánh' }]}
+            label={<span className="text-xs font-semibold text-sushi-text">{t('shippingPage.formBranchLabel')}</span>}
+            rules={[{ required: true, message: t('shippingPage.formBranchPlaceholder') }]}
           >
             <Select
-              placeholder="Chọn chi nhánh"
+              placeholder={t('shippingPage.formBranchPlaceholder')}
               className="w-full"
               options={branches.map((b) => ({
                 label: `${b.name} (${b.code})`,
@@ -482,14 +457,14 @@ export function ShippingManagementView() {
                 name="ward"
                 label={
                   <span className="text-xs font-semibold text-sushi-text">
-                    Phường / Xã (Chọn chuẩn TP.HCM)
+                    {t('shippingPage.formWardLabel')}
                   </span>
                 }
-                rules={[{ required: true, message: 'Vui lòng chọn Phường/Xã' }]}
+                rules={[{ required: true, message: t('shippingPage.formWardPlaceholder') }]}
               >
                 <Select
                   showSearch
-                  placeholder="Gõ tên mới hoặc cũ (Bến Nghé, Đa Kao...)"
+                  placeholder={t('shippingPage.formWardPlaceholder')}
                   className="w-full"
                   options={wardSelectOptions}
                   onChange={handleWardSelect}
@@ -507,20 +482,20 @@ export function ShippingManagementView() {
                 name="district"
                 label={
                   <span className="text-xs font-semibold text-sushi-text">
-                    Khu Vực / Quận (tham chiếu)
+                    {t('shippingPage.formDistrictLabel')}
                   </span>
                 }
-                rules={[{ required: true, message: 'Vui lòng nhập/chọn khu vực' }]}
+                rules={[{ required: true, message: t('shippingPage.formDistrictPlaceholder') }]}
               >
-                <Input placeholder="Tự động điền theo phường/xã" className="w-full" />
+                <Input placeholder={t('shippingPage.formDistrictPlaceholder')} className="w-full" />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
             name="fee"
-            label={<span className="text-xs font-semibold text-sushi-text">Mức Phí Giao Hàng (VNĐ)</span>}
-            rules={[{ required: true, message: 'Nhập số tiền phí ship' }]}
+            label={<span className="text-xs font-semibold text-sushi-text">{t('shippingPage.formFeeLabel')}</span>}
+            rules={[{ required: true, message: t('shippingPage.formFeeLabel') }]}
           >
             <InputNumber
               min={0}
@@ -539,7 +514,7 @@ export function ShippingManagementView() {
             <Col span={12}>
               <Form.Item
                 name="isDefault"
-                label={<span className="text-xs font-semibold text-sushi-text">Chi nhánh mặc định</span>}
+                label={<span className="text-xs font-semibold text-sushi-text">{t('shippingPage.formDefaultLabel')}</span>}
                 valuePropName="checked"
               >
                 <Switch />
@@ -548,7 +523,7 @@ export function ShippingManagementView() {
             <Col span={12}>
               <Form.Item
                 name="isActive"
-                label={<span className="text-xs font-semibold text-sushi-text">Đang phục vụ</span>}
+                label={<span className="text-xs font-semibold text-sushi-text">{t('shippingPage.formActiveLabel')}</span>}
                 valuePropName="checked"
               >
                 <Switch defaultChecked />

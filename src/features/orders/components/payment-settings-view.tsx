@@ -6,20 +6,23 @@ import {
   Input,
   Switch,
   Button,
+  SushiButton,
   App,
-} from 'antd';
-import {
   QrCode,
+  Trash,
+} from '@/components/ui';
+import {
   Bank,
   Check,
   UploadSimple,
-  Trash,
   Spinner,
 } from '@phosphor-icons/react';
 import { usePaymentConfig, useUpdatePaymentConfig } from '../hooks/use-orders';
 import { catalogApi } from '@/features/catalog/api/catalog.api';
+import { useTranslation } from '@/lib/i18n';
 
 export function PaymentSettingsView() {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +40,7 @@ export function PaymentSettingsView() {
         bankName: config.bankName || '',
         accountNumber: config.accountNumber || '',
         accountHolder: config.accountHolder || '',
-        transferSyntax: config.transferSyntax || 'HANBI',
+        transferSyntax: config.transferSyntax || '',
         note: config.note || '',
         isActive: config.isActive ?? true,
       });
@@ -114,7 +117,7 @@ export function PaymentSettingsView() {
                 <div className="flex items-center gap-2">
                   <QrCode size={18} className="text-sushi-gold" />
                   <span className="font-semibold text-sm text-sushi-text">
-                    Ảnh Mã QR Chuyển Khoản
+                    {t('paymentSettingsPage.qrSectionTitle')}
                   </span>
                 </div>
                 {qrPreviewUrl && (
@@ -124,7 +127,7 @@ export function PaymentSettingsView() {
                     className="text-2xs text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer font-medium"
                   >
                     <Trash size={13} />
-                    <span>Gỡ ảnh</span>
+                    <span>{t('paymentSettingsPage.removeQrBtn')}</span>
                   </button>
                 )}
               </div>
@@ -153,7 +156,7 @@ export function PaymentSettingsView() {
                     className="w-full h-10 rounded-xl border-sushi-border text-sushi-text hover:text-white flex items-center justify-center gap-1.5 text-xs font-medium"
                   >
                     <UploadSimple size={16} />
-                    <span>Đổi ảnh QR khác</span>
+                    <span>{t('paymentSettingsPage.changeQrBtn')}</span>
                   </Button>
                 </div>
               ) : (
@@ -164,7 +167,7 @@ export function PaymentSettingsView() {
                   {uploading ? (
                     <div className="py-6 flex flex-col items-center justify-center gap-2 text-sushi-gold">
                       <Spinner size={24} className="animate-spin" />
-                      <span className="text-xs">Đang tải ảnh lên máy chủ...</span>
+                      <span className="text-xs">{t('paymentSettingsPage.uploadingQr')}</span>
                     </div>
                   ) : (
                     <div className="space-y-2 py-3 sm:py-4">
@@ -172,10 +175,10 @@ export function PaymentSettingsView() {
                         <UploadSimple size={24} />
                       </div>
                       <p className="text-xs font-semibold text-sushi-text">
-                        Bấm để tải lên ảnh mã QR của quán
+                        {t('paymentSettingsPage.uploadPrompt')}
                       </p>
                       <p className="text-2xs text-sushi-text-dim">
-                        Hỗ trợ PNG, JPG, WebP (Tối đa 5MB)
+                        {t('paymentSettingsPage.uploadSubPrompt')}
                       </p>
                     </div>
                   )}
@@ -183,7 +186,7 @@ export function PaymentSettingsView() {
               )}
 
               <p className="text-2xs text-sushi-text-dim leading-relaxed">
-                💡 <em>Mẹo:</em> Mở app ngân hàng, chụp màn hình mã QR nhận tiền và tải ảnh lên đây.
+                💡 {t('paymentSettingsPage.qrTip')}
               </p>
             </div>
           </div>
@@ -195,15 +198,15 @@ export function PaymentSettingsView() {
                 <div className="flex items-center gap-2 min-w-0">
                   <Bank size={18} className="text-sushi-gold shrink-0" />
                   <span className="font-semibold text-sm text-sushi-text truncate">
-                    Thông Tin Tài Khoản Ngân Hàng
+                    {t('paymentSettingsPage.bankSectionTitle')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-2xs text-sushi-text-muted hidden sm:inline">Nhận chuyển khoản:</span>
+                  <span className="text-2xs text-sushi-text-muted hidden sm:inline">{t('paymentSettingsPage.enableTransferLabel')}</span>
                   <Form.Item name="isActive" valuePropName="checked" noStyle>
                     <Switch
-                      checkedChildren="Bật"
-                      unCheckedChildren="Tắt"
+                      checkedChildren={t('paymentSettingsPage.switchOn')}
+                      unCheckedChildren={t('paymentSettingsPage.switchOff')}
                       className="bg-zinc-700"
                     />
                   </Form.Item>
@@ -212,11 +215,11 @@ export function PaymentSettingsView() {
 
               <Form.Item
                 name="bankName"
-                label={<span className="text-xs font-medium text-sushi-text-muted">Tên ngân hàng</span>}
+                label={<span className="text-xs font-medium text-sushi-text-muted">{t('paymentSettingsPage.bankNameLabel')}</span>}
                 rules={[{ required: true, message: 'Vui lòng nhập tên ngân hàng' }]}
               >
                 <Input
-                  placeholder="Ví dụ: MB Bank, Vietcombank, Techcombank..."
+                  placeholder={t('paymentSettingsPage.bankNamePlaceholder')}
                   className="rounded-xl h-10"
                 />
               </Form.Item>
@@ -224,22 +227,22 @@ export function PaymentSettingsView() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Form.Item
                   name="accountNumber"
-                  label={<span className="text-xs font-medium text-sushi-text-muted">Số tài khoản</span>}
+                  label={<span className="text-xs font-medium text-sushi-text-muted">{t('paymentSettingsPage.accountNumberLabel')}</span>}
                   rules={[{ required: true, message: 'Vui lòng nhập số tài khoản' }]}
                 >
                   <Input
-                    placeholder="Ví dụ: 0988888888"
+                    placeholder={t('paymentSettingsPage.accountNumberPlaceholder')}
                     className="rounded-xl h-10 font-mono font-semibold"
                   />
                 </Form.Item>
 
                 <Form.Item
                   name="accountHolder"
-                  label={<span className="text-xs font-medium text-sushi-text-muted">Chủ tài khoản (viết hoa)</span>}
+                  label={<span className="text-xs font-medium text-sushi-text-muted">{t('paymentSettingsPage.accountHolderLabel')}</span>}
                   rules={[{ required: true, message: 'Vui lòng nhập tên chủ tài khoản' }]}
                 >
                   <Input
-                    placeholder="Ví dụ: NGUYEN VAN A"
+                    placeholder={t('paymentSettingsPage.accountHolderPlaceholder')}
                     className="rounded-xl h-10 uppercase"
                   />
                 </Form.Item>
@@ -250,27 +253,27 @@ export function PaymentSettingsView() {
                 label={
                   <div className="flex items-center justify-between w-full">
                     <span className="text-xs font-medium text-sushi-text-muted">
-                      Tiền tố nội dung chuyển khoản
+                      {t('paymentSettingsPage.transferSyntaxLabel')}
                     </span>
                     <span className="text-2xs text-sushi-gold">
-                      Khách chuyển: [Tiền tố] [Mã đơn]
+                      {t('paymentSettingsPage.transferSyntaxHint')}
                     </span>
                   </div>
                 }
                 rules={[{ required: true, message: 'Nhập tiền tố cú pháp' }]}
               >
                 <Input
-                  placeholder="Ví dụ: HANBI, SUSHI..."
+                  placeholder={t('paymentSettingsPage.transferSyntaxPlaceholder')}
                   className="rounded-xl h-10 font-mono uppercase"
                 />
               </Form.Item>
 
               <Form.Item
                 name="note"
-                label={<span className="text-xs font-medium text-sushi-text-muted">Lời nhắn / Lưu ý cho khách</span>}
+                label={<span className="text-xs font-medium text-sushi-text-muted">{t('paymentSettingsPage.noteLabel')}</span>}
               >
                 <Input.TextArea
-                  placeholder="Ví dụ: Vui lòng ghi chính xác nội dung chuyển khoản để hệ thống xác nhận nhanh nhất."
+                  placeholder={t('paymentSettingsPage.notePlaceholder')}
                   rows={2}
                   className="rounded-xl"
                 />
@@ -281,15 +284,15 @@ export function PaymentSettingsView() {
 
         {/* Nút lưu: Trên mobile rộng 100%, trên desktop rộng gọn */}
         <div className="pt-3">
-          <Button
+          <SushiButton
             type="primary"
             htmlType="submit"
             loading={updateMutation.isPending}
-            className="w-full sm:w-auto h-12 sm:h-11 px-8 rounded-xl bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-2 text-sm shadow-md cursor-pointer"
+            icon={<Check size={18} weight="bold" />}
+            className="w-full sm:w-auto h-12 sm:h-11 px-8 rounded-xl text-sm flex items-center justify-center gap-2"
           >
-            <Check size={18} weight="bold" />
-            <span>Lưu cấu hình thanh toán</span>
-          </Button>
+            {t('paymentSettingsPage.saveBtn')}
+          </SushiButton>
         </div>
       </Form>
     </div>

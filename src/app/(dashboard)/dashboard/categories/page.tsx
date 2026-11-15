@@ -3,24 +3,33 @@
 import { useState, useMemo } from 'react';
 import {
   SushiButton,
+  SushiFloatingButton,
   Plus,
   SushiPageHeader,
   Input,
   MagnifyingGlass,
+  App,
 } from '@/components/ui';
 import {
+  Category,
   CategoryTable,
   CreateCategoryModal,
   useCategories,
   useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
 export default function CategoriesPage() {
   const { t } = useTranslation();
+  const { modal } = App.useApp();
   const { data: categories = [], isLoading } = useCategories();
   const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState('');
 
   // Lọc danh mục theo từ khóa tìm kiếm
@@ -30,19 +39,45 @@ export default function CategoriesPage() {
     return categories.filter((c) => c.name.toLowerCase().includes(lower));
   }, [categories, search]);
 
+  const handleOpenCreate = () => {
+    setEditingCategory(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (category: Category) => {
+    setEditingCategory(category);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (category: Category) => {
+    modal.confirm({
+      title: `${t('dashboard.deleteCategoryConfirmTitle')} (${category.name})`,
+      content: t('dashboard.deleteCategoryConfirmDesc'),
+      okText: t('common.delete'),
+      okType: 'danger',
+      cancelText: t('common.cancel'),
+      centered: true,
+      onOk: async () => {
+        await deleteMutation.mutateAsync(category.id);
+      },
+    });
+  };
+
   return (
     <div className="space-y-5">
       <SushiPageHeader
         title={t('dashboard.categoriesTitle')}
         subtitle={t('dashboard.categoriesSubtitle')}
         extra={
-          <SushiButton
-            type="primary"
-            icon={<Plus size={16} weight="bold" />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            {t('dashboard.addCategory')}
-          </SushiButton>
+          <div className="hidden md:block">
+            <SushiButton
+              type="primary"
+              icon={<Plus size={16} weight="bold" />}
+              onClick={handleOpenCreate}
+            >
+              {t('dashboard.addCategory')}
+            </SushiButton>
+          </div>
         }
       />
 
@@ -70,14 +105,30 @@ export default function CategoriesPage() {
       <CategoryTable
         categories={filteredCategories}
         loading={isLoading}
+        onEdit={handleOpenEdit}
+        onDelete={handleDelete}
       />
 
-      {/* Modal Tạo Danh Mục Mới */}
+      {/* Nút Floating Action Button trên Mobile */}
+      <SushiFloatingButton
+        onClick={handleOpenCreate}
+        ariaLabel={t('dashboard.addCategory')}
+      />
+
+      {/* Modal Tạo / Chỉnh Sửa Danh Mục */}
       <CreateCategoryModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        initialData={editingCategory}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCategory(null);
+        }}
         onSubmit={async (dto) => {
-          await createMutation.mutateAsync(dto);
+          if (editingCategory) {
+            await updateMutation.mutateAsync({ id: editingCategory.id, dto });
+          } else {
+            await createMutation.mutateAsync(dto);
+          }
         }}
       />
     </div>

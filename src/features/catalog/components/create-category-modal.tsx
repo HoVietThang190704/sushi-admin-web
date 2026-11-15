@@ -11,18 +11,33 @@ interface CreateCategoryModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (dto: CreateCategoryInput) => Promise<Category | void>;
+  initialData?: Category | null;
 }
 
 export function CreateCategoryModal({
   open,
   onClose,
   onSubmit,
+  initialData,
 }: CreateCategoryModalProps) {
   const { t, locale } = useTranslation();
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const isEditing = Boolean(initialData);
 
   const schema = useMemo(() => createCategorySchemaFactory(t), [t]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (initialData) {
+      form.setFieldsValue({
+        name: initialData.name,
+        parentId: initialData.parentId || undefined,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [open, initialData, form]);
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +70,7 @@ export function CreateCategoryModal({
 
   return (
     <ResponsiveModalDrawer
-      title={t('dashboard.modalCreateTitle')}
+      title={isEditing ? t('dashboard.modalEditCategoryTitle') : t('dashboard.modalCreateTitle')}
       open={open}
       onClose={onClose}
       destroyOnHidden
@@ -81,7 +96,7 @@ export function CreateCategoryModal({
               loading={submitting}
               className="w-full sm:w-auto h-10 sm:h-auto rounded-xl font-semibold"
             >
-              {t('common.create')}
+              {isEditing ? t('dashboard.saveChanges') : t('common.create')}
             </Button>
           </div>
         </Form.Item>

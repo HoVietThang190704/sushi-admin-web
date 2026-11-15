@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   Button,
   Space,
   Tooltip,
   App,
-  Pagination,
   ResponsiveModalDrawer,
   SushiMobileCardList,
   SushiCardItem,
@@ -31,6 +30,7 @@ import { OrderPaymentBadge } from './order-payment-badge';
 import { OrderDetailModal } from './order-detail-modal';
 import { useUpdateOrderStatus, useUpdatePaymentStatus } from '../hooks/use-orders';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
+import { useTranslation } from '@/lib/i18n';
 
 interface OrderTableProps {
   orders: Order[];
@@ -38,13 +38,12 @@ interface OrderTableProps {
 }
 
 export function OrderTable({ orders, isLoading }: OrderTableProps) {
+  const { t } = useTranslation();
   const { message } = App.useApp();
   const { formatCurrency } = useFormatCurrency();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [paymentConfirmOrder, setPaymentConfirmOrder] = useState<Order | null>(null);
   const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
-  const [mobilePage, setMobilePage] = useState(1);
-  const mobilePageSize = 10;
 
   const updateStatusMutation = useUpdateOrderStatus();
   const updatePaymentMutation = useUpdatePaymentStatus();
@@ -74,15 +73,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
     }
   };
 
-  // Đảm bảo trang hiển thị hợp lệ khi danh sách thay đổi mà không cần effect
-  const totalPages = Math.max(1, Math.ceil(orders.length / mobilePageSize));
-  const validMobilePage = mobilePage > totalPages ? 1 : mobilePage;
-
-  const paginatedMobileOrders = useMemo(() => {
-    const start = (validMobilePage - 1) * mobilePageSize;
-    return orders.slice(start, start + mobilePageSize);
-  }, [orders, validMobilePage]);
-
   const handleQuickStatusChange = async (
     order: Order,
     toStatus: OrderStatus,
@@ -104,7 +94,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
 
   const columns = [
     {
-      title: 'Mã đơn',
+      title: t('ordersPage.colOrderCode'),
       dataIndex: 'code',
       key: 'code',
       render: (code: string, record: Order) => (
@@ -117,18 +107,18 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           </span>
           {record.source === 'STAFF' ? (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-3xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30">
-              Nhân viên
+              {t('ordersPage.sourceStaff')}
             </span>
           ) : (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-3xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              Website
+              {t('ordersPage.sourceWebsite')}
             </span>
           )}
         </div>
       ),
     },
     {
-      title: 'Khách hàng',
+      title: t('ordersPage.colCustomer'),
       key: 'customer',
       render: (_: unknown, record: Order) => (
         <div>
@@ -142,7 +132,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       ),
     },
     {
-      title: 'Số món',
+      title: t('ordersPage.colItemsCount'),
       key: 'itemsCount',
       align: 'center' as const,
       render: (_: unknown, record: Order) => (
@@ -150,12 +140,12 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
           {record.items?.reduce((sum, item) => sum + item.quantity, 0) ||
             record.items?.length ||
             0}{' '}
-          món
+          {t('common.itemsCount')}
         </span>
       ),
     },
     {
-      title: 'Tổng tiền',
+      title: t('ordersPage.colTotalAmount'),
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       align: 'right' as const,
@@ -166,13 +156,13 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       ),
     },
     {
-      title: 'Trạng thái đơn',
+      title: t('ordersPage.colStatus'),
       dataIndex: 'status',
       key: 'status',
       render: (status: OrderStatus) => <OrderStatusBadge status={status} />,
     },
     {
-      title: 'Thanh toán',
+      title: t('ordersPage.colPayment'),
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
       render: (paymentStatus: Order['paymentStatus'], record: Order) => {
@@ -197,7 +187,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       },
     },
     {
-      title: 'Thời gian',
+      title: t('ordersPage.colTime'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => (
@@ -212,7 +202,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
       ),
     },
     {
-      title: 'Thao tác',
+      title: t('ordersPage.colActions'),
       key: 'actions',
       align: 'center' as const,
       render: (_: unknown, record: Order) => (
@@ -229,10 +219,10 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   setPaymentConfirmOrder(record);
                 }}
               >
-                Xác nhận TT
+                {t('ordersPage.actionConfirmPayment')}
               </Button>
             ) : (
-              <Tooltip title="Xác nhận tiếp nhận đơn hàng">
+              <Tooltip title={t('ordersPage.actionAcceptOrder')}>
                 <Button
                   size="small"
                   type="primary"
@@ -241,7 +231,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   loading={updateStatusMutation.isPending}
                   onClick={(e) => handleQuickStatusChange(record, 'CONFIRMED', e)}
                 >
-                  Nhận đơn
+                  {t('ordersPage.actionAcceptOrder')}
                 </Button>
               </Tooltip>
             )
@@ -258,10 +248,10 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   setPaymentConfirmOrder(record);
                 }}
               >
-                Xác nhận TT
+                {t('ordersPage.actionConfirmPayment')}
               </Button>
             ) : (
-              <Tooltip title="Bắt đầu chế biến món (Khấu trừ kho)">
+              <Tooltip title={t('ordersPage.actionPrepareOrder')}>
                 <Button
                   size="small"
                   type="primary"
@@ -270,14 +260,14 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   loading={updateStatusMutation.isPending}
                   onClick={(e) => handleQuickStatusChange(record, 'PREPARING', e)}
                 >
-                  Làm món
+                  {t('ordersPage.actionPrepareOrder')}
                 </Button>
               </Tooltip>
             )
           )}
 
           {record.status === 'PREPARING' && (
-            <Tooltip title="Món đã xong, chờ khách lấy">
+            <Tooltip title={t('ordersPage.actionReadyOrder')}>
               <Button
                 size="small"
                 type="primary"
@@ -288,13 +278,13 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   handleQuickStatusChange(record, 'READY_FOR_PICKUP', e)
                 }
               >
-                Xong món
+                {t('ordersPage.actionReadyOrder')}
               </Button>
             </Tooltip>
           )}
 
           {record.status === 'READY_FOR_PICKUP' && (
-            <Tooltip title="Xác nhận hoàn tất giao đơn hàng">
+            <Tooltip title={t('ordersPage.actionDeliverOrder')}>
               <Button
                 size="small"
                 type="primary"
@@ -305,12 +295,12 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                   setCompletingOrder(record);
                 }}
               >
-                Giao khách
+                {t('ordersPage.actionDeliverOrder')}
               </Button>
             </Tooltip>
           )}
 
-          <Tooltip title="Xem chi tiết đơn">
+          <Tooltip title={t('ordersPage.actionDetail')}>
             <Button
               size="small"
               icon={<Eye size={16} />}
@@ -325,19 +315,19 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
   return (
     <>
       {/* 1. Giao diện Mobile Card List (< md) */}
-      <div className="block md:hidden">
-        <SushiMobileCardList
-          items={paginatedMobileOrders}
-          loading={isLoading}
-          emptyState={
-            <SushiEmptyState
-              isCard
-              icon={<Receipt size={26} />}
-              title="Không có đơn hàng nào"
-              description="Hiện chưa có đơn hàng nào phù hợp với bộ lọc đã chọn."
-            />
-          }
-          renderItem={(order) => {
+      <SushiMobileCardList
+        items={orders}
+        pageSize={10}
+        loading={isLoading}
+        emptyState={
+          <SushiEmptyState
+            isCard
+            icon={<Receipt size={26} />}
+            title={t('ordersPage.emptyOrders')}
+            description={t('ordersPage.emptyOrdersDesc')}
+          />
+        }
+        renderItem={(order) => {
             const itemsCount =
               order.items?.reduce((sum, item) => sum + item.quantity, 0) ||
               order.items?.length ||
@@ -355,11 +345,11 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                       </span>
                       {order.source === 'STAFF' ? (
                         <span className="px-1.5 py-0.5 rounded text-2xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30 shrink-0">
-                          Nhân viên
+                          {t('ordersPage.sourceStaff')}
                         </span>
                       ) : (
                         <span className="px-1.5 py-0.5 rounded text-2xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
-                          Website
+                          {t('ordersPage.sourceWebsite')}
                         </span>
                       )}
                     </div>
@@ -393,7 +383,9 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                       <div className="flex items-center gap-1 text-sushi-text-muted shrink-0 mr-0.5">
                         <Package size={15} className="shrink-0" />
-                        <span className="font-medium text-sushi-text-primary">{itemsCount} món</span>
+                        <span className="font-medium text-sushi-text-primary">
+                          {itemsCount} {t('common.itemsCount')}
+                        </span>
                       </div>
                       {order.paymentMethod?.toUpperCase() === 'VIETQR' ||
                       order.paymentMethod?.toUpperCase() === 'BANK_TRANSFER' ? (
@@ -439,7 +431,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                     }}
                     className="text-xs"
                   >
-                    Chi tiết
+                    {t('ordersPage.actionDetail')}
                   </Button>
 
                   <div
@@ -458,7 +450,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                             setPaymentConfirmOrder(order);
                           }}
                         >
-                          Xác nhận TT
+                          {t('ordersPage.actionConfirmPayment')}
                         </Button>
                       ) : (
                         <Button
@@ -471,7 +463,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                             handleQuickStatusChange(order, 'CONFIRMED', e)
                           }
                         >
-                          Nhận đơn
+                          {t('ordersPage.actionAcceptOrder')}
                         </Button>
                       )
                     )}
@@ -488,7 +480,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                             setPaymentConfirmOrder(order);
                           }}
                         >
-                          Xác nhận TT
+                          {t('ordersPage.actionConfirmPayment')}
                         </Button>
                       ) : (
                         <Button
@@ -501,7 +493,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                             handleQuickStatusChange(order, 'PREPARING', e)
                           }
                         >
-                          Làm món
+                          {t('ordersPage.actionPrepareOrder')}
                         </Button>
                       )
                     )}
@@ -517,7 +509,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                           handleQuickStatusChange(order, 'READY_FOR_PICKUP', e)
                         }
                       >
-                        Xong món
+                        {t('ordersPage.actionReadyOrder')}
                       </Button>
                     )}
 
@@ -532,7 +524,7 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
                           setCompletingOrder(order);
                         }}
                       >
-                        Giao khách
+                        {t('ordersPage.actionDeliverOrder')}
                       </Button>
                     )}
                   </div>
@@ -541,21 +533,6 @@ export function OrderTable({ orders, isLoading }: OrderTableProps) {
             );
           }}
         />
-
-        {/* Phân trang Mobile nếu số lượng đơn vượt quá kích thước 1 trang */}
-        {orders.length > mobilePageSize && (
-          <div className="flex justify-center pt-3 pb-1">
-            <Pagination
-              simple
-              current={validMobilePage}
-              total={orders.length}
-              pageSize={mobilePageSize}
-              onChange={setMobilePage}
-              size="small"
-            />
-          </div>
-        )}
-      </div>
 
       {/* 2. Giao diện Desktop Table (>= md) */}
       <div className="hidden md:block">

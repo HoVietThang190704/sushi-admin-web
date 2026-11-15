@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   Typography,
   SquaresFour,
+  Eye,
   PencilSimple,
   Trash,
   Copy,
@@ -16,6 +17,7 @@ import {
   SushiEmptyState,
 } from '@/components/ui';
 import { Category } from '../types';
+import { CategoryDetailModal } from './category-detail-modal';
 import { useTranslation } from '@/lib/i18n';
 
 const { Text } = Typography;
@@ -29,6 +31,7 @@ interface CategoryTableProps {
 
 export function CategoryTable({ categories, loading, onEdit, onDelete }: CategoryTableProps) {
   const { t } = useTranslation();
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   const handleCopyId = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -94,10 +97,24 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
     {
       title: t('common.actions'),
       key: 'actions',
-      width: 120,
+      width: 140,
       align: 'right' as const,
       render: (_: unknown, record: Category) => (
-        <div className="flex items-center justify-end space-x-1">
+        <div
+          className="flex items-center justify-end space-x-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Tooltip title={t('ordersPage.detailBtn')}>
+            <button
+              type="button"
+              onClick={() => setSelectedCategory(record)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-sushi-gold hover:bg-sushi-gold/10 transition-colors cursor-pointer border border-transparent hover:border-sushi-gold/30"
+              aria-label={t('ordersPage.detailBtn')}
+            >
+              <Eye size={16} />
+            </button>
+          </Tooltip>
+
           <Tooltip title={t('dashboard.edit')}>
             <button
               type="button"
@@ -129,6 +146,7 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
       {/* 1. Giao diện Mobile Card List (< md) */}
       <SushiMobileCardList
         items={categories}
+        pageSize={6}
         loading={loading}
         emptyState={
           <SushiEmptyState
@@ -141,46 +159,62 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
         renderItem={(category) => {
           const count = category._count?.products || 0;
           return (
-            <SushiCardItem>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-inner">
-                    <SquaresFour size={19} weight="fill" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-bold text-sushi-text truncate">
-                      {category.name}
-                    </h4>
-                    <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                      <span>ID: {category.id.slice(0, 8)}...</span>
-                      <button
-                        type="button"
-                        onClick={(e) => handleCopyId(category.id, e)}
-                        className="hover:text-sushi-text transition-colors p-0.5 cursor-pointer"
-                        aria-label="Copy UUID"
-                      >
-                        <Copy size={11} />
-                      </button>
+            <SushiCardItem className="cursor-pointer hover:border-sushi-gold/50 transition-all active:scale-[0.99]">
+              <div onClick={() => setSelectedCategory(category)}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-inner">
+                      <SquaresFour size={19} weight="fill" />
                     </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-sushi-text truncate">
+                        {category.name}
+                      </h4>
+                      <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                        <span>ID: {category.id.slice(0, 8)}...</span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleCopyId(category.id, e)}
+                          className="hover:text-sushi-text transition-colors p-0.5 cursor-pointer"
+                          aria-label="Copy UUID"
+                        >
+                          <Copy size={11} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex items-center gap-1 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory(category)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-sushi-gold hover:bg-sushi-gold/10 transition-colors border border-sushi-border/60 cursor-pointer"
+                      aria-label={t('ordersPage.detailBtn')}
+                      title={t('ordersPage.detailBtn')}
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <SushiCardActions
+                      onEdit={onEdit ? () => onEdit(category) : undefined}
+                      onDelete={onDelete ? () => onDelete(category) : undefined}
+                      editLabel={t('dashboard.edit')}
+                      deleteLabel={t('dashboard.delete')}
+                    />
                   </div>
                 </div>
 
-                <SushiCardActions
-                  onEdit={onEdit ? () => onEdit(category) : undefined}
-                  onDelete={onDelete ? () => onDelete(category) : undefined}
-                  editLabel={t('dashboard.edit')}
-                  deleteLabel={t('dashboard.delete')}
-                />
-              </div>
-
-              <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md font-semibold font-mono bg-blue-500/10 border border-blue-500/25 text-blue-400">
-                  {count} {t('common.itemsCount')}
-                </span>
-                <span className="inline-flex items-center space-x-1.5 text-emerald-400 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>{t('common.active')}</span>
-                </span>
+                <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-md font-semibold font-mono bg-blue-500/10 border border-blue-500/25 text-blue-400">
+                    {count} {t('common.itemsCount')}
+                  </span>
+                  <span className="inline-flex items-center space-x-1.5 text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>{t('common.active')}</span>
+                  </span>
+                </div>
               </div>
             </SushiCardItem>
           );
@@ -194,13 +228,18 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
           dataSource={categories}
           columns={columns}
           rowKey="id"
+          onRow={(record) => ({
+            onClick: () => setSelectedCategory(record),
+            className: 'cursor-pointer hover:bg-zinc-900/60 transition-colors',
+          })}
           pagination={{
-            pageSize: 8,
-            showSizeChanger: false,
+            pageSize: 6,
+            showSizeChanger: true,
+            pageSizeOptions: ['6', '10', '20'],
             className: 'py-3 px-4',
           }}
           expandable={{
-            childrenColumnName: 'none', // Tắt hoàn toàn icon (+) mở rộng cây thừa thãi
+            childrenColumnName: 'none',
           }}
           scroll={{ x: 'max-content' }}
           className="border border-sushi-border rounded-2xl overflow-hidden shadow-sm"
@@ -215,6 +254,14 @@ export function CategoryTable({ categories, loading, onEdit, onDelete }: Categor
           }}
         />
       </div>
+
+      {/* 3. Modal / Bottom Sheet Chi tiết Danh Mục */}
+      <CategoryDetailModal
+        category={selectedCategory}
+        open={Boolean(selectedCategory)}
+        onClose={() => setSelectedCategory(null)}
+        onEdit={onEdit}
+      />
     </>
   );
 }

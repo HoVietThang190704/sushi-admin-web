@@ -3,9 +3,12 @@
 import React, { useState, useMemo } from 'react';
 import {
   SushiPageHeader,
+  SushiButton,
+  SushiFloatingButton,
   Button,
   Input,
   Tabs,
+  Plus,
 } from '@/components/ui';
 import {
   ArrowsClockwise,
@@ -28,14 +31,18 @@ import {
   OrderDateFilterDrawer,
   CreateStaffOrderModal,
 } from '@/features/orders';
+import { useTranslation } from '@/lib/i18n';
 
 export default function OrdersPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filterDateRange, setFilterDateRange] = useState<{
     startDate?: string;
     endDate?: string;
   }>({});
+  const [page, setPage] = useState<number>(1);
+  const limit = 50;
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isCreateStaffOrderModalOpen, setIsCreateStaffOrderModalOpen] = useState(false);
 
@@ -49,16 +56,21 @@ export default function OrdersPage() {
       status: filterStatus,
       startDate: filterDateRange.startDate,
       endDate: filterDateRange.endDate,
+      page,
+      limit,
     }),
-    [filterStatus, filterDateRange],
+    [filterStatus, filterDateRange, page, limit],
   );
 
-  const { data: orders = [], isLoading, refetch, isFetching } = useOrders(queryFilter);
+  const { data: ordersPage, isLoading, refetch, isFetching } = useOrders(queryFilter);
+  const orders = useMemo(() => ordersPage?.items ?? [], [ordersPage]);
+  const totalOrders = ordersPage?.total ?? orders.length;
+  const totalPages = Math.max(1, Math.ceil(totalOrders / limit));
 
   // Tính số lượng đơn theo từng trạng thái để hiển thị count trên Tabs
   const counts = useMemo(() => {
     const res: Record<string, number> = {
-      ALL: orders.length,
+      ALL: activeTab === 'ALL' ? totalOrders : orders.length,
       PENDING: 0,
       CONFIRMED: 0,
       PREPARING: 0,
@@ -73,7 +85,7 @@ export default function OrdersPage() {
       }
     });
     return res;
-  }, [orders]);
+  }, [orders, activeTab, totalOrders]);
 
   // Lọc theo từ khóa tìm kiếm (mã đơn, tên, sđt)
   const filteredOrders = useMemo(() => {
@@ -93,7 +105,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5">
           <ListIcon size={16} />
-          Tất cả {counts.ALL > 0 && `(${counts.ALL})`}
+          {t('ordersPage.tabAll')} {counts.ALL > 0 && `(${counts.ALL})`}
         </span>
       ),
     },
@@ -102,7 +114,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-amber-400">
           <Receipt size={16} />
-          Chờ xác nhận {counts.PENDING > 0 && `(${counts.PENDING})`}
+          {t('ordersPage.tabPending')} {counts.PENDING > 0 && `(${counts.PENDING})`}
         </span>
       ),
     },
@@ -111,7 +123,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-blue-400">
           <CheckCircle size={16} />
-          Đã nhận {counts.CONFIRMED > 0 && `(${counts.CONFIRMED})`}
+          {t('ordersPage.tabConfirmed')} {counts.CONFIRMED > 0 && `(${counts.CONFIRMED})`}
         </span>
       ),
     },
@@ -120,7 +132,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-orange-400">
           <CookingPot size={16} />
-          Đang làm món {counts.PREPARING > 0 && `(${counts.PREPARING})`}
+          {t('ordersPage.tabPreparing')} {counts.PREPARING > 0 && `(${counts.PREPARING})`}
         </span>
       ),
     },
@@ -129,7 +141,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-purple-400">
           <Package size={16} />
-          Chờ lấy {counts.READY_FOR_PICKUP > 0 && `(${counts.READY_FOR_PICKUP})`}
+          {t('ordersPage.tabReady')} {counts.READY_FOR_PICKUP > 0 && `(${counts.READY_FOR_PICKUP})`}
         </span>
       ),
     },
@@ -138,7 +150,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-emerald-400">
           <CheckCircle size={16} />
-          Đã xong {counts.COMPLETED > 0 && `(${counts.COMPLETED})`}
+          {t('ordersPage.tabCompleted')} {counts.COMPLETED > 0 && `(${counts.COMPLETED})`}
         </span>
       ),
     },
@@ -147,7 +159,7 @@ export default function OrdersPage() {
       label: (
         <span className="flex items-center gap-1.5 text-rose-400">
           <WarningCircle size={16} />
-          Đã hủy {counts.CANCELLED > 0 && `(${counts.CANCELLED})`}
+          {t('ordersPage.tabCancelled')} {counts.CANCELLED > 0 && `(${counts.CANCELLED})`}
         </span>
       ),
     },
@@ -156,58 +168,66 @@ export default function OrdersPage() {
   return (
     <div className="space-y-4">
       <SushiPageHeader
-        title="Quản Lý Đơn Hàng"
-        subtitle="Theo dõi vòng đời đơn hàng, điều phối bếp và cập nhật trạng thái theo thời gian thực"
+        title={t('ordersPage.title')}
+        subtitle={t('ordersPage.subtitle')}
         extra={
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:w-64 min-w-0">
               <Input
-                placeholder="Tìm mã đơn, tên, SĐT..."
-                prefix={<MagnifyingGlass size={16} className="text-sushi-text-muted shrink-0" />}
+                placeholder={t('ordersPage.searchPlaceholder')}
+                prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1 shrink-0" />}
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 allowClear
-                className="w-full h-10 rounded-xl"
+                className="w-full h-10 rounded-xl !bg-sushi-surface !border-sushi-border"
               />
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <Button
-                icon={
-                  <Funnel
-                    size={16}
-                    weight={hasDateFilter ? 'fill' : 'regular'}
-                    className={hasDateFilter ? 'text-sushi-gold' : ''}
-                  />
-                }
+              <button
+                type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className={`h-10 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm flex items-center justify-center shrink-0 ${
-                  hasDateFilter ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
+                title={t('ordersPage.filterDate')}
+                aria-label={t('ordersPage.filterDate')}
+                className={`relative h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-1.5 shrink-0 transition-all duration-200 cursor-pointer ${
+                  hasDateFilter
+                    ? 'border-sushi-gold/60 bg-sushi-gold/10 text-sushi-gold hover:bg-sushi-gold/15'
+                    : 'border-sushi-border bg-sushi-surface text-sushi-text-muted hover:text-white hover:border-sushi-text-dim/50 hover:bg-sushi-card-hover'
                 }`}
-                title="Lọc đơn hàng theo ngày"
               >
-                <span className="hidden sm:inline">Lọc ngày</span>
+                <Funnel
+                  size={17}
+                  weight={hasDateFilter ? 'fill' : 'regular'}
+                  className={hasDateFilter ? 'text-sushi-gold shrink-0' : 'shrink-0'}
+                />
+                <span className="hidden sm:inline">{t('ordersPage.filterDate')}</span>
                 {hasDateFilter && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 sm:ml-1 inline-block" />
+                  <span className="w-2 h-2 rounded-full bg-sushi-gold absolute top-1.5 right-1.5 sm:static sm:w-1.5 sm:h-1.5" />
                 )}
-              </Button>
-              <Button
-                icon={<ArrowsClockwise size={16} className={isFetching ? 'animate-spin' : ''} />}
+              </button>
+
+              <button
+                type="button"
                 onClick={() => refetch()}
-                loading={isFetching}
-                className="h-10 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm flex items-center justify-center shrink-0"
-                title="Làm mới danh sách đơn hàng"
+                disabled={isFetching}
+                title={t('ordersPage.refresh')}
+                aria-label={t('ordersPage.refresh')}
+                className="h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-sushi-border bg-sushi-surface text-sushi-text-muted hover:text-white hover:border-sushi-text-dim/50 hover:bg-sushi-card-hover text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-1.5 shrink-0 transition-all duration-200 cursor-pointer disabled:opacity-60"
               >
-                <span className="hidden sm:inline">Làm mới</span>
-              </Button>
-              <Button
+                <ArrowsClockwise
+                  size={17}
+                  className={`shrink-0 ${isFetching ? 'animate-spin text-sushi-primary' : ''}`}
+                />
+                <span className="hidden sm:inline">{t('ordersPage.refresh')}</span>
+              </button>
+
+              <SushiButton
                 type="primary"
                 icon={<PhoneCall size={16} weight="fill" />}
                 onClick={() => setIsCreateStaffOrderModalOpen(true)}
-                className="h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-semibold flex items-center justify-center shrink-0"
+                className="!hidden md:!inline-flex h-10 rounded-xl px-4 text-sm font-semibold items-center justify-center shrink-0"
               >
-                <span className="hidden sm:inline">+ Tạo đơn qua điện thoại</span>
-                <span className="sm:hidden">+ Đơn mới</span>
-              </Button>
+                {t('ordersPage.createOrderBtn')}
+              </SushiButton>
             </div>
           </div>
         }
@@ -217,7 +237,7 @@ export default function OrdersPage() {
       {hasDateFilter && (
         <div className="flex items-center gap-2 text-xs bg-sushi-gold/10 text-sushi-gold border border-sushi-gold/30 px-3 py-1.5 rounded-xl w-fit">
           <span>
-            Lọc ngày:{' '}
+            {t('ordersPage.filterDate')}:{' '}
             {filterDateRange.startDate
               ? dayjs(filterDateRange.startDate).format('DD/MM/YYYY')
               : '...'}
@@ -228,9 +248,12 @@ export default function OrdersPage() {
           </span>
           <button
             type="button"
-            onClick={() => setFilterDateRange({})}
+            onClick={() => {
+              setFilterDateRange({});
+              setPage(1);
+            }}
             className="hover:text-white p-0.5 cursor-pointer ml-1 inline-flex items-center"
-            title="Xóa bộ lọc ngày"
+            title={t('ordersPage.clearDateFilter')}
           >
             <X size={14} />
           </button>
@@ -240,11 +263,38 @@ export default function OrdersPage() {
       <div className="bg-sushi-card border border-sushi-border rounded-xl p-2.5 sm:p-4 shadow-sm">
         <Tabs
           activeKey={activeTab}
-          onChange={setActiveTab}
+          onChange={(tab) => {
+            setActiveTab(tab);
+            setPage(1);
+          }}
           items={tabItems}
           className="border-b-0 overflow-x-auto"
         />
         <OrderTable orders={filteredOrders} isLoading={isLoading} />
+
+        {totalOrders > 0 && (
+          <div className="mt-4 pt-3 border-t border-sushi-border/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-sushi-text-muted">
+            <span>
+              {t('ordersPage.showingSummary')} {orders.length} / {totalOrders} {t('ordersPage.ordersUnit')} ({t('ordersPage.pageLabel')} {page}/{totalPages})
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                size="small"
+                disabled={page <= 1 || isFetching}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              >
+                {t('ordersPage.prevPage')}
+              </Button>
+              <Button
+                size="small"
+                disabled={page >= totalPages || isFetching}
+                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              >
+                {t('ordersPage.nextPage')}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <OrderDateFilterDrawer
@@ -252,14 +302,31 @@ export default function OrdersPage() {
         onClose={() => setIsFilterDrawerOpen(false)}
         startDate={filterDateRange.startDate}
         endDate={filterDateRange.endDate}
-        onApply={(filter) => setFilterDateRange(filter)}
-        onReset={() => setFilterDateRange({})}
+        onApply={(filter) => {
+          setFilterDateRange(filter);
+          setPage(1);
+        }}
+        onReset={() => {
+          setFilterDateRange({});
+          setPage(1);
+        }}
       />
 
       <CreateStaffOrderModal
         open={isCreateStaffOrderModalOpen}
         onCancel={() => setIsCreateStaffOrderModalOpen(false)}
         onSuccess={() => refetch()}
+      />
+
+      <SushiFloatingButton
+        onClick={() => setIsCreateStaffOrderModalOpen(true)}
+        label="Đơn mới"
+        ariaLabel="Tạo đơn qua điện thoại"
+        icon={
+          <span className="flex items-center">
+            <PhoneCall size={18} weight="fill" />
+          </span>
+        }
       />
     </div>
   );

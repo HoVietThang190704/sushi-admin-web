@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import {
   Table,
   Button,
-  Modal,
+  SushiButton,
+  ResponsiveModalDrawer,
   Form,
   InputNumber,
   Input,
   Select,
   Tag,
-  Empty,
   Package,
   CheckCircle,
   WarningCircle,
@@ -24,8 +24,10 @@ import {
   useAdjustWarehouseStock,
   WarehouseStock,
 } from '@/features/inventory';
+import { useTranslation } from '@/lib/i18n';
 
 export function WarehouseStockView() {
+  const { t } = useTranslation();
   const { data: warehouses = [], isLoading: warehousesLoading } = useWarehouses();
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | undefined>(undefined);
 
@@ -44,7 +46,7 @@ export function WarehouseStockView() {
     form.setFieldsValue({
       type: 'IN',
       reason: 'PURCHASE',
-      quantity: 10,
+      quantity: 1,
       note: '',
     });
     setIsAdjustModalOpen(true);
@@ -76,7 +78,7 @@ export function WarehouseStockView() {
 
   const columns = [
     {
-      title: 'Mã / Tên nguyên liệu',
+      title: t('warehouseView.colIngredient'),
       key: 'ingredient',
       render: (_: unknown, record: WarehouseStock) => (
         <div>
@@ -86,14 +88,14 @@ export function WarehouseStockView() {
       ),
     },
     {
-      title: 'Đơn vị tính',
+      title: t('warehouseView.colUnit'),
       dataIndex: ['ingredient', 'unit'],
       key: 'unit',
       width: 120,
       render: (unit: string) => <Tag className="font-mono text-xs">{unit}</Tag>,
     },
     {
-      title: 'Tồn thực tế',
+      title: t('warehouseView.colStock'),
       dataIndex: 'currentStock',
       key: 'currentStock',
       width: 160,
@@ -104,7 +106,7 @@ export function WarehouseStockView() {
       ),
     },
     {
-      title: 'Ngưỡng cảnh báo',
+      title: t('warehouseView.colMinStock'),
       dataIndex: 'minStock',
       key: 'minStock',
       width: 150,
@@ -115,7 +117,7 @@ export function WarehouseStockView() {
       ),
     },
     {
-      title: 'Trạng thái',
+      title: t('warehouseView.colStatus'),
       key: 'status',
       width: 160,
       render: (_: unknown, record: WarehouseStock) => {
@@ -123,7 +125,7 @@ export function WarehouseStockView() {
           return (
             <Tag color="error" className="px-2.5 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1.5">
               <WarningCircle size={14} weight="fill" />
-              <span>Hết hàng</span>
+              <span>{t('dashboard.alertOut')}</span>
             </Tag>
           );
         }
@@ -131,20 +133,20 @@ export function WarehouseStockView() {
           return (
             <Tag color="warning" className="px-2.5 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1.5">
               <WarningCircle size={14} weight="fill" />
-              <span>Gần hết</span>
+              <span>{t('dashboard.alertLow')}</span>
             </Tag>
           );
         }
         return (
           <Tag color="success" className="px-2.5 py-1 text-xs rounded-full font-medium inline-flex items-center gap-1.5">
             <CheckCircle size={14} weight="fill" />
-            <span>An toàn</span>
+            <span>{t('dashboard.alertSafe')}</span>
           </Tag>
         );
       },
     },
     {
-      title: 'Hành động',
+      title: t('warehouseView.colActions'),
       key: 'actions',
       width: 130,
       render: (_: unknown, record: WarehouseStock) => (
@@ -154,7 +156,7 @@ export function WarehouseStockView() {
           onClick={() => handleOpenAdjust(record)}
           className="text-sushi-gold hover:bg-sushi-gold/10 font-medium"
         >
-          Nhập / Xuất
+          {t('warehouseView.adjustBtn')}
         </Button>
       ),
     },
@@ -167,7 +169,7 @@ export function WarehouseStockView() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
           <div className="flex items-center gap-2">
             <Package size={18} className="text-sushi-gold shrink-0" />
-            <span className="text-xs sm:text-sm font-semibold text-sushi-text">Chọn Kho:</span>
+            <span className="text-xs sm:text-sm font-semibold text-sushi-text">{t('warehouseView.selectWarehouse')}</span>
           </div>
           <Select
             value={activeWarehouseId}
@@ -183,9 +185,9 @@ export function WarehouseStockView() {
 
         {selectedWarehouse && (
           <div className="text-3xs sm:text-xs text-sushi-text-muted">
-            <span>Địa chỉ: <strong>{selectedWarehouse.address || 'Trung tâm'}</strong></span>
+            <span>{t('warehouseView.address')}: <strong>{selectedWarehouse.address || 'Trung tâm'}</strong></span>
             <span className="mx-1.5">•</span>
-            <span>Chi nhánh liên kết: <strong>{selectedWarehouse._count?.branches || 1}</strong></span>
+            <span>{t('warehouseView.linkedBranches')}: <strong>{selectedWarehouse._count?.branches || 1}</strong></span>
           </div>
         )}
       </div>
@@ -199,8 +201,8 @@ export function WarehouseStockView() {
           <SushiEmptyState
             isCard
             icon={<Package size={24} />}
-            title="Kho này chưa có dữ liệu tồn kho"
-            description="Vui lòng thực hiện nhập kho hoặc kiểm kê đầu kỳ."
+            title={t('warehouseView.emptyTitle')}
+            description={t('warehouseView.emptyDesc')}
           />
         }
         renderItem={(item) => {
@@ -214,14 +216,13 @@ export function WarehouseStockView() {
           return (
             <SushiCardItem>
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-bold text-sushi-text truncate">
                     {item.ingredient?.name}
                   </h4>
-                  <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                    <span>Mã: {item.ingredient?.code}</span>
-                    <span>·</span>
-                    <span>Min: {item.minStock} {item.ingredient?.unit}</span>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                    <span className="truncate">{item.ingredient?.code}</span>
+                    <span className="shrink-0">· Min: {item.minStock} {item.ingredient?.unit}</span>
                   </div>
                 </div>
 
@@ -230,13 +231,13 @@ export function WarehouseStockView() {
                   onClick={() => handleOpenAdjust(item)}
                   className="rounded-lg h-8 px-2.5 text-xs text-sushi-gold border-sushi-gold/30 hover:bg-sushi-gold/10 shrink-0 font-medium"
                 >
-                  Nhập / Xuất
+                  {t('warehouseView.adjustBtn')}
                 </Button>
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
                 <div className="flex items-baseline space-x-1 font-mono">
-                  <span className="text-sushi-text-dim text-3xs uppercase mr-0.5">Tồn kho:</span>
+                  <span className="text-sushi-text-dim text-3xs uppercase mr-0.5">{t('warehouseView.colStock')}:</span>
                   <span className={`text-sm ${colorClass}`}>{item.currentStock.toLocaleString()}</span>
                   <span className="text-sushi-text-dim">{item.ingredient?.unit}</span>
                 </div>
@@ -245,17 +246,17 @@ export function WarehouseStockView() {
                   {item.status === 'OUT_OF_STOCK' ? (
                     <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold bg-red-500/15 border border-red-500/35 text-red-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                      <span>Hết hàng</span>
+                      <span>{t('dashboard.alertOut')}</span>
                     </span>
                   ) : item.status === 'LOW_STOCK' ? (
                     <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold bg-amber-500/15 border border-amber-500/35 text-amber-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                      <span>Gần hết</span>
+                      <span>{t('dashboard.alertLow')}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-3xs font-medium bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      <span>An toàn</span>
+                      <span>{t('dashboard.alertSafe')}</span>
                     </span>
                   )}
                 </div>
@@ -275,60 +276,80 @@ export function WarehouseStockView() {
           pagination={{ pageSize: 10, showSizeChanger: true }}
           scroll={{ x: 'max-content' }}
           locale={{
-            emptyText: <Empty description="Kho này chưa có dữ liệu nguyên vật liệu" />,
+            emptyText: (
+              <SushiEmptyState
+                icon={<Package size={24} />}
+                title={t('warehouseView.emptyTitle')}
+                description={t('warehouseView.emptyDesc')}
+              />
+            ),
           }}
         />
       </div>
 
-      {/* Modal Điều chỉnh tồn kho */}
-      <Modal
+      {/* Modal / Bottom Sheet Điều chỉnh tồn kho */}
+      <ResponsiveModalDrawer
         title={
-          <div className="flex items-center gap-2 text-sushi-text">
+          <div className="flex items-center gap-2 text-sushi-text font-bold">
             <Package size={20} className="text-sushi-gold" />
-            <span>Điều chỉnh tồn kho: {adjustingStock?.ingredient?.name}</span>
+            <span>{t('warehouseView.modalTitle')}: {adjustingStock?.ingredient?.name}</span>
           </div>
         }
         open={isAdjustModalOpen}
-        onCancel={() => setIsAdjustModalOpen(false)}
-        onOk={handleSaveAdjustment}
-        confirmLoading={adjustStockMutation.isPending}
-        okText="Xác nhận"
-        cancelText="Hủy"
+        onClose={() => setIsAdjustModalOpen(false)}
+        footer={
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button
+              onClick={() => setIsAdjustModalOpen(false)}
+              className="w-full sm:w-auto h-10 rounded-xl"
+            >
+              {t('common.cancel')}
+            </Button>
+            <SushiButton
+              type="primary"
+              onClick={handleSaveAdjustment}
+              loading={adjustStockMutation.isPending}
+              className="w-full sm:w-auto h-10 rounded-xl"
+            >
+              {t('warehouseView.confirmBtn')}
+            </SushiButton>
+          </div>
+        }
       >
         <Form form={form} layout="vertical" className="pt-2">
           <div className="p-3 mb-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between">
-            <span className="text-xs text-zinc-400">Tồn hiện tại trong kho:</span>
+            <span className="text-xs text-zinc-400">{t('warehouseView.currentStockLabel')}</span>
             <span className="text-sm font-bold font-mono text-sushi-gold">
               {adjustingStock?.currentStock.toLocaleString()} {adjustingStock?.ingredient?.unit}
             </span>
           </div>
 
-          <Form.Item name="type" label="Loại giao dịch" rules={[{ required: true }]}>
+          <Form.Item name="type" label={t('warehouseView.txTypeLabel')} rules={[{ required: true }]}>
             <Select
               options={[
-                { value: 'IN', label: '📥 Nhập thêm kho (Cộng tồn)' },
-                { value: 'OUT', label: '📤 Xuất kho thủ công (Trừ tồn)' },
+                { value: 'IN', label: `📥 ${t('warehouseView.txTypeIn')}` },
+                { value: 'OUT', label: `📤 ${t('warehouseView.txTypeOut')}` },
               ]}
             />
           </Form.Item>
 
-          <Form.Item name="reason" label="Lý do" rules={[{ required: true }]}>
+          <Form.Item name="reason" label={t('warehouseView.reasonLabel')} rules={[{ required: true }]}>
             <Select
               options={[
-                { value: 'PURCHASE', label: 'Nhập hàng nhà cung cấp' },
-                { value: 'ADJUSTMENT', label: 'Kiểm kê cân đối' },
-                { value: 'DISCARD_WASTE', label: 'Hủy hỏng / Hết hạn' },
-                { value: 'KITCHEN_USAGE', label: 'Xuất chế biến bổ sung' },
+                { value: 'PURCHASE', label: t('warehouseView.reasonPurchase') },
+                { value: 'ADJUSTMENT', label: t('warehouseView.reasonAdjustment') },
+                { value: 'DISCARD_WASTE', label: t('warehouseView.reasonWaste') },
+                { value: 'KITCHEN_USAGE', label: t('warehouseView.reasonKitchen') },
               ]}
             />
           </Form.Item>
 
           <Form.Item
             name="quantity"
-            label="Số lượng"
+            label={t('warehouseView.quantityLabel')}
             rules={[
-              { required: true, message: 'Vui lòng nhập số lượng' },
-              { type: 'number', min: 0.001, message: 'Số lượng phải > 0' },
+              { required: true, message: t('warehouseView.quantityLabel') },
+              { type: 'number', min: 0.001, message: '> 0' },
             ]}
           >
             <InputNumber
@@ -339,11 +360,11 @@ export function WarehouseStockView() {
             />
           </Form.Item>
 
-          <Form.Item name="note" label="Ghi chú">
-            <Input.TextArea placeholder="Ghi chú bổ sung..." rows={2} />
+          <Form.Item name="note" label={t('warehouseView.noteLabel')}>
+            <Input.TextArea placeholder={t('warehouseView.noteLabel')} rows={2} />
           </Form.Item>
         </Form>
-      </Modal>
+      </ResponsiveModalDrawer>
     </div>
   );
 }

@@ -201,7 +201,7 @@ export function StockTransactionTable({
               </div>
 
               <div className="mt-2.5 pt-2 border-t border-sushi-border/60 flex items-center justify-between text-3xs text-sushi-text-dim font-mono">
-                <span>Mã: {tx.id.slice(0, 8)}...</span>
+                <span>{t('dashboard.codeShort')}: {tx.id.slice(0, 8)}...</span>
                 <span>
                   {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>

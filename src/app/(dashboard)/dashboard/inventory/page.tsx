@@ -177,7 +177,7 @@ export default function InventoryPage() {
               onClick={() => setIsIngredientModalOpen(true)}
               className="h-10 sm:h-9 rounded-xl px-2 sm:px-3 text-xs sm:text-sm flex items-center justify-center"
             >
-              <span className="truncate sm:hidden">Thêm NL</span>
+              <span className="truncate sm:hidden">{t('dashboard.addIngredientShort')}</span>
               <span className="hidden sm:inline">{t('dashboard.addIngredient')}</span>
             </Button>
           </div>
@@ -243,7 +243,7 @@ export default function InventoryPage() {
               {alertCount}
             </span>
             <span className="text-3xs sm:text-2xs font-mono text-sushi-text-dim truncate">
-              {alertCount > 0 ? 'Cần nhập' : 'An toàn'}
+              {alertCount > 0 ? t('dashboard.alertNeedRestock') : t('dashboard.alertSafe')}
             </span>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function InventoryPage() {
             <span className="text-xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {stockInTransactions.length}
             </span>
-            <span className="text-3xs sm:text-2xs text-emerald-400 font-mono">Phiếu PNK</span>
+            <span className="text-3xs sm:text-2xs text-emerald-400 font-mono">{t('dashboard.stockInSlips')}</span>
           </div>
         </div>
 
@@ -282,7 +282,7 @@ export default function InventoryPage() {
             <span className="text-xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
               {stockOutTransactions.length}
             </span>
-            <span className="text-3xs sm:text-2xs text-amber-400 font-mono">Phiếu PXK</span>
+            <span className="text-3xs sm:text-2xs text-amber-400 font-mono">{t('dashboard.stockOutSlips')}</span>
           </div>
         </div>
       </div>
@@ -350,7 +350,7 @@ export default function InventoryPage() {
                 className="sm:hidden text-2xs text-sushi-gold hover:underline flex items-center gap-1 cursor-pointer font-sans"
               >
                 <X size={12} />
-                <span>Xóa bộ lọc</span>
+                <span>{t('dashboard.clearFilter')}</span>
               </button>
             )}
             <span>
@@ -370,7 +370,7 @@ export default function InventoryPage() {
                 id="recipe-search-input"
                 name="recipeSearch"
                 prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5 shrink-0" />}
-                placeholder="Tìm theo tên món hoặc mã SKU..."
+                placeholder={t('dashboard.searchRecipePlaceholder')}
                 allowClear
                 value={recipeSearch}
                 onChange={(e) => setRecipeSearch(e.target.value)}
@@ -391,7 +391,7 @@ export default function InventoryPage() {
               className={`h-10 rounded-xl px-3 flex items-center justify-center shrink-0 sm:hidden ${
                 hasActiveRecipeFilters ? 'border-sushi-gold/60 bg-sushi-gold/10' : ''
               }`}
-              title="Lọc trạng thái công thức món"
+              title={t('dashboard.tabRecipesBom')}
             >
               {hasActiveRecipeFilters && (
                 <span className="w-1.5 h-1.5 rounded-full bg-sushi-gold ml-0.5 inline-block" />
@@ -405,9 +405,9 @@ export default function InventoryPage() {
                 value={recipeFilterStatus}
                 onChange={(val) => setRecipeFilterStatus(val)}
                 options={[
-                  { value: 'ALL', label: 'Tất cả trạng thái' },
-                  { value: 'CONFIGURED', label: 'Đã có công thức' },
-                  { value: 'MISSING', label: 'Chưa có công thức' },
+                  { value: 'ALL', label: t('dashboard.recipeFilterAll') },
+                  { value: 'CONFIGURED', label: t('dashboard.recipeFilterConfigured') },
+                  { value: 'MISSING', label: t('dashboard.recipeFilterMissing') },
                 ]}
               />
             </div>
@@ -422,11 +422,11 @@ export default function InventoryPage() {
                 className="sm:hidden text-2xs text-sushi-gold hover:underline flex items-center gap-1 cursor-pointer font-sans"
               >
                 <X size={12} />
-                <span>Xóa bộ lọc</span>
+                <span>{t('dashboard.clearFilter')}</span>
               </button>
             )}
             <span>
-              {filteredRecipeProducts.length} / {singleProducts.length} món
+              {filteredRecipeProducts.length} / {singleProducts.length} {t('common.itemsCount')}
             </span>
           </div>
         </div>
@@ -446,7 +446,7 @@ export default function InventoryPage() {
               label: (
                 <span className="flex items-center gap-1.5 font-medium">
                   <Package size={16} />
-                  <span>Tồn kho Chi Nhánh</span>
+                  <span>{t('dashboard.tabBranchStock')}</span>
                 </span>
               ),
               children: (
@@ -460,7 +460,7 @@ export default function InventoryPage() {
               label: (
                 <span className="flex items-center gap-1.5 font-medium">
                   <CookingPot size={16} />
-                  <span>Công thức món (BOM)</span>
+                  <span>{t('dashboard.tabRecipesBom')}</span>
                 </span>
               ),
               children: (
@@ -477,7 +477,7 @@ export default function InventoryPage() {
               key: 'balance',
               label: (
                 <span className="flex items-center space-x-2">
-                  <span>{t('dashboard.tabStockBalance')} (Tổng)</span>
+                  <span>{t('dashboard.tabStockBalance')} {t('dashboard.tabTotalSuffix')}</span>
                   {alertCount > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full text-2xs font-mono font-bold bg-red-500 text-white">
                       {alertCount}

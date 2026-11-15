@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import {
   SushiButton,
+  SushiFloatingButton,
   Plus,
   SushiPageHeader,
   Select,
@@ -10,24 +11,30 @@ import {
   MagnifyingGlass,
   Button,
   Funnel,
+  App,
 } from '@/components/ui';
 import { X } from '@phosphor-icons/react';
 import {
+  Product,
   ProductTable,
   CreateProductModal,
   ProductFilterDrawer,
   useProducts,
   useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
   useCategoryOptions,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
 export default function ProductsPage() {
   const { t } = useTranslation();
+  const { modal } = App.useApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const hasActiveFilters = Boolean(selectedCategoryId || (selectedType && selectedType !== 'ALL'));
@@ -41,6 +48,32 @@ export default function ProductsPage() {
   const { options: categoryOptions } = useCategoryOptions();
   const { data: products = [], isLoading } = useProducts(selectedCategoryId);
   const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+
+  const handleOpenCreate = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (product: Product) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (product: Product) => {
+    modal.confirm({
+      title: `${t('dashboard.deleteProductConfirmTitle')} (${product.name})`,
+      content: t('dashboard.deleteProductConfirmDesc'),
+      okText: t('common.delete'),
+      okType: 'danger',
+      cancelText: t('common.cancel'),
+      centered: true,
+      onOk: async () => {
+        await deleteProductMutation.mutateAsync(product.id);
+      },
+    });
+  };
 
   // Bộ lọc kết hợp: Từ khóa + Phân loại (SINGLE / COMBO)
   const filteredProducts = useMemo(() => {
@@ -69,13 +102,15 @@ export default function ProductsPage() {
         title={t('dashboard.productsTitle')}
         subtitle={t('dashboard.productsSubtitle')}
         extra={
-          <SushiButton
-            type="primary"
-            icon={<Plus size={16} weight="bold" />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            {t('dashboard.addProduct')}
-          </SushiButton>
+          <div className="hidden md:block">
+            <SushiButton
+              type="primary"
+              icon={<Plus size={16} weight="bold" />}
+              onClick={handleOpenCreate}
+            >
+              {t('dashboard.addProduct')}
+            </SushiButton>
+          </div>
         }
       />
 
@@ -153,7 +188,7 @@ export default function ProductsPage() {
               className="sm:hidden text-2xs text-sushi-gold hover:underline flex items-center gap-1 cursor-pointer font-sans"
             >
               <X size={12} />
-              <span>Xóa bộ lọc</span>
+              <span>{t('dashboard.clearFilter')}</span>
             </button>
           )}
           <span>
@@ -166,6 +201,8 @@ export default function ProductsPage() {
       <ProductTable
         products={filteredProducts}
         loading={isLoading}
+        onEdit={handleOpenEdit}
+        onDelete={handleDelete}
       />
 
       {/* Bottom Sheet Lọc Món Ăn Cho Mobile */}
@@ -181,12 +218,32 @@ export default function ProductsPage() {
         totalFilteredCount={filteredProducts.length}
       />
 
-      {/* Modal Thêm Sản Phẩm Mới */}
+      {/* Nút Floating Action Button trên Mobile */}
+      <SushiFloatingButton
+        onClick={handleOpenCreate}
+        ariaLabel={t('dashboard.addProduct')}
+      />
+
+      {/* Modal Thêm / Chỉnh Sửa Món Ăn */}
       <CreateProductModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        initialData={editingProduct}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingProduct(null);
+        }}
         onSubmit={async (dto) => {
-          await createProductMutation.mutateAsync(dto);
+          if (editingProduct) {
+            await updateProductMutation.mutateAsync({
+              id: editingProduct.id,
+              dto: {
+                ...dto,
+                categoryId: dto.categoryId || null,
+              },
+            });
+          } else {
+            await createProductMutation.mutateAsync(dto);
+          }
         }}
       />
     </div>

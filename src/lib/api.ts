@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from './endpoints';
+
 export function getApiBaseUrl(): string {
   // Khi chạy trong trình duyệt, luôn dùng đường dẫn tương đối '' để yêu cầu đi qua Next.js rewrite (cổng 3005).
   // Nhờ đó cookie trở thành First-Party Cookie, khắc phục 100% lỗi iOS Safari chặn cookie khác cổng (3005 vs 3000).
@@ -53,8 +55,8 @@ export async function fetchApi<T = unknown>(
   if (
     response.status === 401 &&
     !isRetry &&
-    !endpoint.includes('/auth/login') &&
-    !endpoint.includes('/auth/refresh')
+    !endpoint.includes(API_ENDPOINTS.AUTH.LOGIN) &&
+    !endpoint.includes(API_ENDPOINTS.AUTH.REFRESH)
   ) {
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -65,7 +67,7 @@ export async function fetchApi<T = unknown>(
     isRefreshing = true;
 
     try {
-      const refreshRes = await fetch(`${baseUrl}/api/auth/refresh`, {
+      const refreshRes = await fetch(`${baseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

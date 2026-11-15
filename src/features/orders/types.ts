@@ -63,6 +63,15 @@ export interface GetOrdersFilter {
   branchId?: string;
   startDate?: string;
   endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PagedOrders {
+  items: Order[];
+  page: number;
+  limit: number;
+  total: number;
 }
 
 export interface UpdateOrderStatusInput {

@@ -7,6 +7,7 @@ import {
   Button,
 } from '@/components/ui';
 import { Check } from '@phosphor-icons/react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface ProductFilterDrawerProps {
   open: boolean;
@@ -19,12 +20,6 @@ export interface ProductFilterDrawerProps {
   onReset: () => void;
   totalFilteredCount: number;
 }
-
-const TYPE_OPTIONS = [
-  { value: 'ALL', label: 'Tất cả loại' },
-  { value: 'SINGLE', label: 'Món đơn (Single)' },
-  { value: 'COMBO', label: 'Combo / Set' },
-];
 
 function FilterForm({
   selectedCategoryId,
@@ -43,8 +38,15 @@ function FilterForm({
   onApply: (catId?: string, type?: string) => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const [tempCategoryId, setTempCategoryId] = useState<string | undefined>(selectedCategoryId);
   const [tempType, setTempType] = useState<string>(selectedType);
+
+  const typeOptions = [
+    { value: 'ALL', label: t('dashboard.allTypes') },
+    { value: 'SINGLE', label: t('dashboard.productTypeSingle') },
+    { value: 'COMBO', label: t('dashboard.productTypeCombo') },
+  ];
 
   const hasActiveFilters = Boolean(tempCategoryId || (tempType && tempType !== 'ALL'));
 
@@ -66,16 +68,16 @@ function FilterForm({
         {/* Lọc theo danh mục */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-            Danh Mục Món Ăn
+            {t('dashboard.productCategoryLabel')}
           </label>
           <Select
             className="w-full h-11"
-            placeholder="Tất cả danh mục"
+            placeholder={t('dashboard.allCategoriesFilter')}
             allowClear
             value={tempCategoryId || ''}
             onChange={(val) => setTempCategoryId(val ? String(val) : undefined)}
             options={[
-              { value: '', label: 'Tất cả danh mục' },
+              { value: '', label: t('dashboard.allCategoriesFilter') },
               ...categoryOptions,
             ]}
           />
@@ -84,10 +86,10 @@ function FilterForm({
         {/* Lọc theo loại món: Single / Combo */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-            Phân Loại Sản Phẩm
+            {t('dashboard.productTypeLabel')}
           </label>
           <div className="grid grid-cols-1 gap-2">
-            {TYPE_OPTIONS.map((item) => {
+            {typeOptions.map((item) => {
               const isSelected = tempType === item.value;
               return (
                 <button
@@ -116,7 +118,7 @@ function FilterForm({
           disabled={!hasActiveFilters}
           className="rounded-xl flex-1 h-11 border-sushi-border text-sushi-text-muted hover:text-white"
         >
-          Xóa bộ lọc
+          {t('dashboard.clearFilter')}
         </Button>
         <Button
           type="primary"
@@ -124,7 +126,7 @@ function FilterForm({
           className="rounded-xl flex-1 h-11 bg-sushi-gold hover:bg-sushi-gold/90 text-black font-semibold border-none flex items-center justify-center gap-1.5"
         >
           <Check size={16} weight="bold" />
-          <span>Áp dụng ({totalFilteredCount})</span>
+          <span>{t('dashboard.applyFilter')} ({totalFilteredCount})</span>
         </Button>
       </div>
     </div>
@@ -142,12 +144,13 @@ export function ProductFilterDrawer({
   onReset,
   totalFilteredCount,
 }: ProductFilterDrawerProps) {
+  const { t } = useTranslation();
   return (
     <ResponsiveModalDrawer
       open={open}
       onClose={onClose}
       destroyOnHidden
-      title="Bộ Lọc Món Ăn"
+      title={t('dashboard.filterProductsTitle')}
     >
       {open && (
         <FilterForm

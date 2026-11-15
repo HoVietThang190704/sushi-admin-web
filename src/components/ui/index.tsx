@@ -50,8 +50,6 @@ export {
   Spin,
   Skeleton,
   Progress,
-  message,
-  notification,
 
   // Navigation (Điều hướng)
   Menu,
@@ -62,6 +60,65 @@ export {
   // General
   Button,
 } from 'antd';
+
+import {
+  App as AntdApp,
+  message as antdStaticMessage,
+  notification as antdStaticNotification,
+} from 'antd';
+import type { MessageInstance } from 'antd/es/message/interface';
+import type { NotificationInstance } from 'antd/es/notification/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
+
+let bridgedMessage: MessageInstance | null = null;
+let bridgedNotification: NotificationInstance | null = null;
+let bridgedModal: ModalHookAPI | null = null;
+
+/**
+ * Cầu nối Context tự động cho message / notification / modal của Ant Design v5
+ * Giúp toàn bộ lệnh gọi `message.success(...)` dùng chung Dynamic Theme từ `<App>`
+ * mà không phát sinh cảnh báo Console Error.
+ */
+export function AntdAppBridge() {
+  const staticApp = AntdApp.useApp();
+  bridgedMessage = staticApp.message;
+  bridgedNotification = staticApp.notification;
+  bridgedModal = staticApp.modal;
+  return null;
+}
+
+export const message: typeof antdStaticMessage = new Proxy(antdStaticMessage, {
+  get(target, prop, receiver) {
+    if (bridgedMessage && prop in bridgedMessage) {
+      const value = Reflect.get(bridgedMessage, prop);
+      return typeof value === 'function' ? value.bind(bridgedMessage) : value;
+    }
+    const fallback = Reflect.get(target, prop, receiver);
+    return typeof fallback === 'function' ? fallback.bind(target) : fallback;
+  },
+});
+
+export const notification: typeof antdStaticNotification = new Proxy(
+  antdStaticNotification,
+  {
+    get(target, prop, receiver) {
+      if (bridgedNotification && prop in bridgedNotification) {
+        const value = Reflect.get(bridgedNotification, prop);
+        return typeof value === 'function' ? value.bind(bridgedNotification) : value;
+      }
+      const fallback = Reflect.get(target, prop, receiver);
+      return typeof fallback === 'function' ? fallback.bind(target) : fallback;
+    },
+  },
+);
+
+export const modalConfirm = (
+  ...args: Parameters<ModalHookAPI['confirm']>
+) => {
+  if (bridgedModal) {
+    return bridgedModal.confirm(...args);
+  }
+};
 
 // 2. Export các Types phổ biến của Ant Design
 export type {
@@ -129,6 +186,7 @@ import React from 'react';
 import { Button as AntdButton, ButtonProps, Card as AntdCard, CardProps, Pagination as AntdPagination } from 'antd';
 import { PencilSimple, Trash } from '@phosphor-icons/react';
 import { SUSHICOLORS } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 /**
  * Nút bấm chuẩn nhận diện thương hiệu Sushi Platform (Đỏ son Vermilion gradient)
@@ -305,8 +363,9 @@ export function SushiMobileCardList<T>({
   renderItem,
   keyExtractor,
   className = '',
-  pageSize,
+  pageSize = 8,
 }: SushiMobileCardListProps<T>) {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
 
   // Tự động điều chỉnh trang khi tổng số items thay đổi
@@ -323,7 +382,7 @@ export function SushiMobileCardList<T>({
     <div className={`md:hidden ${className}`}>
       {loading ? (
         <div className="py-12 text-center text-xs text-sushi-text-dim">
-          Loading...
+          {t('common.loading')}
         </div>
       ) : items.length === 0 ? (
         emptyState || null
@@ -341,10 +400,11 @@ export function SushiMobileCardList<T>({
             </React.Fragment>
           ))}
 
-          {pageSize && items.length > pageSize && (
+          {pageSize && items.length > 0 && (
             <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-sushi-border/40 mt-3">
               <span className="text-2xs text-sushi-text-dim font-mono">
-                Trang {activePage} / {totalPages} ({items.length} mục)
+                {t('ordersPage.pageLabel')} {activePage} / {totalPages} ({items.length}{' '}
+                {t('common.itemsCount')})
               </span>
               <AntdPagination
                 simple
@@ -393,4 +453,7 @@ export function SushiPageHeader({ title, subtitle, extra, subtitleClassName, cla
 
 export { ResponsiveModalDrawer } from './responsive-modal-drawer';
 export type { ResponsiveModalDrawerProps } from './responsive-modal-drawer';
+export { SushiFloatingButton } from './sushi-floating-button';
+export type { SushiFloatingButtonProps } from './sushi-floating-button';
+
 

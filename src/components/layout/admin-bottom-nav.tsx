@@ -34,10 +34,9 @@ export function AdminBottomNav() {
       rafId = window.requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
         const diff = currentScrollY - lastScrollY.current;
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
-        // Luôn hiện khi ở gần đầu trang (< 30px) hoặc chạm đáy trang
-        if (currentScrollY <= 30 || (maxScroll > 60 && currentScrollY >= maxScroll - 30)) {
+        // Luôn hiện khi ở gần đầu trang (< 30px)
+        if (currentScrollY <= 30) {
           setIsVisible(true);
           lastScrollY.current = Math.max(0, currentScrollY);
           rafId = null;

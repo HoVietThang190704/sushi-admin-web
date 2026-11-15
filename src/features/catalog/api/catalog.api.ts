@@ -1,6 +1,13 @@
 import { fetchApi } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
-import { Category, CreateCategoryInput, Product, CreateProductInput } from '../types';
+import {
+  Category,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  Product,
+  CreateProductInput,
+  UpdateProductInput,
+} from '../types';
 
 export const catalogApi = {
   /**
@@ -8,6 +15,13 @@ export const catalogApi = {
    */
   getCategories: async (): Promise<Category[]> => {
     return fetchApi<Category[]>(API_ENDPOINTS.CATALOG.CATEGORIES);
+  },
+
+  /**
+   * Lấy chi tiết 1 danh mục kèm danh sách món ăn bên trong
+   */
+  getCategoryById: async (id: string): Promise<Category> => {
+    return fetchApi<Category>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id));
   },
 
   /**
@@ -21,10 +35,32 @@ export const catalogApi = {
   },
 
   /**
-   * Lấy danh sách sản phẩm (có thể lọc theo categoryId)
+   * Cập nhật danh mục thực đơn
    */
-  getProducts: async (categoryId?: string): Promise<Product[]> => {
-    const query = categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : '';
+  updateCategory: async (id: string, dto: UpdateCategoryInput): Promise<Category> => {
+    return fetchApi<Category>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id), {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Xóa danh mục thực đơn
+   */
+  deleteCategory: async (id: string): Promise<{ id: string; deleted: boolean }> => {
+    return fetchApi<{ id: string; deleted: boolean }>(API_ENDPOINTS.CATALOG.CATEGORY_BY_ID(id), {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * Lấy danh sách sản phẩm (có thể lọc theo categoryId, mặc định bao gồm cả món tạm ngừng cho Admin)
+   */
+  getProducts: async (categoryId?: string, includeInactive = true): Promise<Product[]> => {
+    const params = new URLSearchParams();
+    if (categoryId) params.set('categoryId', categoryId);
+    if (includeInactive) params.set('includeInactive', 'true');
+    const query = params.toString() ? `?${params.toString()}` : '';
     return fetchApi<Product[]>(`${API_ENDPOINTS.CATALOG.PRODUCTS}${query}`);
   },
 
@@ -42,6 +78,25 @@ export const catalogApi = {
     return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCTS, {
       method: 'POST',
       body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Cập nhật sản phẩm / món ăn
+   */
+  updateProduct: async (id: string, dto: UpdateProductInput): Promise<Product> => {
+    return fetchApi<Product>(API_ENDPOINTS.CATALOG.PRODUCT_BY_ID(id), {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Xóa sản phẩm / món ăn
+   */
+  deleteProduct: async (id: string): Promise<{ id: string; deleted: boolean }> => {
+    return fetchApi<{ id: string; deleted: boolean }>(API_ENDPOINTS.CATALOG.PRODUCT_BY_ID(id), {
+      method: 'DELETE',
     });
   },
 

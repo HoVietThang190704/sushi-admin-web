@@ -182,11 +182,11 @@ export function CreateTransactionModal({
         {warehouses.length > 0 && (
           <Form.Item
             name="warehouseId"
-            label="Kho thực hiện"
+            label={t('warehouseView.selectWarehouse')}
             rules={[createZodRule(schema, 'warehouseId')]}
           >
             <Select
-              placeholder="Chọn kho thực hiện nhập / xuất"
+              placeholder={t('warehouseView.selectWarehouse')}
               options={warehouses.map((w) => ({
                 value: w.id,
                 label: `${w.name} (${w.code})`,
@@ -198,7 +198,7 @@ export function CreateTransactionModal({
         {/* Hiển thị tồn kho hiện có nếu là Xuất kho */}
         {transactionType === 'OUT' && currentIngredient && (
           <div className="mb-4 p-3 rounded-xl bg-sushi-surface/80 border border-sushi-border flex items-center justify-between text-xs font-mono">
-            <span className="text-sushi-text-muted">Tồn kho khả dụng hiện tại:</span>
+            <span className="text-sushi-text-muted">{t('warehouseView.currentStockLabel')}</span>
             <span
               className={`font-bold ${
                 currentIngredient.currentStock <= 0 ? 'text-red-400' : 'text-emerald-400'

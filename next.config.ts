@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
+  ? process.env.ALLOWED_DEV_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : ['localhost:3005'];
+
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['192.168.1.252', '10.250.250.114', 'localhost:3005'],
+  allowedDevOrigins,
   async rewrites() {
     return [
       {
