@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     ALERTS: '/api/inventory/alerts',
     TRANSACTIONS: '/api/inventory/transactions',
     WAREHOUSES: '/api/inventory/warehouses',
+    WAREHOUSE_BY_ID: (id: string) => `/api/inventory/warehouses/${id}`,
     WAREHOUSE_STOCKS: (warehouseId: string) =>
       `/api/inventory/warehouses/${warehouseId}/stocks`,
     ADJUST_WAREHOUSE_STOCK: (warehouseId: string, ingredientId: string) =>
@@ -42,6 +43,8 @@ export const API_ENDPOINTS = {
   },
   SHIPPING: {
     BRANCHES: '/api/shipping/branches',
+    BRANCHES_MANAGE: '/api/shipping/branches/manage',
+    BRANCH_BY_ID: (id: string) => `/api/shipping/branches/${id}`,
     RULES: '/api/shipping/rules',
     RULE_BY_ID: (id: string) => `/api/shipping/rules/${id}`,
     LOCATIONS: '/api/shipping/locations',

@@ -1,10 +1,45 @@
 import { fetchApi } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/endpoints';
-import { Branch, ShippingRule, UpsertShippingRuleInput } from '../types';
+import {
+  Branch,
+  CreateBranchInput,
+  UpdateBranchInput,
+  DeleteBranchResult,
+  ShippingRule,
+  UpsertShippingRuleInput,
+} from '../types';
 
 export async function fetchBranches(): Promise<Branch[]> {
   const res = await fetchApi<Branch[]>(API_ENDPOINTS.SHIPPING.BRANCHES);
   return res || [];
+}
+
+export async function fetchBranchesForAdmin(): Promise<Branch[]> {
+  const res = await fetchApi<Branch[]>(API_ENDPOINTS.SHIPPING.BRANCHES_MANAGE);
+  return res || [];
+}
+
+export async function createBranch(input: CreateBranchInput): Promise<Branch> {
+  return fetchApi<Branch>(API_ENDPOINTS.SHIPPING.BRANCHES, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateBranch(
+  id: string,
+  input: UpdateBranchInput,
+): Promise<Branch> {
+  return fetchApi<Branch>(API_ENDPOINTS.SHIPPING.BRANCH_BY_ID(id), {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteBranch(id: string): Promise<DeleteBranchResult> {
+  return fetchApi<DeleteBranchResult>(API_ENDPOINTS.SHIPPING.BRANCH_BY_ID(id), {
+    method: 'DELETE',
+  });
 }
 
 export async function fetchShippingRules(params?: {

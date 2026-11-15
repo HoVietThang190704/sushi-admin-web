@@ -8,6 +8,9 @@ export {
   useCreateIngredient,
   useCreateTransaction,
   useWarehouses,
+  useCreateWarehouse,
+  useUpdateWarehouse,
+  useDeleteWarehouse,
   useWarehouseStocks,
   useAdjustWarehouseStock,
   useRecipes,
@@ -22,5 +25,6 @@ export { CreateIngredientModal } from './components/create-ingredient-modal';
 export { CreateTransactionModal } from './components/create-transaction-modal';
 export { RecipeManagementView } from './components/recipe-management-view';
 export { WarehouseStockView } from './components/warehouse-stock-view';
+export { WarehouseManagementView } from './components/warehouse-management-view';
 export { IngredientFilterDrawer } from './components/ingredient-filter-drawer';
 export { RecipeFilterDrawer } from './components/recipe-filter-drawer';

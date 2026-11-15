@@ -5,6 +5,8 @@ import { inventoryApi } from '../api/inventory.api';
 import {
   CreateIngredientInput,
   CreateTransactionInput,
+  CreateWarehouseInput,
+  UpdateWarehouseInput,
   TransactionType,
   UpsertRecipeInput,
   AdjustWarehouseStockInput,
@@ -86,6 +88,62 @@ export function useWarehouses() {
   return useQuery({
     queryKey: inventoryKeys.warehouses(),
     queryFn: () => inventoryApi.getWarehouses(),
+  });
+}
+
+export function useCreateWarehouse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: CreateWarehouseInput) => inventoryApi.createWarehouse(dto),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['branches'] });
+      message.success(`Đã tạo kho "${data.name}" (${data.code}) thành công!`);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Không thể tạo kho nguyên liệu';
+      message.error(msg);
+    },
+  });
+}
+
+export function useUpdateWarehouse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: UpdateWarehouseInput }) =>
+      inventoryApi.updateWarehouse(id, dto),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['branches'] });
+      message.success(`Cập nhật kho "${data.name}" thành công!`);
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Không thể cập nhật kho nguyên liệu';
+      message.error(msg);
+    },
+  });
+}
+
+export function useDeleteWarehouse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => inventoryApi.deleteWarehouse(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['branches'] });
+      if (res.deactivated) {
+        message.info('Kho đã có lịch sử giao dịch nên được chuyển sang trạng thái Tạm ngừng.');
+      } else {
+        message.success('Đã xóa kho nguyên liệu thành công!');
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Không thể xóa kho nguyên liệu';
+      message.error(msg);
+    },
   });
 }
 

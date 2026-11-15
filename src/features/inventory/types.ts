@@ -73,10 +73,35 @@ export interface Warehouse {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  branches?: Array<{
+    id: string;
+    code: string;
+    name: string;
+    isActive: boolean;
+  }>;
   _count?: {
     stocks: number;
     branches: number;
   };
+}
+
+export interface CreateWarehouseInput {
+  code: string;
+  name: string;
+  address?: string;
+}
+
+export interface UpdateWarehouseInput {
+  code?: string;
+  name?: string;
+  address?: string | null;
+  isActive?: boolean;
+}
+
+export interface DeleteWarehouseResult {
+  id: string;
+  deleted: boolean;
+  deactivated: boolean;
 }
 
 export interface WarehouseStock {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Table,
   Button,
@@ -12,6 +13,7 @@ import {
   Select,
   Tag,
   Package,
+  Gear,
   CheckCircle,
   WarningCircle,
   SushiMobileCardList,
@@ -181,13 +183,22 @@ export function WarehouseStockView() {
               label: `${w.name} (${w.code})`,
             }))}
           />
+          <Link href="/dashboard/warehouses">
+            <Button
+              size="small"
+              icon={<Gear size={14} />}
+              className="rounded-lg h-9 px-3 text-xs text-sushi-gold border-sushi-gold/30 hover:bg-sushi-gold/10 font-medium w-full sm:w-auto"
+            >
+              {t('warehousesPage.manageBtn')}
+            </Button>
+          </Link>
         </div>
 
         {selectedWarehouse && (
           <div className="text-3xs sm:text-xs text-sushi-text-muted">
             <span>{t('warehouseView.address')}: <strong>{selectedWarehouse.address || 'Trung tâm'}</strong></span>
             <span className="mx-1.5">•</span>
-            <span>{t('warehouseView.linkedBranches')}: <strong>{selectedWarehouse._count?.branches || 1}</strong></span>
+            <span>{t('warehouseView.linkedBranches')}: <strong>{selectedWarehouse._count?.branches ?? 0}</strong></span>
           </div>
         )}
       </div>

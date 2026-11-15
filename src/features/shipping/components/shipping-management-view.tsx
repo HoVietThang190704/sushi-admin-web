@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Table,
   Button,
@@ -11,7 +12,6 @@ import {
   SushiCardItem,
   SushiCardActions,
   SushiEmptyState,
-  Modal,
   ResponsiveModalDrawer,
   Form,
   Input,
@@ -39,12 +39,12 @@ import {
   upsertShippingRule,
   deleteShippingRule,
 } from '../api/shipping.api';
-import { ShippingRule, UpsertShippingRuleInput } from '../types';
+import { ShippingRule } from '../types';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import { useTranslation } from '@/lib/i18n';
 
 export function ShippingManagementView() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const queryClient = useQueryClient();
   const { formatCurrency } = useFormatCurrency();
   const { t } = useTranslation();
@@ -59,7 +59,7 @@ export function ShippingManagementView() {
   // Queries
   const { data: branches = [], isLoading: loadingBranches } = useQuery({
     queryKey: ['branches'],
-    queryFn: fetchBranches,
+    queryFn: () => fetchBranches(),
   });
 
   const { data: locations = [] } = useQuery({
@@ -221,7 +221,7 @@ export function ShippingManagementView() {
             danger
             icon={<Trash size={16} />}
             onClick={() => {
-              Modal.confirm({
+              modal.confirm({
                 title: t('shippingPage.deleteConfirmTitle'),
                 content: `${record.ward}, ${record.district}?`,
                 okText: t('shippingPage.deleteConfirmOk'),
@@ -237,7 +237,7 @@ export function ShippingManagementView() {
   ];
 
   const handleDeleteRule = (rule: ShippingRule) => {
-    Modal.confirm({
+    modal.confirm({
       title: t('shippingPage.deleteConfirmTitle'),
       content: `${rule.ward}, ${rule.district}?`,
       okText: t('shippingPage.deleteConfirmOk'),
@@ -292,14 +292,24 @@ export function ShippingManagementView() {
         title={t('shippingPage.title')}
         subtitle={t('shippingPage.subtitle')}
         extra={
-          <div className="hidden md:block">
-            <SushiButton
-              type="primary"
-              icon={<Plus size={16} weight="bold" />}
-              onClick={handleOpenCreate}
-            >
-              {t('shippingPage.addRuleButton')}
-            </SushiButton>
+          <div className="flex items-center gap-2.5">
+            <Link href="/dashboard/branches">
+              <Button
+                icon={<Storefront size={16} />}
+                className="rounded-xl h-10 px-3.5 text-xs sm:text-sm font-medium"
+              >
+                {t('branchesPage.manageBtn')}
+              </Button>
+            </Link>
+            <div className="hidden md:block">
+              <SushiButton
+                type="primary"
+                icon={<Plus size={16} weight="bold" />}
+                onClick={handleOpenCreate}
+              >
+                {t('shippingPage.addRuleButton')}
+              </SushiButton>
+            </div>
           </div>
         }
       />

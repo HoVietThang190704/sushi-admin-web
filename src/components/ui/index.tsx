@@ -81,9 +81,11 @@ let bridgedModal: ModalHookAPI | null = null;
  */
 export function AntdAppBridge() {
   const staticApp = AntdApp.useApp();
-  bridgedMessage = staticApp.message;
-  bridgedNotification = staticApp.notification;
-  bridgedModal = staticApp.modal;
+  React.useEffect(() => {
+    bridgedMessage = staticApp.message;
+    bridgedNotification = staticApp.notification;
+    bridgedModal = staticApp.modal;
+  }, [staticApp]);
   return null;
 }
 

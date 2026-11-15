@@ -9,6 +9,7 @@ import {
   QrCode,
   Gear,
   Storefront,
+  Database,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
 
@@ -67,6 +68,20 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: '/dashboard/inventory',
     labelKey: 'dashboard.menuInventory',
     icon: CookingPot,
+  },
+  {
+    key: 'warehouses',
+    path: '/dashboard/warehouses',
+    labelKey: 'dashboard.warehouses',
+    icon: Database,
+    hideInBottomNav: true,
+  },
+  {
+    key: 'branches',
+    path: '/dashboard/branches',
+    labelKey: 'dashboard.branches',
+    icon: Storefront,
+    hideInBottomNav: true,
   },
   {
     key: 'orders',

@@ -7,6 +7,9 @@ import {
   CreateTransactionInput,
   TransactionType,
   Warehouse,
+  CreateWarehouseInput,
+  UpdateWarehouseInput,
+  DeleteWarehouseResult,
   WarehouseStock,
   Recipe,
   UpsertRecipeInput,
@@ -38,6 +41,20 @@ export const inventoryApi = {
 
   // Warehouses & Stocks
   getWarehouses: () => fetchApi<Warehouse[]>(API_ENDPOINTS.INVENTORY.WAREHOUSES),
+  createWarehouse: (dto: CreateWarehouseInput) =>
+    fetchApi<Warehouse>(API_ENDPOINTS.INVENTORY.WAREHOUSES, {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    }),
+  updateWarehouse: (id: string, dto: UpdateWarehouseInput) =>
+    fetchApi<Warehouse>(API_ENDPOINTS.INVENTORY.WAREHOUSE_BY_ID(id), {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    }),
+  deleteWarehouse: (id: string) =>
+    fetchApi<DeleteWarehouseResult>(API_ENDPOINTS.INVENTORY.WAREHOUSE_BY_ID(id), {
+      method: 'DELETE',
+    }),
   getWarehouseStocks: (warehouseId: string) =>
     fetchApi<WarehouseStock[]>(API_ENDPOINTS.INVENTORY.WAREHOUSE_STOCKS(warehouseId)),
   adjustWarehouseStock: (
