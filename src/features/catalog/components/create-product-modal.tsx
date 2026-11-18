@@ -51,6 +51,7 @@ export function CreateProductModal({
     if (!open) return;
     if (initialData) {
       const initialImg = initialData.imageUrl || '';
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setImageUrl(initialImg);
       form.setFieldsValue({
         name: initialData.name,

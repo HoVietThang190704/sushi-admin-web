@@ -22,11 +22,11 @@
   "auth": {
     "loginTitle": "Đăng Nhập Quản Trị",
     "loginSubtitle": "Nhập thông tin xác thực để truy cập bảng điều khiển vận hành.",
-    "emailLabel": "EMAIL TÀI KHOẢN",
+    "emailLabel": "Email tài khoản",
     "emailPlaceholder": "admin@sushi.com",
     "emailRequired": "Vui lòng nhập email của bạn",
     "emailInvalid": "Định dạng email không hợp lệ",
-    "passwordLabel": "MẬT KHẨU",
+    "passwordLabel": "Mật khẩu",
     "passwordPlaceholder": "••••••••••••",
     "passwordRequired": "Vui lòng nhập mật khẩu",
     "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",

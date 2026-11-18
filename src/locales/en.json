@@ -22,11 +22,11 @@
   "auth": {
     "loginTitle": "Admin Sign In",
     "loginSubtitle": "Enter your credentials to access the chain operations control panel.",
-    "emailLabel": "ACCOUNT EMAIL",
+    "emailLabel": "Account Email",
     "emailPlaceholder": "admin@sushi.com",
     "emailRequired": "Please enter your email",
     "emailInvalid": "Invalid email address format",
-    "passwordLabel": "PASSWORD",
+    "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••••••",
     "passwordRequired": "Please enter your password",
     "passwordMinLength": "Password must be at least 6 characters",
