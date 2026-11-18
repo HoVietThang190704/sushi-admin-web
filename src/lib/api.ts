@@ -78,9 +78,12 @@ export async function fetchApi<T = unknown>(
         return fetchApi<T>(endpoint, options, true);
       } else {
         processQueue(new Error('Phiên đăng nhập đã hết hạn'));
+        // Nếu làm mới token thất bại, trả về lỗi 401 ban đầu để AuthProvider xử lý redirect về login
+        throw new Error('Phiên đăng nhập đã hết hạn');
       }
     } catch (err) {
       processQueue(err);
+      throw err;
     } finally {
       isRefreshing = false;
     }

@@ -9,6 +9,13 @@ export const API_ENDPOINTS = {
     ME: '/api/auth/me',
     LOGOUT: '/api/auth/logout',
     REFRESH: '/api/auth/refresh',
+    CHANGE_PASSWORD: '/api/auth/change-password',
+  },
+  STAFF: {
+    ROOT: '/api/staff',
+    BY_ID: (id: string) => `/api/staff/${id}`,
+    STATUS: (id: string) => `/api/staff/${id}/status`,
+    RESET_PASSWORD: (id: string) => `/api/staff/${id}/reset-password`,
   },
   CATALOG: {
     CATEGORIES: '/api/catalog/categories',

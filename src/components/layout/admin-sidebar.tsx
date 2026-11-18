@@ -15,6 +15,7 @@ import { SUSHICOLORS } from '@/lib/theme';
 import { useTranslation, LanguageSwitcher } from '@/lib/i18n';
 import { NAV_ITEMS, getActiveNavKey, getActiveParentKey } from '@/config/navigation.config';
 import { useRealtime } from '@/providers/realtime-provider';
+import { useAuth } from '@/features/auth';
 
 const { Sider } = Layout;
 
@@ -37,6 +38,7 @@ export function AdminSidebar({
   const router = useRouter();
   const pathname = usePathname();
   const { isConnected } = useRealtime();
+  const { user } = useAuth();
 
   // Tự động suy ra active key & parent key từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
@@ -59,16 +61,25 @@ export function AdminSidebar({
     setOpenKeys(keys);
   };
 
-  // Sinh danh sách Menu Items từ NAV_ITEMS (Hỗ trợ mục cha Cấu hình xổ xuống)
+  // Sinh danh sách Menu Items từ NAV_ITEMS (Lọc theo vai trò của tài khoản)
   const menuItems = useMemo(
-    () =>
-      NAV_ITEMS.map((item) => {
+    () => {
+      const userRole = user?.role;
+      return NAV_ITEMS.filter((item) => {
+        if (!item.roles || item.roles.length === 0) return true;
+        return userRole ? (item.roles as readonly string[]).includes(userRole) : false;
+      }).map((item) => {
         const IconComponent = item.icon;
         const isActive = selectedKey === item.key;
         const isParentActive = activeParentKey === item.key;
 
         // Nếu là mục cha có các mục con xổ xuống (như Cấu hình)
         if (item.children && item.children.length > 0) {
+          const visibleChildren = item.children.filter((child) => {
+            if (!child.roles || child.roles.length === 0) return true;
+            return userRole ? (child.roles as readonly string[]).includes(userRole) : false;
+          });
+
           return {
             key: item.key,
             icon: (
@@ -82,7 +93,7 @@ export function AdminSidebar({
                 {t(item.labelKey)}
               </span>
             ),
-            children: item.children.map((child) => {
+            children: visibleChildren.map((child) => {
               const isChildActive = selectedKey === child.key;
               const ChildIcon = child.icon;
 
@@ -119,8 +130,9 @@ export function AdminSidebar({
             </span>
           ),
         };
-      }),
-    [selectedKey, activeParentKey, t]
+      });
+    },
+    [selectedKey, activeParentKey, user?.role, t]
   );
 
   const handleMenuClick = ({ key }: { key: string }) => {

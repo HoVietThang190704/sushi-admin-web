@@ -10,6 +10,7 @@ import {
 } from '@/components/ui';
 import { SUSHICOLORS } from '@/lib/theme';
 import { useAuth } from '@/features/auth';
+import { authApi } from '@/features/auth/api/auth.api';
 import { RealtimeProvider } from '@/providers/realtime-provider';
 import { useTranslation } from '@/lib/i18n';
 import {
@@ -18,6 +19,8 @@ import {
   AdminBottomNav,
   useDashboardSwipe,
 } from '@/components/layout';
+import { MandatoryChangePasswordModal } from '@/components/auth/mandatory-change-password-modal';
+import { NAV_ITEMS } from '@/config/navigation.config';
 
 const { Content } = Layout;
 const { Text } = Typography;
@@ -26,7 +29,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  const { loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated, user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -35,9 +38,42 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.replace('/');
+      // Cookie cũ/hết hạn khiến proxy.ts tưởng đã đăng nhập và đẩy ngược về /dashboard (vòng lặp).
+      // Xoá cookie phía server trước khi quay về trang login để phá vòng lặp.
+      authApi
+        .logout()
+        .catch(() => undefined)
+        .finally(() => router.replace('/'));
+      return;
     }
-  }, [loading, isAuthenticated, router]);
+
+    // Role-based route protection
+    if (!loading && user?.role) {
+      const userRole = user.role;
+      // Tìm cấu hình quyền của route hiện tại
+      let matchedRoles: readonly string[] | undefined;
+
+      for (const item of NAV_ITEMS) {
+        if (item.path && (pathname === item.path || pathname.startsWith(`${item.path}/`))) {
+          matchedRoles = item.roles;
+          break;
+        }
+        if (item.children) {
+          for (const child of item.children) {
+            if (pathname === child.path || pathname.startsWith(`${child.path}/`)) {
+              matchedRoles = child.roles;
+              break;
+            }
+          }
+          if (matchedRoles) break;
+        }
+      }
+
+      if (matchedRoles && matchedRoles.length > 0 && !matchedRoles.includes(userRole)) {
+        router.replace('/dashboard');
+      }
+    }
+  }, [loading, isAuthenticated, user?.role, pathname, router]);
 
   if (loading || !isAuthenticated) {
     return (
@@ -95,6 +131,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Thanh Điều Hướng Đáy Màn Hình Cho Mobile (1-Click Bottom Bar) */}
         <AdminBottomNav />
+
+        {/* Modal bắt buộc đổi mật khẩu khi có flag mustChangePassword */}
+        <MandatoryChangePasswordModal open={Boolean(user?.mustChangePassword)} />
       </Layout>
     </Layout>
   );

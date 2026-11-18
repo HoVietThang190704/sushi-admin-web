@@ -5,10 +5,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { BOTTOM_NAV_ITEMS, getActiveNavKey } from '@/config/navigation.config';
+import { useAuth } from '@/features/auth';
 
 export function AdminBottomNav() {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const visibleItems = useMemo(() => {
+    const userRole = user?.role;
+    return BOTTOM_NAV_ITEMS.filter((item) => {
+      if (!item.roles || item.roles.length === 0) return true;
+      return userRole ? (item.roles as readonly string[]).includes(userRole) : false;
+    });
+  }, [user?.role]);
 
   // Xác định active key tự động từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
@@ -92,7 +102,7 @@ export function AdminBottomNav() {
       }}
     >
       <div className="flex items-center justify-around h-14 px-2 rounded-full bg-[#1c1c20]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.55)]">
-        {BOTTOM_NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = selectedKey === item.key;
           const label = t(item.labelKey);

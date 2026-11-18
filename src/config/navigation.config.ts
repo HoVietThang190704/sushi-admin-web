@@ -10,13 +10,16 @@ import {
   Gear,
   Storefront,
   Database,
+  Users,
 } from '@/components/ui';
 import { TranslationKey } from '@/lib/i18n';
+import { UserRole } from '@/types/auth';
 
 export interface NavChildItem {
   key: string;
   path: string;
   labelKey: TranslationKey;
+  roles?: readonly UserRole[];
   icon?: React.ComponentType<{
     size?: number;
     className?: string;
@@ -28,6 +31,7 @@ export interface NavItem {
   key: string;
   path?: string;
   labelKey: TranslationKey;
+  roles?: readonly UserRole[];
   icon: React.ComponentType<{
     size?: number;
     className?: string;
@@ -56,18 +60,21 @@ export const NAV_ITEMS: readonly NavItem[] = [
     path: '/dashboard/categories',
     labelKey: 'dashboard.menuCategories',
     icon: SquaresFour,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
   },
   {
     key: 'products',
     path: '/dashboard/products',
     labelKey: 'dashboard.menuProducts',
     icon: ForkKnife,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
   },
   {
     key: 'inventory',
     path: '/dashboard/inventory',
     labelKey: 'dashboard.menuInventory',
     icon: CookingPot,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'KITCHEN_STAFF'],
   },
   {
     key: 'warehouses',
@@ -75,6 +82,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     labelKey: 'dashboard.warehouses',
     icon: Database,
     hideInBottomNav: true,
+    roles: ['SUPER_ADMIN'],
   },
   {
     key: 'branches',
@@ -82,36 +90,50 @@ export const NAV_ITEMS: readonly NavItem[] = [
     labelKey: 'dashboard.branches',
     icon: Storefront,
     hideInBottomNav: true,
+    roles: ['SUPER_ADMIN'],
+  },
+  {
+    key: 'staff',
+    path: '/dashboard/staff',
+    labelKey: 'dashboard.staff',
+    icon: Users,
+    hideInBottomNav: true,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
   },
   {
     key: 'orders',
     path: '/dashboard/orders',
     labelKey: 'dashboard.orders',
     icon: Package,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'CASHIER', 'KITCHEN_STAFF'],
   },
   {
     key: 'settings',
     labelKey: 'dashboard.settingsGroup',
     icon: Gear,
     hideInBottomNav: true,
+    roles: ['SUPER_ADMIN'],
     children: [
       {
         key: 'store-settings',
         path: '/dashboard/store-settings',
         labelKey: 'dashboard.storeSettings',
         icon: Storefront,
+        roles: ['SUPER_ADMIN'],
       },
       {
         key: 'shipping',
         path: '/dashboard/shipping',
         labelKey: 'dashboard.shipping',
         icon: Truck,
+        roles: ['SUPER_ADMIN'],
       },
       {
         key: 'payment-settings',
         path: '/dashboard/settings',
         labelKey: 'dashboard.paymentSettings',
         icon: QrCode,
+        roles: ['SUPER_ADMIN'],
       },
     ],
   },

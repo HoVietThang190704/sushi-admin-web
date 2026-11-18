@@ -59,4 +59,14 @@ export const authApi = {
       body: JSON.stringify({ refreshToken }),
     });
   },
+
+  /**
+   * Đổi mật khẩu tài khoản hiện tại
+   */
+  changePassword: async (dto: { currentPassword: string; newPassword: string }): Promise<LoginResponse> => {
+    return fetchApi<LoginResponse>(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  },
 };
