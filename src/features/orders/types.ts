@@ -106,11 +106,22 @@ export interface UpdatePaymentConfigInput {
   isActive?: boolean;
 }
 
+export interface HeroBannerItem {
+  id: string;
+  imageUrl: string;
+  leadTitle?: string;
+  highlightTitle?: string;
+  description?: string;
+  kanjiWatermark?: string;
+  isActive?: boolean;
+}
+
 export interface StoreConfig {
   id: string;
   key: string;
   customerOrderingEnabled: boolean;
   contactPhone: string;
+  heroBanners?: HeroBannerItem[] | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -118,6 +129,7 @@ export interface StoreConfig {
 export interface UpdateStoreConfigInput {
   customerOrderingEnabled?: boolean;
   contactPhone?: string;
+  heroBanners?: HeroBannerItem[];
 }
 
 export interface CreateStaffOrderItemInput {
