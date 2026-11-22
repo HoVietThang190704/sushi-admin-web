@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import {
   Table,
   Typography,
@@ -35,28 +34,6 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const columns = [
-    {
-      title: t('dashboard.productTableImage'),
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      width: 76,
-      render: (url: string | null | undefined, record: Product) => (
-        <div className="w-11 h-11 rounded-xl overflow-hidden border border-sushi-border bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
-          {url ? (
-            <Image
-              src={url}
-              alt={record.name}
-              width={44}
-              height={44}
-              className="object-cover w-full h-full"
-              unoptimized
-            />
-          ) : (
-            <ForkKnife size={20} className="text-sushi-text-dim" />
-          )}
-        </div>
-      ),
-    },
     {
       title: t('dashboard.productTableName'),
       dataIndex: 'name',
@@ -208,32 +185,15 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
           <SushiCardItem className="cursor-pointer hover:border-sushi-gold/50 transition-all active:scale-[0.99]">
             <div onClick={() => setSelectedProduct(product)}>
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden border border-sushi-border/80 bg-sushi-surface flex items-center justify-center shrink-0 shadow-sm">
-                    {product.imageUrl ? (
-                      <Image
-                        src={product.imageUrl}
-                        alt={product.name}
-                        width={56}
-                        height={56}
-                        className="object-cover w-full h-full"
-                        unoptimized
-                      />
-                    ) : (
-                      <ForkKnife size={22} className="text-sushi-text-dim" />
-                    )}
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <h4 className="text-sm font-bold text-sushi-text truncate leading-snug">
+                    {product.name}
+                  </h4>
+                  <div className="text-2xs text-sushi-text-muted truncate">
+                    {product.category?.name || t('common.uncategorized')}
                   </div>
-
-                  <div className="min-w-0 flex-1 space-y-0.5">
-                    <h4 className="text-sm font-bold text-sushi-text truncate leading-snug">
-                      {product.name}
-                    </h4>
-                    <div className="text-2xs text-sushi-text-muted truncate">
-                      {product.category?.name || t('common.uncategorized')}
-                    </div>
-                    <div className="text-2xs text-sushi-text-dim font-mono truncate">
-                      SKU: {product.sku}
-                    </div>
+                  <div className="text-2xs text-sushi-text-dim font-mono truncate">
+                    SKU: {product.sku}
                   </div>
                 </div>
 
