@@ -33,6 +33,10 @@ export const API_ENDPOINTS = {
     PAYMENT_CONFIG: '/api/orders/payment-config',
     STORE_CONFIG: '/api/orders/store-config',
   },
+  SETTINGS: {
+    PAYMENT_CONFIG: '/api/orders/payment-config',
+    STORE_CONFIG: '/api/orders/store-config',
+  },
   INVENTORY: {
     INGREDIENTS: '/api/inventory/ingredients',
     ALERTS: '/api/inventory/alerts',

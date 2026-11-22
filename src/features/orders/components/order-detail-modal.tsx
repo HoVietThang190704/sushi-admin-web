@@ -36,6 +36,7 @@ import {
 } from '../hooks/use-orders';
 import { useFormatCurrency } from '@/lib/hooks/use-format-currency';
 import { useIsMobile } from '@/lib/hooks/use-is-mobile';
+import { useTranslation } from '@/lib/i18n';
 import { SUSHICOLORS } from '@/lib/theme';
 
 interface OrderDetailModalProps {
@@ -52,6 +53,7 @@ export function OrderDetailModal({
   const { message } = App.useApp();
   const { formatCurrency } = useFormatCurrency();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const [cancelReason, setCancelReason] = useState('');
   const [showCancelInput, setShowCancelInput] = useState(false);
@@ -177,7 +179,7 @@ export function OrderDetailModal({
               type="button"
               onClick={onClose}
               className="w-8 h-8 rounded-full flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer shrink-0 mt-0.5"
-              aria-label="Đóng chi tiết"
+              aria-label={t('ordersPage.modalCloseBtn')}
             >
               <X size={20} />
             </button>
@@ -194,7 +196,7 @@ export function OrderDetailModal({
                   <User size={16} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold">Khách hàng</div>
+                  <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold">{t('ordersPage.modalCustomer')}</div>
                   <div className="font-bold text-sm text-sushi-text truncate">{order.customerName}</div>
                 </div>
               </div>
@@ -209,7 +211,7 @@ export function OrderDetailModal({
 
             <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-sushi-border/50">
               <div className="min-w-0">
-                <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold mb-1">Thanh toán</div>
+                <div className="text-2xs text-sushi-text-muted uppercase tracking-wider font-semibold mb-1">{t('ordersPage.modalPayment')}</div>
                 <div className="flex items-center gap-1.5">
                   <OrderPaymentBadge status={order.paymentStatus} />
                   <span className="text-2xs text-sushi-text-muted">({order.paymentMethod})</span>
@@ -224,7 +226,7 @@ export function OrderDetailModal({
                 {updatePaymentMutation.isPending && (
                   <CircleNotch size={13} className="animate-spin" />
                 )}
-                <span>{order.paymentStatus === 'PAID' ? 'Đổi sang Chưa TT' : 'Đổi sang Đã TT'}</span>
+                <span>{order.paymentStatus === 'PAID' ? t('ordersPage.modalToggleUnpaid') : t('ordersPage.modalTogglePaid')}</span>
               </button>
             </div>
 
@@ -278,7 +280,7 @@ export function OrderDetailModal({
           {/* Phiếu Danh sách Món ăn & Tổng tiền liền khối */}
           <div className="rounded-2xl border border-sushi-border/70 bg-sushi-surface/50 overflow-hidden shadow-xs">
             <div className="px-3.5 py-2.5 bg-zinc-900/60 border-b border-sushi-border/60 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-sushi-text-muted">
-              <span>Món ăn đã đặt</span>
+              <span>{t('ordersPage.modalItemsList')}</span>
               <span className="text-sushi-gold font-mono">{totalItemsCount} món</span>
             </div>
 
@@ -320,7 +322,7 @@ export function OrderDetailModal({
 
             <div className="px-3.5 py-3 bg-zinc-900/70 border-t border-sushi-border/70 flex items-center justify-between">
               <span className="text-sm font-semibold text-sushi-text-muted">
-                Tổng thanh toán:
+                {t('ordersPage.modalTotalPayment')}:
               </span>
               <span className="text-lg font-bold font-mono text-sushi-gold">
                 {formatCurrency(order.totalAmount)}
@@ -356,11 +358,11 @@ export function OrderDetailModal({
                   className="h-11 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
                 >
                   <XCircle size={16} weight="bold" />
-                  <span>Hủy đơn</span>
+                  <span>{t('ordersPage.modalCancelOrderBtn')}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
+                  onClick={() => handleUpdateStatus('CONFIRMED', t('ordersPage.modalConfirmOrderBtn'))}
                   disabled={isTransferUnpaid || updateStatusMutation.isPending}
                   className={`flex-1 h-11 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
                     isTransferUnpaid
@@ -374,7 +376,7 @@ export function OrderDetailModal({
                   ) : (
                     <CheckCircle size={18} weight="bold" />
                   )}
-                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Xác nhận đơn'}</span>
+                  <span>{isTransferUnpaid ? t('ordersPage.modalWaitingPayment') : t('ordersPage.modalConfirmOrderBtn')}</span>
                 </button>
               </div>
             )}
@@ -387,11 +389,11 @@ export function OrderDetailModal({
                   className="h-11 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
                 >
                   <XCircle size={16} weight="bold" />
-                  <span>Hủy đơn</span>
+                  <span>{t('ordersPage.modalCancelOrderBtn')}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
+                  onClick={() => handleUpdateStatus('PREPARING', t('ordersPage.modalStartCookingBtn'))}
                   disabled={isTransferUnpaid || updateStatusMutation.isPending}
                   className={`flex-1 h-11 px-4 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
                     isTransferUnpaid
@@ -405,7 +407,7 @@ export function OrderDetailModal({
                   ) : (
                     <CookingPot size={18} weight="bold" />
                   )}
-                  <span>{isTransferUnpaid ? 'Chờ thanh toán' : 'Bắt đầu chế biến'}</span>
+                  <span>{isTransferUnpaid ? t('ordersPage.modalWaitingPayment') : t('ordersPage.modalStartCookingBtn')}</span>
                 </button>
               </div>
             )}
@@ -422,7 +424,7 @@ export function OrderDetailModal({
                 ) : (
                   <Package size={18} weight="bold" />
                 )}
-                <span>Sẵn sàng lấy món</span>
+                <span>{t('ordersPage.modalReadyPickupBtn')}</span>
               </button>
             )}
 
@@ -438,7 +440,7 @@ export function OrderDetailModal({
                 ) : (
                   <Truck size={18} weight="bold" />
                 )}
-                <span>Bắt đầu giao hàng (Shipper lấy)</span>
+                <span>{t('ordersPage.modalDeliveringBtn')}</span>
               </button>
             )}
 
@@ -454,7 +456,7 @@ export function OrderDetailModal({
                 ) : (
                   <CheckCircle size={18} weight="bold" />
                 )}
-                <span>Xác nhận đã giao thành công</span>
+                <span>{t('ordersPage.modalCompletedBtn')}</span>
               </button>
             )}
           </div>
@@ -570,11 +572,11 @@ export function OrderDetailModal({
                   className="h-10 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <XCircle size={16} weight="bold" />
-                  <span>Hủy đơn</span>
+                  <span>{t('ordersPage.modalCancelOrderBtn')}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleUpdateStatus('CONFIRMED', 'Xác nhận đơn hàng')}
+                  onClick={() => handleUpdateStatus('CONFIRMED', t('ordersPage.modalConfirmOrderBtn'))}
                   disabled={isTransferUnpaid || updateStatusMutation.isPending}
                   className={`h-10 px-5 rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all ${
                     isTransferUnpaid
@@ -601,11 +603,11 @@ export function OrderDetailModal({
                   className="h-10 px-4 rounded-xl border border-rose-500/35 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <XCircle size={16} weight="bold" />
-                  <span>Hủy đơn</span>
+                  <span>{t('ordersPage.modalCancelOrderBtn')}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleUpdateStatus('PREPARING', 'Bắt đầu chế biến')}
+                  onClick={() => handleUpdateStatus('PREPARING', t('ordersPage.modalStartCookingBtn'))}
                   disabled={isTransferUnpaid || updateStatusMutation.isPending}
                   className={`h-10 px-5 rounded-xl font-bold text-sm inline-flex items-center gap-2 transition-all ${
                     isTransferUnpaid
@@ -652,7 +654,7 @@ export function OrderDetailModal({
                 ) : (
                   <Truck size={18} weight="bold" />
                 )}
-                <span>Bắt đầu giao hàng</span>
+                <span>{t('ordersPage.modalDeliveringBtn')}</span>
               </button>
             )}
 
@@ -668,7 +670,7 @@ export function OrderDetailModal({
                 ) : (
                   <CheckCircle size={18} weight="bold" />
                 )}
-                <span>Xác nhận đã giao</span>
+                <span>{t('ordersPage.modalCompletedBtn')}</span>
               </button>
             )}
           </Space>
@@ -692,7 +694,7 @@ export function OrderDetailModal({
           <div className="p-3.5 rounded-xl bg-sushi-surface/80 border border-sushi-border/80 flex items-start justify-between">
             <div className="space-y-1 min-w-0">
               <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted flex items-center gap-1.5">
-                <User size={14} className="text-sushi-gold" /> Khách hàng
+                <User size={14} className="text-sushi-gold" /> {t('ordersPage.modalCustomer')}
               </span>
               <div className="font-bold text-sm text-sushi-text truncate">
                 {order.customerName}
@@ -711,7 +713,7 @@ export function OrderDetailModal({
               <span className="text-2xs text-sushi-text-muted block mb-1">Loại hình</span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-400 border border-cyan-800/60 flex items-center gap-1">
                 <Truck size={12} />
-                <span>Giao tận nơi</span>
+                <span>{t('ordersPage.modalDeliveryVal')}</span>
               </span>
             </div>
           </div>
@@ -719,7 +721,7 @@ export function OrderDetailModal({
           <div className="p-3.5 rounded-xl bg-sushi-surface/80 border border-sushi-border/80 flex items-start justify-between">
             <div className="space-y-1.5 min-w-0">
               <span className="text-2xs uppercase tracking-wider font-semibold text-sushi-text-muted flex items-center gap-1.5">
-                <CreditCard size={14} className="text-sushi-gold" /> Thanh toán
+                <CreditCard size={14} className="text-sushi-gold" /> {t('ordersPage.modalPayment')}
               </span>
               <div className="flex items-center gap-2">
                 <OrderPaymentBadge status={order.paymentStatus} />
@@ -735,7 +737,7 @@ export function OrderDetailModal({
               {updatePaymentMutation.isPending && (
                 <CircleNotch size={13} className="animate-spin" />
               )}
-              <span>{order.paymentStatus === 'PAID' ? 'Hủy đánh dấu Đã TT' : 'Đánh dấu Đã TT'}</span>
+              <span>{order.paymentStatus === 'PAID' ? t('ordersPage.modalUnmarkPaid') : t('ordersPage.modalMarkPaid')}</span>
             </button>
           </div>
         </div>
@@ -770,7 +772,7 @@ export function OrderDetailModal({
             <MapPin size={18} className="text-sushi-gold shrink-0 mt-0.5" weight="fill" />
             <div className="min-w-0 flex-1">
               <span className="font-semibold text-sushi-text-muted block text-2xs uppercase tracking-wider mb-0.5">
-                Địa chỉ giao hàng:
+                {t('ordersPage.modalAddress')}:
               </span>
               <span className="text-sushi-text font-medium leading-relaxed block text-sm">
                 {order.address}
@@ -784,7 +786,7 @@ export function OrderDetailModal({
           <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs flex items-start gap-2.5">
             <FileText size={17} className="text-amber-400 shrink-0 mt-0.5" />
             <div className="min-w-0 flex-1">
-              <span className="font-semibold text-amber-400">Ghi chú từ khách: </span>
+              <span className="font-semibold text-amber-400">{t('ordersPage.modalCustomerNote')}: </span>
               <span className="text-amber-200/90 italic leading-relaxed">{order.note}</span>
             </div>
           </div>
@@ -812,7 +814,7 @@ export function OrderDetailModal({
 
           <div className="px-4 py-3 bg-zinc-900/50 border-t border-sushi-border/80 flex items-center justify-between">
             <span className="text-sm font-semibold text-sushi-text-muted">
-              Tổng tiền thanh toán:
+              {t('ordersPage.modalTotalPayment')}:
             </span>
             <span className="text-xl font-bold font-mono text-sushi-gold">
               {formatCurrency(order.totalAmount)}

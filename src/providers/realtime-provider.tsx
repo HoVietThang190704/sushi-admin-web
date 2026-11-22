@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth';
 import { inventoryKeys } from '@/features/inventory/hooks/use-inventory';
 import { catalogKeys } from '@/features/catalog/hooks/use-categories';
 import { orderKeys } from '@/features/orders/hooks/use-orders';
+import { settingsKeys } from '@/features/settings/hooks/use-settings';
 
 export interface RealtimeContextType {
   isConnected: boolean;
@@ -56,6 +57,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           queryClient.invalidateQueries({ queryKey: catalogKeys.all });
         } else if (event?.resource === 'order') {
           queryClient.invalidateQueries({ queryKey: orderKeys.all });
+          queryClient.invalidateQueries({ queryKey: settingsKeys.storeConfig });
+          queryClient.invalidateQueries({ queryKey: settingsKeys.paymentConfig });
         }
         setLastEvent(event);
       },

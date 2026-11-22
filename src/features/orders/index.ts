@@ -9,6 +9,4 @@ export * from './components/order-table';
 export * from './components/order-date-filter-drawer';
 export * from './components/order-lifecycle-timeline';
 export * from './components/order-cancel-form';
-export * from './components/payment-settings-view';
-export * from './components/store-settings-view';
 export * from './utils';

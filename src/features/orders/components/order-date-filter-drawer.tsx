@@ -6,6 +6,7 @@ import { CalendarBlank, X } from '@phosphor-icons/react';
 import dayjs, { Dayjs } from 'dayjs';
 import { SUSHICOLORS } from '@/lib/theme';
 import { useIsMobile } from '@/lib/hooks/use-is-mobile';
+import { useTranslation } from '@/lib/i18n';
 
 interface OrderDateFilterDrawerProps {
   open: boolean;
@@ -29,6 +30,7 @@ function FilterForm({
   onApply: (filter: { startDate?: string; endDate?: string }) => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const [tempStart, setTempStart] = useState<Dayjs | null>(
     startDate ? dayjs(startDate) : null,
   );
@@ -70,13 +72,13 @@ function FilterForm({
       {/* Header: BỘ LỌC + Nút đóng X */}
       <div className="flex items-center justify-between pb-3 border-b border-sushi-border">
         <h3 className="text-base font-bold uppercase tracking-wider text-sushi-text font-sans">
-          BỘ LỌC
+          {t('ordersPage.filterModalTitle')}
         </h3>
         <button
           type="button"
           onClick={onClose}
           className="w-8 h-8 rounded-full flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
-          aria-label="Đóng bộ lọc"
+          aria-label={t('ordersPage.closeFilterAria')}
         >
           <X size={20} />
         </button>
@@ -84,28 +86,28 @@ function FilterForm({
 
       {/* Lựa chọn nhanh */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-sushi-text-muted shrink-0">Nhanh:</span>
+        <span className="text-xs text-sushi-text-muted shrink-0">{t('ordersPage.quickFilterLabel')}:</span>
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
             onClick={() => handleQuickSelect('today')}
             className="text-xs px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-sushi-border transition-colors cursor-pointer"
           >
-            Hôm nay
+            {t('ordersPage.quickToday')}
           </button>
           <button
             type="button"
             onClick={() => handleQuickSelect('7days')}
             className="text-xs px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-sushi-border transition-colors cursor-pointer"
           >
-            7 ngày qua
+            {t('ordersPage.quick7Days')}
           </button>
           <button
             type="button"
             onClick={() => handleQuickSelect('30days')}
             className="text-xs px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-sushi-border transition-colors cursor-pointer"
           >
-            30 ngày qua
+            {t('ordersPage.quick30Days')}
           </button>
         </div>
       </div>
@@ -113,13 +115,13 @@ function FilterForm({
       {/* Trường chọn Ngày bắt đầu */}
       <div className="space-y-1.5">
         <label className="text-sm font-semibold text-sushi-text block">
-          Ngày bắt đầu
+          {t('ordersPage.startDateLabel')}
         </label>
         <DatePicker
           value={tempStart}
           onChange={(val) => setTempStart(val)}
           format="DD/MM/YYYY"
-          placeholder="Chọn ngày bắt đầu"
+          placeholder={t('ordersPage.startDatePlaceholder')}
           className="w-full h-11 rounded-xl bg-sushi-surface border-sushi-border text-sushi-text placeholder:text-zinc-500 font-sans"
           suffixIcon={<CalendarBlank size={18} className="text-sushi-text-muted" />}
         />
@@ -128,13 +130,13 @@ function FilterForm({
       {/* Trường chọn Ngày kết thúc */}
       <div className="space-y-1.5">
         <label className="text-sm font-semibold text-sushi-text block">
-          Ngày kết thúc
+          {t('ordersPage.endDateLabel')}
         </label>
         <DatePicker
           value={tempEnd}
           onChange={(val) => setTempEnd(val)}
           format="DD/MM/YYYY"
-          placeholder="Chọn ngày kết thúc"
+          placeholder={t('ordersPage.endDatePlaceholder')}
           disabledDate={(current) =>
             tempStart ? current && current.isBefore(tempStart, 'day') : false
           }
@@ -150,7 +152,7 @@ function FilterForm({
           onClick={handleReset}
           className="h-12 rounded-xl font-semibold border-sushi-border text-sushi-text hover:bg-zinc-800"
         >
-          Thiết lập lại
+          {t('ordersPage.resetBtn')}
         </Button>
         <Button
           size="large"
@@ -158,7 +160,7 @@ function FilterForm({
           onClick={handleApply}
           className="h-12 rounded-xl font-semibold bg-sushi-gold hover:opacity-90 text-black border-none shadow-md"
         >
-          Áp dụng
+          {t('ordersPage.applyBtn')}
         </Button>
       </div>
     </div>

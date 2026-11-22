@@ -1,6 +1,6 @@
 'use client';
 
-import { StoreSettingsView } from '@/features/orders';
+import { StoreSettingsView } from '@/features/settings';
 import { SushiPageHeader } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 

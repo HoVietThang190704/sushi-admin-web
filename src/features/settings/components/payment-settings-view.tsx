@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import {
   Form,
   Input,
@@ -17,7 +18,7 @@ import {
   UploadSimple,
   Spinner,
 } from '@phosphor-icons/react';
-import { usePaymentConfig, useUpdatePaymentConfig } from '../hooks/use-orders';
+import { usePaymentConfig, useUpdatePaymentConfig } from '../hooks/use-settings';
 import { catalogApi } from '@/features/catalog/api/catalog.api';
 import { useTranslation } from '@/lib/i18n';
 
@@ -143,10 +144,12 @@ export function PaymentSettingsView() {
               {qrPreviewUrl ? (
                 <div className="space-y-3">
                   <div className="relative w-full aspect-square max-w-[220px] sm:max-w-[260px] mx-auto rounded-xl overflow-hidden border-2 border-sushi-gold/40 bg-zinc-950 p-2 flex items-center justify-center shadow-inner">
-                    <img
+                    <Image
                       src={qrPreviewUrl}
                       alt="Mã QR chuyển khoản"
-                      className="w-full h-full object-contain rounded-lg"
+                      fill
+                      unoptimized
+                      className="object-contain rounded-lg p-1.5"
                     />
                   </div>
 

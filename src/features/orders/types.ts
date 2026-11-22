@@ -83,55 +83,6 @@ export interface UpdatePaymentStatusInput {
   paymentStatus: PaymentStatus;
 }
 
-export interface PaymentConfig {
-  id: string;
-  key: string;
-  bankName?: string | null;
-  accountNumber?: string | null;
-  accountHolder?: string | null;
-  qrImageUrl?: string | null;
-  transferSyntax?: string | null;
-  note?: string | null;
-  isActive: boolean;
-  updatedAt: string;
-}
-
-export interface UpdatePaymentConfigInput {
-  bankName?: string;
-  accountNumber?: string;
-  accountHolder?: string;
-  qrImageUrl?: string;
-  transferSyntax?: string;
-  note?: string;
-  isActive?: boolean;
-}
-
-export interface HeroBannerItem {
-  id: string;
-  imageUrl: string;
-  leadTitle?: string;
-  highlightTitle?: string;
-  description?: string;
-  kanjiWatermark?: string;
-  isActive?: boolean;
-}
-
-export interface StoreConfig {
-  id: string;
-  key: string;
-  customerOrderingEnabled: boolean;
-  contactPhone: string;
-  heroBanners?: HeroBannerItem[] | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UpdateStoreConfigInput {
-  customerOrderingEnabled?: boolean;
-  contactPhone?: string;
-  heroBanners?: HeroBannerItem[];
-}
-
 export interface CreateStaffOrderItemInput {
   productId: string;
   quantity: number;

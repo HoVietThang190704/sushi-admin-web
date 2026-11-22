@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { CaretDown } from '@phosphor-icons/react';
 import { OrderStatusHistory } from '../types';
 import { getOrderStatusLabel, formatOrderActor } from '../utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface OrderLifecycleTimelineProps {
   histories?: OrderStatusHistory[];
@@ -14,6 +15,7 @@ export function OrderLifecycleTimeline({
   histories,
   collapsible = false,
 }: OrderLifecycleTimelineProps) {
+  const { t, locale } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(!collapsible);
 
   if (!histories || histories.length === 0) return null;
@@ -27,7 +29,7 @@ export function OrderLifecycleTimeline({
           className="w-full px-3.5 py-2.5 flex items-center justify-between text-xs font-semibold text-sushi-text-muted hover:text-sushi-text transition-colors cursor-pointer"
         >
           <span className="uppercase tracking-wider">
-            Lịch sử vòng đời ({histories.length})
+            {t('ordersPage.lifecycleTitle')} ({histories.length})
           </span>
           <CaretDown
             size={14}
@@ -36,7 +38,7 @@ export function OrderLifecycleTimeline({
         </button>
       ) : (
         <div className="px-3.5 pt-3 pb-2 text-xs font-bold uppercase tracking-wider text-sushi-text-muted">
-          Lịch sử vòng đời đơn ({histories.length})
+          {t('ordersPage.lifecycleTitle')} ({histories.length})
         </div>
       )}
 
@@ -50,7 +52,7 @@ export function OrderLifecycleTimeline({
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-sushi-gold shrink-0" />
                 <span className="font-mono text-sushi-text-muted text-2xs shrink-0">
-                  {new Date(h.createdAt).toLocaleTimeString('vi-VN', {
+                  {new Date(h.createdAt).toLocaleTimeString(locale === 'vi' ? 'vi-VN' : 'en-US', {
                     hour: '2-digit',
                     minute: '2-digit',
                     second: '2-digit',
@@ -59,14 +61,14 @@ export function OrderLifecycleTimeline({
                 <span className="font-medium text-sushi-text truncate">
                   {h.fromStatus ? (
                     <>
-                      <span>{getOrderStatusLabel(h.fromStatus)}</span>
+                      <span>{getOrderStatusLabel(h.fromStatus, t)}</span>
                       <span className="text-sushi-text-muted mx-1">→</span>
                     </>
                   ) : (
-                    <span className="text-sushi-text-muted mr-1">Khởi tạo:</span>
+                    <span className="text-sushi-text-muted mr-1">{t('ordersPage.initializedLabel')}:</span>
                   )}
                   <span className="text-sushi-gold font-semibold">
-                    {getOrderStatusLabel(h.toStatus)}
+                    {getOrderStatusLabel(h.toStatus, t)}
                   </span>
                 </span>
                 {h.reason && (
@@ -76,7 +78,7 @@ export function OrderLifecycleTimeline({
                 )}
               </div>
               <span className="text-sushi-text-muted text-2xs shrink-0 ml-2">
-                bởi {formatOrderActor(h.changedBy)}
+                {t('ordersPage.byActor')} {formatOrderActor(h.changedBy, t)}
               </span>
             </div>
           ))}

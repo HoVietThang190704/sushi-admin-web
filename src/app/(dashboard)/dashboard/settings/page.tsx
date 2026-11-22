@@ -1,6 +1,6 @@
 'use client';
 
-import { PaymentSettingsView } from '@/features/orders';
+import { PaymentSettingsView } from '@/features/settings';
 import { SushiPageHeader } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 

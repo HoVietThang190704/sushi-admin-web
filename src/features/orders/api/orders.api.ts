@@ -6,10 +6,6 @@ import {
   PagedOrders,
   UpdateOrderStatusInput,
   UpdatePaymentStatusInput,
-  PaymentConfig,
-  UpdatePaymentConfigInput,
-  StoreConfig,
-  UpdateStoreConfigInput,
   CreateStaffOrderInput,
 } from '../types';
 
@@ -49,24 +45,6 @@ export const ordersApi = {
 
   updatePaymentStatus: (orderId: string, input: UpdatePaymentStatusInput) =>
     fetchApi<Order>(API_ENDPOINTS.ORDERS.PAYMENT(orderId), {
-      method: 'PATCH',
-      body: JSON.stringify(input),
-    }),
-
-  getPaymentConfig: () =>
-    fetchApi<PaymentConfig>(API_ENDPOINTS.ORDERS.PAYMENT_CONFIG),
-
-  updatePaymentConfig: (input: UpdatePaymentConfigInput) =>
-    fetchApi<PaymentConfig>(API_ENDPOINTS.ORDERS.PAYMENT_CONFIG, {
-      method: 'PATCH',
-      body: JSON.stringify(input),
-    }),
-
-  getStoreConfig: () =>
-    fetchApi<StoreConfig>(API_ENDPOINTS.ORDERS.STORE_CONFIG),
-
-  updateStoreConfig: (input: UpdateStoreConfigInput) =>
-    fetchApi<StoreConfig>(API_ENDPOINTS.ORDERS.STORE_CONFIG, {
       method: 'PATCH',
       body: JSON.stringify(input),
     }),
