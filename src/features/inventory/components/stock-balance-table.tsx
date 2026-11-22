@@ -49,14 +49,9 @@ export function StockBalanceTable({
       dataIndex: 'name',
       key: 'name',
       render: (name: string) => (
-        <div className="flex items-center space-x-3 py-1">
-          <div className="w-8 h-8 rounded-xl bg-sushi-surface border border-sushi-border text-sushi-primary flex items-center justify-center shrink-0 shadow-sm">
-            <CookingPot size={17} weight="fill" />
-          </div>
-          <Text strong className="text-sushi-text block text-sm font-sans truncate">
-            {name}
-          </Text>
-        </div>
+        <Text strong className="text-sushi-text block text-sm font-sans truncate py-1">
+          {name}
+        </Text>
       ),
     },
     {
@@ -197,18 +192,13 @@ export function StockBalanceTable({
           return (
             <SushiCardItem>
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border text-emerald-400 flex items-center justify-center shrink-0 shadow-inner">
-                    <CookingPot size={19} weight="fill" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-bold text-sushi-text truncate">
-                      {item.name}
-                    </h4>
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
-                      <span className="truncate">{t('dashboard.codeShort')}: {item.code}</span>
-                      <span className="shrink-0">· Min: {item.minStock} {item.unit}</span>
-                    </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-bold text-sushi-text truncate">
+                    {item.name}
+                  </h4>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-sushi-text-dim font-mono mt-0.5">
+                    <span className="truncate">{t('dashboard.codeShort')}: {item.code}</span>
+                    <span className="shrink-0">· Min: {item.minStock} {item.unit}</span>
                   </div>
                 </div>
 
