@@ -73,9 +73,9 @@ export function RecipeManagementView({
     return map;
   }, [recipes]);
 
-  // Chỉ quản lý công thức cho món đơn (SINGLE)
+  // Quản lý công thức định mức cho danh sách món ăn
   const singleProducts = useMemo(() => {
-    return products.filter((p) => p.type === 'SINGLE');
+    return products;
   }, [products]);
 
   // Lọc sản phẩm

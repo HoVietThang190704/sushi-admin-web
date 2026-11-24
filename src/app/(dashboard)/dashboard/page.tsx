@@ -490,12 +490,7 @@ export default function DashboardOverviewPage() {
                             {product.name}
                           </div>
                           <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim mt-0.5">
-                            <Tag
-                              color={product.type === 'COMBO' ? 'gold' : 'blue'}
-                              className="text-3xs font-mono font-semibold !px-1.5 !py-0 !leading-none mr-0"
-                            >
-                              {product.type}
-                            </Tag>
+                            <span className="font-mono">{product.sku}</span>
                             {product.category?.name && (
                               <span className="text-sushi-text-muted truncate">
                                 · {product.category.name}
@@ -556,12 +551,6 @@ export default function DashboardOverviewPage() {
                       </div>
 
                       <div className="flex items-center space-x-3 shrink-0 ml-3">
-                        <Tag
-                          color={product.type === 'COMBO' ? 'gold' : 'blue'}
-                          className="text-2xs font-mono font-semibold mr-0"
-                        >
-                          {product.type}
-                        </Tag>
                         <span className="text-xs font-bold text-sushi-text font-sans">
                           {formatCurrency(product.sellingPrice)}
                         </span>

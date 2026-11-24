@@ -77,7 +77,7 @@ export default function InventoryPage() {
 
   // Recipe (BOM) Data Memo
   const singleProducts = useMemo(() => {
-    return products.filter((p) => p.type === 'SINGLE');
+    return products;
   }, [products]);
 
   const recipeMap = useMemo(() => {

@@ -66,23 +66,6 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
       ),
     },
     {
-      title: t('dashboard.productTableType'),
-      dataIndex: 'type',
-      key: 'type',
-      width: 120,
-      render: (type: string) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-mono font-semibold border ${
-            type === 'COMBO'
-              ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
-              : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
-          }`}
-        >
-          {type}
-        </span>
-      ),
-    },
-    {
       title: t('dashboard.productTablePrice'),
       dataIndex: 'sellingPrice',
       key: 'sellingPrice',
@@ -221,15 +204,6 @@ export function ProductTable({ products, loading, onEdit, onDelete }: ProductTab
 
               <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-3xs font-mono font-semibold border ${
-                      product.type === 'COMBO'
-                        ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
-                        : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
-                    }`}
-                  >
-                    {product.type}
-                  </span>
                   <span
                     className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-3xs font-medium border ${
                       product.isActive

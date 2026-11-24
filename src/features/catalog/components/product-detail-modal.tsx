@@ -11,7 +11,6 @@ import {
   Copy,
   CheckCircle,
   WarningCircle,
-  Package,
   PencilSimple,
   message,
 } from '@/components/ui';
@@ -37,18 +36,17 @@ export function ProductDetailModal({
   const { t, locale } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
 
-  const { data: detailProduct, isLoading: loadingDetail } = useProductDetail(
+  const { data: detailProduct } = useProductDetail(
     open && product ? product.id : undefined,
   );
 
   const { data: recipe, isLoading: loadingRecipe } = useRecipeByProduct(
-    open && product?.type === 'SINGLE' ? product.id : undefined,
+    open && product ? product.id : undefined,
   );
 
   if (!product) return null;
 
   const activeProduct = detailProduct || product;
-  const comboItems = activeProduct.comboItemsAsParent || [];
   const recipeItems = recipe?.items || [];
 
   const estimatedBomCost = recipeItems.reduce((sum, item) => {
@@ -128,16 +126,6 @@ export function ProductDetailModal({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-mono font-semibold border ${
-                  activeProduct.type === 'COMBO'
-                    ? 'bg-sushi-gold/15 text-sushi-gold border-sushi-gold/30'
-                    : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
-                }`}
-              >
-                {activeProduct.type}
-              </span>
-
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-2xs font-medium border ${
                   activeProduct.isActive
@@ -243,147 +231,91 @@ export function ProductDetailModal({
           </div>
         )}
 
-        {/* 3. Nội dung chuyên biệt theo loại món: SINGLE (Công thức BOM) hoặc COMBO (Món thành phần) */}
-        {activeProduct.type === 'SINGLE' ? (
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-sushi-surface/40 border border-sushi-border/80 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <CookingPot size={17} className="text-sushi-gold shrink-0" weight="fill" />
-                <span className="text-xs font-bold uppercase tracking-wider text-sushi-text">
-                  {t('dashboard.productRecipeBomTitle')}
-                </span>
-              </div>
-
-              {!loadingRecipe && (
-                recipeItems.length > 0 ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                    <CheckCircle size={12} weight="fill" />
-                    <span>
-                      {t('recipeView.statusConfigured')} ({recipeItems.length}{' '}
-                      {t('recipeView.ingredientsShort')})
-                    </span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-semibold bg-red-500/15 border border-red-500/30 text-red-400">
-                    <WarningCircle size={12} weight="fill" />
-                    <span>{t('recipeView.statusMissing')}</span>
-                  </span>
-                )
-              )}
-            </div>
-
-            {loadingRecipe ? (
-              <div className="py-6 flex justify-center">
-                <Spin size="small" />
-              </div>
-            ) : recipeItems.length > 0 ? (
-              <div className="space-y-2.5">
-                <div className="divide-y divide-sushi-border/50 rounded-xl border border-sushi-border/60 bg-sushi-card/80 overflow-hidden">
-                  {recipeItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="px-3 py-2.5 flex items-center justify-between gap-2 text-xs"
-                    >
-                      <div className="min-w-0">
-                        <div className="font-semibold text-sushi-text truncate">
-                          {item.ingredient?.name || item.ingredientId}
-                        </div>
-                        {item.ingredient?.code && (
-                          <div className="text-3xs text-sushi-text-dim font-mono">
-                            {item.ingredient.code}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0 font-mono">
-                        <span className="font-bold text-sushi-gold">
-                          {Number(item.quantity)} {item.ingredient?.unit}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {estimatedBomCost > 0 && (
-                  <div className="flex items-center justify-between px-1 pt-1 text-xs">
-                    <span className="text-sushi-text-muted">
-                      {t('dashboard.productEstCostLabel')}
-                    </span>
-                    <span className="font-mono font-bold text-sushi-text">
-                      {formatCurrency(estimatedBomCost)}
-                    </span>
-                  </div>
-                )}
-
-                {recipe?.notes && (
-                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300">
-                    <span className="font-semibold block mb-0.5">
-                      {t('recipeView.notesLabel')}:
-                    </span>
-                    <span>{recipe.notes}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="py-4 text-center text-xs text-sushi-text-dim italic">
-                {t('recipeView.notDeclared')}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-sushi-surface/40 border border-sushi-border/80 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Package size={17} className="text-sushi-gold shrink-0" weight="fill" />
-                <span className="text-xs font-bold uppercase tracking-wider text-sushi-text">
-                  {t('dashboard.productComboItemsTitle')}
-                </span>
-              </div>
-              <span className="text-2xs font-mono text-sushi-gold font-semibold">
-                {comboItems.length} {t('common.itemsCount')}
+        {/* 3. Định mức nguyên liệu (Công thức BOM) */}
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-sushi-surface/40 border border-sushi-border/80 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <CookingPot size={17} className="text-sushi-gold shrink-0" weight="fill" />
+              <span className="text-xs font-bold uppercase tracking-wider text-sushi-text">
+                {t('dashboard.productRecipeBomTitle')}
               </span>
             </div>
 
-            {loadingDetail ? (
-              <div className="py-6 flex justify-center">
-                <Spin size="small" />
-              </div>
-            ) : comboItems.length > 0 ? (
+            {!loadingRecipe && (
+              recipeItems.length > 0 ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <CheckCircle size={12} weight="fill" />
+                  <span>
+                    {t('recipeView.statusConfigured')} ({recipeItems.length}{' '}
+                    {t('recipeView.ingredientsShort')})
+                  </span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-semibold bg-red-500/15 border border-red-500/30 text-red-400">
+                  <WarningCircle size={12} weight="fill" />
+                  <span>{t('recipeView.statusMissing')}</span>
+                </span>
+              )
+            )}
+          </div>
+
+          {loadingRecipe ? (
+            <div className="py-6 flex justify-center">
+              <Spin size="small" />
+            </div>
+          ) : recipeItems.length > 0 ? (
+            <div className="space-y-2.5">
               <div className="divide-y divide-sushi-border/50 rounded-xl border border-sushi-border/60 bg-sushi-card/80 overflow-hidden">
-                {comboItems.map((ci) => (
+                {recipeItems.map((item) => (
                   <div
-                    key={ci.id}
-                    className="px-3 py-2.5 flex items-center justify-between gap-3 text-xs"
+                    key={item.id}
+                    className="px-3 py-2.5 flex items-center justify-between gap-2 text-xs"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="px-2 py-0.5 rounded-md bg-sushi-gold/15 border border-sushi-gold/30 text-sushi-gold font-mono font-bold text-2xs shrink-0">
-                        {ci.quantity}x
-                      </span>
-                      <div className="min-w-0">
-                        <div className="font-semibold text-sushi-text truncate">
-                          {ci.childProduct?.name || ci.childProductId}
-                        </div>
-                        {ci.childProduct?.sku && (
-                          <div className="text-3xs text-sushi-text-dim font-mono">
-                            SKU: {ci.childProduct.sku}
-                          </div>
-                        )}
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sushi-text truncate">
+                        {item.ingredient?.name || item.ingredientId}
                       </div>
+                      {item.ingredient?.code && (
+                        <div className="text-3xs text-sushi-text-dim font-mono">
+                          {item.ingredient.code}
+                        </div>
+                      )}
                     </div>
-                    {ci.childProduct?.sellingPrice !== undefined && (
-                      <span className="font-mono text-sushi-text-muted shrink-0">
-                        {formatCurrency(ci.childProduct.sellingPrice)}
+                    <div className="text-right shrink-0 font-mono">
+                      <span className="font-bold text-sushi-gold">
+                        {Number(item.quantity)} {item.ingredient?.unit}
                       </span>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="py-4 text-center text-xs text-sushi-text-dim italic">
-                {t('dashboard.productComboEmpty')}
-              </div>
-            )}
-          </div>
-        )}
+
+              {estimatedBomCost > 0 && (
+                <div className="flex items-center justify-between px-1 pt-1 text-xs">
+                  <span className="text-sushi-text-muted">
+                    {t('dashboard.productEstCostLabel')}
+                  </span>
+                  <span className="font-mono font-bold text-sushi-text">
+                    {formatCurrency(estimatedBomCost)}
+                  </span>
+                </div>
+              )}
+
+              {recipe?.notes && (
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300">
+                  <span className="font-semibold block mb-0.5">
+                    {t('recipeView.notesLabel')}:
+                  </span>
+                  <span>{recipe.notes}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-4 text-center text-xs text-sushi-text-dim italic">
+              {t('recipeView.notDeclared')}
+            </div>
+          )}
+        </div>
       </div>
     </ResponsiveModalDrawer>
   );

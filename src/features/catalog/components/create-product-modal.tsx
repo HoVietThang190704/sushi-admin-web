@@ -8,7 +8,6 @@ import {
   Input,
   InputNumber,
   Select,
-  Radio,
   Switch,
   Button,
   ImageSquare,
@@ -58,7 +57,6 @@ export function CreateProductModal({
         sku: initialData.sku,
         barcode: initialData.barcode || undefined,
         categoryId: initialData.categoryId || undefined,
-        type: initialData.type,
         sellingPrice: Number(initialData.sellingPrice),
         imageUrl: initialImg,
         description: initialData.description || '',
@@ -194,42 +192,25 @@ export function CreateProductModal({
           </Form.Item>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Loại sản phẩm: SINGLE vs COMBO */}
-          <Form.Item
-            name="type"
-            label={t('dashboard.productTypeLabel')}
-          >
-            <Radio.Group buttonStyle="solid" className="w-full">
-              <Radio.Button value="SINGLE" className="w-1/2 text-center">
-                {t('dashboard.productTypeSingle')}
-              </Radio.Button>
-              <Radio.Button value="COMBO" className="w-1/2 text-center">
-                {t('dashboard.productTypeCombo')}
-              </Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-
-          {/* Giá bán */}
-          <Form.Item
-            name="sellingPrice"
-            label={t('dashboard.productPriceLabel')}
-            rules={[createZodRule(schema, 'sellingPrice')]}
-          >
-            <InputNumber<number>
-              style={{ width: '100%' }}
-              min={1000}
-              step={5000}
-              formatter={(value) =>
-                value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
-              }
-              parser={(value) =>
-                value ? Number(value.replace(/,/g, '')) : 0
-              }
-              placeholder="120,000"
-            />
-          </Form.Item>
-        </div>
+        {/* Giá bán */}
+        <Form.Item
+          name="sellingPrice"
+          label={t('dashboard.productPriceLabel')}
+          rules={[createZodRule(schema, 'sellingPrice')]}
+        >
+          <InputNumber<number>
+            style={{ width: '100%' }}
+            min={1000}
+            step={5000}
+            formatter={(value) =>
+              value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''
+            }
+            parser={(value) =>
+              value ? Number(value.replace(/,/g, '')) : 0
+            }
+            placeholder="120,000"
+          />
+        </Form.Item>
 
         {/* =====================================================================
             Gia vị / Đồ ăn kèm theo món & Mô tả hương vị

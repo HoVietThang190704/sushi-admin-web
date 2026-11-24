@@ -31,17 +31,15 @@ export default function ProductsPage() {
   const { t } = useTranslation();
   const { modal } = App.useApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
-  const [selectedType, setSelectedType] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  const hasActiveFilters = Boolean(selectedCategoryId || (selectedType && selectedType !== 'ALL'));
+  const hasActiveFilters = Boolean(selectedCategoryId);
 
   const handleResetFilters = () => {
     setSelectedCategoryId(undefined);
-    setSelectedType('ALL');
   };
 
   // TanStack Query Hooks
@@ -75,15 +73,9 @@ export default function ProductsPage() {
     });
   };
 
-  // Bộ lọc kết hợp: Từ khóa + Phân loại (SINGLE / COMBO)
+  // Bộ lọc theo từ khóa tìm kiếm (tên, SKU, barcode)
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      // 1. Lọc theo Type
-      if (selectedType !== 'ALL' && product.type !== selectedType) {
-        return false;
-      }
-
-      // 2. Lọc theo từ khóa tìm kiếm (tên, SKU, barcode)
       if (search.trim()) {
         const query = search.toLowerCase().trim();
         const matchName = product.name.toLowerCase().includes(query);
@@ -94,7 +86,7 @@ export default function ProductsPage() {
 
       return true;
     });
-  }, [products, selectedType, search]);
+  }, [products, search]);
 
   return (
     <div className="space-y-5">
@@ -163,20 +155,6 @@ export default function ProductsPage() {
               ]}
             />
           </div>
-
-          {/* Bộ lọc phân loại Single / Combo dạng Dropdown (Chỉ hiển thị trên Desktop >= sm) */}
-          <div className="hidden sm:block sm:w-40">
-            <Select
-              className="w-full h-10"
-              value={selectedType}
-              onChange={(val) => setSelectedType(val)}
-              options={[
-                { value: 'ALL', label: t('dashboard.allTypes') },
-                { value: 'SINGLE', label: 'Single' },
-                { value: 'COMBO', label: 'Combo' },
-              ]}
-            />
-          </div>
         </div>
 
         {/* Số lượng món hiển thị & chip reset nhanh trên mobile */}
@@ -211,8 +189,6 @@ export default function ProductsPage() {
         onClose={() => setIsFilterDrawerOpen(false)}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={(catId) => setSelectedCategoryId(catId)}
-        selectedType={selectedType}
-        onSelectType={(type) => setSelectedType(type)}
         categoryOptions={categoryOptions}
         onReset={handleResetFilters}
         totalFilteredCount={filteredProducts.length}

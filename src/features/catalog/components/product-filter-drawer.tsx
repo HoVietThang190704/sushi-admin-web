@@ -14,8 +14,6 @@ export interface ProductFilterDrawerProps {
   onClose: () => void;
   selectedCategoryId?: string;
   onSelectCategory: (categoryId?: string) => void;
-  selectedType: string;
-  onSelectType: (type: string) => void;
   categoryOptions: Array<{ value: string; label: string }>;
   onReset: () => void;
   totalFilteredCount: number;
@@ -23,7 +21,6 @@ export interface ProductFilterDrawerProps {
 
 function FilterForm({
   selectedCategoryId,
-  selectedType,
   categoryOptions,
   totalFilteredCount,
   onClose,
@@ -31,33 +28,24 @@ function FilterForm({
   onReset,
 }: {
   selectedCategoryId?: string;
-  selectedType: string;
   categoryOptions: Array<{ value: string; label: string }>;
   totalFilteredCount: number;
   onClose: () => void;
-  onApply: (catId?: string, type?: string) => void;
+  onApply: (catId?: string) => void;
   onReset: () => void;
 }) {
   const { t } = useTranslation();
   const [tempCategoryId, setTempCategoryId] = useState<string | undefined>(selectedCategoryId);
-  const [tempType, setTempType] = useState<string>(selectedType);
 
-  const typeOptions = [
-    { value: 'ALL', label: t('dashboard.allTypes') },
-    { value: 'SINGLE', label: t('dashboard.productTypeSingle') },
-    { value: 'COMBO', label: t('dashboard.productTypeCombo') },
-  ];
-
-  const hasActiveFilters = Boolean(tempCategoryId || (tempType && tempType !== 'ALL'));
+  const hasActiveFilters = Boolean(tempCategoryId);
 
   const handleApply = () => {
-    onApply(tempCategoryId, tempType);
+    onApply(tempCategoryId);
     onClose();
   };
 
   const handleReset = () => {
     setTempCategoryId(undefined);
-    setTempType('ALL');
     onReset();
     onClose();
   };
@@ -81,33 +69,6 @@ function FilterForm({
               ...categoryOptions,
             ]}
           />
-        </div>
-
-        {/* Lọc theo loại món: Single / Combo */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-sushi-text-muted block">
-            {t('dashboard.productTypeLabel')}
-          </label>
-          <div className="grid grid-cols-1 gap-2">
-            {typeOptions.map((item) => {
-              const isSelected = tempType === item.value;
-              return (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => setTempType(item.value)}
-                  className={`py-3 px-4 rounded-xl text-xs font-semibold border text-left flex items-center justify-between transition-all cursor-pointer ${
-                    isSelected
-                      ? 'border-sushi-gold bg-sushi-gold/15 text-sushi-gold shadow-xs'
-                      : 'border-sushi-border bg-sushi-surface/50 text-sushi-text-muted hover:text-white hover:bg-sushi-surface'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  {isSelected && <Check size={16} weight="bold" className="text-sushi-gold" />}
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
 
@@ -138,8 +99,6 @@ export function ProductFilterDrawer({
   onClose,
   selectedCategoryId,
   onSelectCategory,
-  selectedType,
-  onSelectType,
   categoryOptions,
   onReset,
   totalFilteredCount,
@@ -155,13 +114,11 @@ export function ProductFilterDrawer({
       {open && (
         <FilterForm
           selectedCategoryId={selectedCategoryId}
-          selectedType={selectedType}
           categoryOptions={categoryOptions}
           totalFilteredCount={totalFilteredCount}
           onClose={onClose}
-          onApply={(catId, type) => {
+          onApply={(catId) => {
             onSelectCategory(catId);
-            if (type) onSelectType(type);
           }}
           onReset={onReset}
         />

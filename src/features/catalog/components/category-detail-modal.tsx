@@ -189,14 +189,6 @@ export function CategoryDetailModal({
                       </div>
                       <div className="flex items-center gap-1.5 text-3xs font-mono text-sushi-text-dim">
                         <span>SKU: {product.sku}</span>
-                        <span>·</span>
-                        <span
-                          className={
-                            product.type === 'COMBO' ? 'text-sushi-gold' : 'text-sky-400'
-                          }
-                        >
-                          {product.type}
-                        </span>
                       </div>
                     </div>
                   </div>
