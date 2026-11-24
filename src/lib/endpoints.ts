@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   ORDERS: {
     ROOT: '/api/orders',
     STAFF: '/api/orders/staff',
+    ANALYTICS: '/api/orders/analytics',
     BY_ID: (id: string) => `/api/orders/${id}`,
     STATUS: (id: string) => `/api/orders/${id}/status`,
     PAYMENT: (id: string) => `/api/orders/${id}/payment`,

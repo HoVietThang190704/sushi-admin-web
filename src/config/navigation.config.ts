@@ -5,6 +5,7 @@ import {
   SquaresFour,
   Package,
   CookingPot,
+  Receipt,
   Truck,
   QrCode,
   Gear,
@@ -106,6 +107,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     labelKey: 'dashboard.orders',
     icon: Package,
     roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'CASHIER', 'KITCHEN_STAFF'],
+  },
+  {
+    key: 'reports',
+    path: '/dashboard/reports',
+    labelKey: 'dashboard.accountingReports',
+    icon: Receipt,
+    hideInBottomNav: true,
+    roles: ['SUPER_ADMIN', 'BRANCH_MANAGER'],
   },
   {
     key: 'settings',
