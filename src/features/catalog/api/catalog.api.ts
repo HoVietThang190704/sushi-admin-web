@@ -54,6 +54,18 @@ export const catalogApi = {
   },
 
   /**
+   * Sắp xếp thứ tự hiển thị danh mục thực đơn
+   */
+  reorderCategories: async (
+    items: Array<{ id: string; sortOrder: number }>,
+  ): Promise<Category[]> => {
+    return fetchApi<Category[]>(API_ENDPOINTS.CATALOG.REORDER_CATEGORIES, {
+      method: 'PATCH',
+      body: JSON.stringify({ items }),
+    });
+  },
+
+  /**
    * Lấy danh sách sản phẩm (có thể lọc theo categoryId, mặc định bao gồm cả món tạm ngừng cho Admin)
    */
   getProducts: async (categoryId?: string, includeInactive = true): Promise<Product[]> => {

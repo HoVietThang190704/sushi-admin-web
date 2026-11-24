@@ -105,3 +105,54 @@ export function useDeleteCategory() {
     },
   });
 }
+
+/**
+ * Hook sắp xếp thứ tự danh mục với Optimistic Update mượt mà
+ */
+export function useReorderCategories() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (items: Array<{ id: string; sortOrder: number }>) =>
+      catalogApi.reorderCategories(items),
+    onMutate: async (newOrderItems) => {
+      await queryClient.cancelQueries({ queryKey: catalogKeys.categories() });
+      const previousCategories = queryClient.getQueryData<Category[]>(
+        catalogKeys.categories(),
+      );
+
+      if (previousCategories) {
+        const orderMap = new Map(
+          newOrderItems.map((item) => [item.id, item.sortOrder]),
+        );
+        const optimisticCategories = [...previousCategories]
+          .map((cat) => ({
+            ...cat,
+            sortOrder: orderMap.get(cat.id) ?? cat.sortOrder ?? 0,
+          }))
+          .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+        queryClient.setQueryData<Category[]>(
+          catalogKeys.categories(),
+          optimisticCategories,
+        );
+      }
+
+      return { previousCategories };
+    },
+    onError: (err: unknown, _vars, context) => {
+      if (context?.previousCategories) {
+        queryClient.setQueryData(
+          catalogKeys.categories(),
+          context.previousCategories,
+        );
+      }
+      const msg =
+        err instanceof Error ? err.message : 'Không thể cập nhật thứ tự danh mục';
+      message.error(msg);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: catalogKeys.all });
+    },
+  });
+}

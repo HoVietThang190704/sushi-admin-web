@@ -8,6 +8,7 @@ export type UpdateProductInput = Partial<CreateProductInput> & { isActive?: bool
 export interface Category {
   id: string;
   name: string;
+  sortOrder?: number;
   parentId?: string | null;
   createdAt: string;
   products?: Product[];
@@ -35,6 +36,8 @@ export interface Product {
   category?: Category | null;
   sellingPrice: number | string;
   imageUrl?: string | null;
+  description?: string | null;
+  accompaniments?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

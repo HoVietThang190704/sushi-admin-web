@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   },
   CATALOG: {
     CATEGORIES: '/api/catalog/categories',
+    REORDER_CATEGORIES: '/api/catalog/categories/reorder',
     CATEGORY_BY_ID: (id: string) => `/api/catalog/categories/${id}`,
     PRODUCTS: '/api/catalog/products',
     PRODUCT_BY_ID: (id: string) => `/api/catalog/products/${id}`,

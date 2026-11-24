@@ -217,6 +217,32 @@ export function ProductDetailModal({
           </div>
         </div>
 
+        {/* 2.5. Đồ ăn kèm & Mô tả món ăn (nếu có) */}
+        {(activeProduct.accompaniments || activeProduct.description) && (
+          <div className="p-3.5 rounded-2xl bg-sushi-surface/40 border border-sushi-border/70 space-y-2 text-xs">
+            {activeProduct.accompaniments && (
+              <div>
+                <span className="text-2xs text-sushi-text-dim uppercase font-mono block">
+                  {t('dashboard.productAccompanimentsLabel')}
+                </span>
+                <span className="text-sushi-gold font-medium mt-0.5 block">
+                  {activeProduct.accompaniments}
+                </span>
+              </div>
+            )}
+            {activeProduct.description && (
+              <div>
+                <span className="text-2xs text-sushi-text-dim uppercase font-mono block">
+                  {t('dashboard.productDescriptionLabel')}
+                </span>
+                <span className="text-sushi-text-muted mt-0.5 block leading-relaxed">
+                  {activeProduct.description}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 3. Nội dung chuyên biệt theo loại món: SINGLE (Công thức BOM) hoặc COMBO (Món thành phần) */}
         {activeProduct.type === 'SINGLE' ? (
           <div className="p-3.5 sm:p-4 rounded-2xl bg-sushi-surface/40 border border-sushi-border/80 space-y-3">

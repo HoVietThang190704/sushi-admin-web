@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ResponsiveModalDrawer, Form, Input, Button } from '@/components/ui';
+import { ResponsiveModalDrawer, Form, Input, InputNumber, Button } from '@/components/ui';
 import { Category, CreateCategoryInput } from '../types';
 import { createCategorySchemaFactory } from '../schemas/catalog.schema';
 import { createZodRule } from '@/lib/zod-validator';
@@ -12,6 +12,7 @@ interface CreateCategoryModalProps {
   onClose: () => void;
   onSubmit: (dto: CreateCategoryInput) => Promise<Category | void>;
   initialData?: Category | null;
+  defaultSortOrder?: number;
 }
 
 export function CreateCategoryModal({
@@ -19,6 +20,7 @@ export function CreateCategoryModal({
   onClose,
   onSubmit,
   initialData,
+  defaultSortOrder = 1,
 }: CreateCategoryModalProps) {
   const { t, locale } = useTranslation();
   const [form] = Form.useForm();
@@ -32,12 +34,16 @@ export function CreateCategoryModal({
     if (initialData) {
       form.setFieldsValue({
         name: initialData.name,
+        sortOrder: initialData.sortOrder ?? 0,
         parentId: initialData.parentId || undefined,
       });
     } else {
       form.resetFields();
+      form.setFieldsValue({
+        sortOrder: defaultSortOrder,
+      });
     }
-  }, [open, initialData, form]);
+  }, [open, initialData, defaultSortOrder, form]);
 
   useEffect(() => {
     if (!open) return;
@@ -83,6 +89,23 @@ export function CreateCategoryModal({
           rules={[createZodRule(schema, 'name')]}
         >
           <Input placeholder={t('dashboard.categoryNamePlaceholder')} />
+        </Form.Item>
+
+        <Form.Item
+          name="sortOrder"
+          label={t('dashboard.categorySortOrderLabel')}
+          extra={
+            <span className="text-2xs text-sushi-text-dim block mt-1">
+              {t('dashboard.categorySortOrderHint')}
+            </span>
+          }
+        >
+          <InputNumber
+            min={0}
+            max={999}
+            className="w-full rounded-xl"
+            placeholder="1"
+          />
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0, marginTop: 16 }}>

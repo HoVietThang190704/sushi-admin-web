@@ -9,6 +9,7 @@ import {
   Input,
   MagnifyingGlass,
   App,
+  message,
 } from '@/components/ui';
 import {
   Category,
@@ -18,6 +19,7 @@ import {
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
+  useReorderCategories,
 } from '@/features/catalog';
 import { useTranslation } from '@/lib/i18n';
 
@@ -28,6 +30,7 @@ export default function CategoriesPage() {
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
+  const reorderMutation = useReorderCategories();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState('');
@@ -63,6 +66,15 @@ export default function CategoriesPage() {
     });
   };
 
+  const handleReorder = async (reorderedList: Category[]) => {
+    const payload = reorderedList.map((cat, idx) => ({
+      id: cat.id,
+      sortOrder: idx + 1,
+    }));
+    await reorderMutation.mutateAsync(payload);
+    message.success(t('dashboard.categoryOrderSaved'));
+  };
+
   return (
     <div className="space-y-5">
       <SushiPageHeader
@@ -81,7 +93,7 @@ export default function CategoriesPage() {
         }
       />
 
-      {/* Toolbar Tìm Kiếm & Thống Kê */}
+      {/* Toolbar Tìm Kiếm & Hướng dẫn Kéo thả */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm">
         <div className="w-full sm:w-80">
           <Input
@@ -107,6 +119,7 @@ export default function CategoriesPage() {
         loading={isLoading}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
+        onReorder={!search.trim() ? handleReorder : undefined}
       />
 
       {/* Nút Floating Action Button trên Mobile */}
@@ -119,6 +132,7 @@ export default function CategoriesPage() {
       <CreateCategoryModal
         open={isModalOpen}
         initialData={editingCategory}
+        defaultSortOrder={categories.length + 1}
         onClose={() => {
           setIsModalOpen(false);
           setEditingCategory(null);

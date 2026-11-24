@@ -6,6 +6,7 @@ export {
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
+  useReorderCategories,
   useCategoryOptions,
   catalogKeys,
 } from './hooks/use-categories';

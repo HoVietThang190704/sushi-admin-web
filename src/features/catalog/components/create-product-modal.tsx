@@ -61,13 +61,21 @@ export function CreateProductModal({
         type: initialData.type,
         sellingPrice: Number(initialData.sellingPrice),
         imageUrl: initialImg,
+        description: initialData.description || '',
+        accompaniments:
+          initialData.accompaniments !== undefined && initialData.accompaniments !== null
+            ? initialData.accompaniments
+            : '',
         isActive: initialData.isActive,
       });
     } else {
       setImageUrl('');
       form.resetFields();
+      form.setFieldsValue({
+        accompaniments: t('dashboard.presetSushiVal'),
+      });
     }
-  }, [open, initialData, form]);
+  }, [open, initialData, form, t]);
 
   useEffect(() => {
     if (!open) return;
@@ -164,13 +172,13 @@ export function CreateProductModal({
         </Form.Item>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Mã SKU */}
+          {/* Mã SKU / Tên phụ tiếng Việt */}
           <Form.Item
             name="sku"
             label={t('dashboard.productSkuLabel')}
             rules={[createZodRule(schema, 'sku')]}
           >
-            <Input placeholder={t('dashboard.productSkuPlaceholder')} className="uppercase font-mono" />
+            <Input placeholder={t('dashboard.productSkuPlaceholder')} />
           </Form.Item>
 
           {/* Danh mục */}
@@ -222,6 +230,52 @@ export function CreateProductModal({
             />
           </Form.Item>
         </div>
+
+        {/* =====================================================================
+            Gia vị / Đồ ăn kèm theo món & Mô tả hương vị
+           ===================================================================== */}
+        <Form.Item
+          name="accompaniments"
+          label={t('dashboard.productAccompanimentsLabel')}
+        >
+          <Input
+            placeholder={t('dashboard.productAccompanimentsPlaceholder')}
+            allowClear
+          />
+        </Form.Item>
+        <div className="-mt-3 mb-4 space-y-1.5">
+          <span className="text-2xs text-sushi-text-dim block">
+            {t('dashboard.productAccompanimentsHint')}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { label: t('dashboard.presetSushi'), value: t('dashboard.presetSushiVal') },
+              { label: t('dashboard.presetRamen'), value: t('dashboard.presetRamenVal') },
+              { label: t('dashboard.presetGrilled'), value: t('dashboard.presetGrilledVal') },
+              { label: t('dashboard.presetNone'), value: '' },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => form.setFieldValue('accompaniments', preset.value)}
+                className="px-2.5 py-1 rounded-lg text-2xs font-medium bg-sushi-surface hover:bg-sushi-card-hover text-sushi-text-muted hover:text-sushi-gold border border-sushi-border/80 transition-colors cursor-pointer"
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Form.Item
+          name="description"
+          label={t('dashboard.productDescriptionLabel')}
+        >
+          <Input.TextArea
+            rows={2}
+            placeholder={t('dashboard.productDescriptionPlaceholder')}
+            className="rounded-xl"
+          />
+        </Form.Item>
 
         {/* =====================================================================
             Khu Vực Tải Ảnh Cloudinary Trực Tiếp

@@ -11,6 +11,7 @@ export const createCategorySchemaFactory = (t: (key: TranslationKey) => string) 
       .min(1, t('validation.categoryNameRequired'))
       .min(2, t('validation.categoryNameMin'))
       .max(100, t('validation.categoryNameMax')),
+    sortOrder: z.coerce.number().int().min(0).optional(),
     parentId: z.string().uuid(t('validation.parentIdInvalid')).optional(),
   });
 
@@ -21,6 +22,7 @@ export const createCategorySchema = z.object({
     .min(1, 'Vui lòng nhập tên danh mục!')
     .min(2, 'Tên danh mục phải có ít nhất 2 ký tự')
     .max(100, 'Tên danh mục không được vượt quá 100 ký tự'),
+  sortOrder: z.coerce.number().int().min(0).optional(),
   parentId: z.string().uuid('Parent ID phải là UUID hợp lệ').optional(),
 });
 
@@ -45,6 +47,8 @@ export const createProductSchemaFactory = (t: (key: TranslationKey) => string) =
       .number({ error: t('validation.productPriceRequired') })
       .positive(t('validation.productPricePositive')),
     imageUrl: z.string().url(t('validation.productImageInvalid')).optional().or(z.literal('')),
+    description: z.string().max(2000).optional(),
+    accompaniments: z.string().max(500).optional(),
     isActive: z.boolean().optional(),
   });
 
@@ -66,6 +70,8 @@ export const createProductSchema = z.object({
     .number({ error: 'Vui lòng nhập giá bán' })
     .positive('Giá bán phải lớn hơn 0'),
   imageUrl: z.string().url('Đường dẫn ảnh không hợp lệ').optional().or(z.literal('')),
+  description: z.string().max(2000).optional(),
+  accompaniments: z.string().max(500).optional(),
   isActive: z.boolean().optional(),
 });
 
