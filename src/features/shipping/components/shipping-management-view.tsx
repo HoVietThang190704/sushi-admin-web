@@ -286,36 +286,38 @@ export function ShippingManagementView() {
   }, [locations]);
 
   return (
-    <div className="space-y-6">
-      {/* Header chuẩn dùng chung SushiPageHeader */}
-      <SushiPageHeader
-        title={t('shippingPage.title')}
-        subtitle={t('shippingPage.subtitle')}
-        extra={
-          <div className="flex items-center gap-2.5">
-            <Link href="/dashboard/branches">
-              <Button
-                icon={<Storefront size={16} />}
-                className="rounded-xl h-10 px-3.5 text-xs sm:text-sm font-medium"
-              >
-                {t('branchesPage.manageBtn')}
-              </Button>
-            </Link>
-            <div className="hidden md:block">
-              <SushiButton
-                type="primary"
-                icon={<Plus size={16} weight="bold" />}
-                onClick={handleOpenCreate}
-              >
-                {t('shippingPage.addRuleButton')}
-              </SushiButton>
+    <div className="space-y-4">
+      <div className="pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('shippingPage.title')}
+          subtitle={t('shippingPage.subtitle')}
+          extra={
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/branches">
+                <Button
+                  icon={<Storefront size={15} />}
+                  className="rounded-lg h-9 px-3 text-xs font-medium"
+                >
+                  {t('branchesPage.manageBtn')}
+                </Button>
+              </Link>
+              <div className="hidden md:block">
+                <SushiButton
+                  type="primary"
+                  icon={<Plus size={15} weight="bold" />}
+                  onClick={handleOpenCreate}
+                  className="h-9 rounded-lg px-3.5 text-xs font-semibold"
+                >
+                  {t('shippingPage.addRuleButton')}
+                </SushiButton>
+              </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      </div>
 
-      {/* Bảng dữ liệu (Desktop >= md) */}
-      <Card className="hidden md:block rounded-2xl border-sushi-border/80 bg-sushi-card/90 shadow-sm overflow-hidden">
+      {/* Desktop Table (>= md) */}
+      <div className="hidden md:block rounded-xl border border-sushi-border bg-sushi-card overflow-hidden">
         <Table
           dataSource={rules}
           columns={columns}
@@ -325,15 +327,14 @@ export function ShippingManagementView() {
           locale={{
             emptyText: (
               <SushiEmptyState
-                icon={<Truck size={24} />}
+                icon={<Truck size={20} />}
                 title={t('shippingPage.emptyTitle')}
                 description={t('shippingPage.emptyDescDesktop')}
               />
             ),
           }}
-          className="[&_.ant-table]:bg-transparent [&_.ant-table-thead_th]:bg-zinc-900/80 [&_.ant-table-thead_th]:text-sushi-text-muted [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:font-semibold"
         />
-      </Card>
+      </div>
 
       {/* Danh sách Dạng Card chuẩn dùng chung SushiMobileCardList (< md) */}
       <SushiMobileCardList

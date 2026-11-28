@@ -4,9 +4,7 @@
 // Sushi Platform - Centralized UI Design System & Component Hub
 // =============================================================================
 
-// 1. Export toàn bộ Components cốt lõi của Ant Design
 export {
-  // Layouts & Containers
   Layout,
   App,
   Card,
@@ -14,8 +12,6 @@ export {
   Divider,
   Row,
   Col,
-
-  // Data Entry (Nhập liệu & Biểu mẫu)
   Form,
   Input,
   InputNumber,
@@ -26,8 +22,6 @@ export {
   Checkbox,
   Radio,
   Upload,
-
-  // Data Display (Hiển thị dữ liệu & Bảng)
   Table,
   Tag,
   Badge,
@@ -41,8 +35,6 @@ export {
   Tooltip,
   Popover,
   Typography,
-
-  // Feedback & Overlays (Thông báo & Cửa sổ popup)
   Modal,
   Drawer,
   Alert,
@@ -50,14 +42,10 @@ export {
   Spin,
   Skeleton,
   Progress,
-
-  // Navigation (Điều hướng)
   Menu,
   Dropdown,
   Breadcrumb,
   Pagination,
-
-  // General
   Button,
 } from 'antd';
 
@@ -74,11 +62,6 @@ let bridgedMessage: MessageInstance | null = null;
 let bridgedNotification: NotificationInstance | null = null;
 let bridgedModal: ModalHookAPI | null = null;
 
-/**
- * Cầu nối Context tự động cho message / notification / modal của Ant Design v5
- * Giúp toàn bộ lệnh gọi `message.success(...)` dùng chung Dynamic Theme từ `<App>`
- * mà không phát sinh cảnh báo Console Error.
- */
 export function AntdAppBridge() {
   const staticApp = AntdApp.useApp();
   React.useEffect(() => {
@@ -122,7 +105,6 @@ export const modalConfirm = (
   }
 };
 
-// 2. Export các Types phổ biến của Ant Design
 export type {
   TableColumnsType,
   TableProps,
@@ -136,7 +118,6 @@ export type {
   DrawerProps,
 } from 'antd';
 
-// 3. UNIFIED ICON SET: Bộ Icon đồng bộ toàn hệ sinh thái từ Phosphor Icons
 export {
   SignIn,
   SignOut,
@@ -187,15 +168,20 @@ export {
   CreditCard,
 } from '@phosphor-icons/react';
 
-// 4. Các Components được bọc phong cách Sushi Platform cao cấp (Bespoke Wrappers)
 import React from 'react';
-import { Button as AntdButton, ButtonProps, Card as AntdCard, CardProps, Pagination as AntdPagination } from 'antd';
+import {
+  Button as AntdButton,
+  ButtonProps,
+  Card as AntdCard,
+  CardProps,
+  Pagination as AntdPagination,
+} from 'antd';
 import { PencilSimple, Trash } from '@phosphor-icons/react';
 import { SUSHICOLORS } from '@/lib/theme';
 import { useTranslation } from '@/lib/i18n';
 
 /**
- * Nút bấm chuẩn nhận diện thương hiệu Sushi Platform (Đỏ son Vermilion gradient)
+ * Nút bấm chính phong cách phẳng, sắc nét (Tactile Vermilion, không bóng phát sáng giả tạo)
  */
 export function SushiButton({ style, children, className, ...props }: ButtonProps) {
   const isPrimary = props.type === 'primary' || !props.type;
@@ -204,19 +190,19 @@ export function SushiButton({ style, children, className, ...props }: ButtonProp
     <AntdButton
       {...props}
       style={{
-        borderRadius: 10,
+        borderRadius: 8,
         fontWeight: 600,
         ...(isPrimary
           ? {
-              background: `linear-gradient(135deg, ${SUSHICOLORS.primary} 0%, ${SUSHICOLORS.primaryDark} 100%)`,
-              borderColor: SUSHICOLORS.primary,
-              boxShadow: `0 4px 14px 0 ${SUSHICOLORS.primary}55`,
-              color: SUSHICOLORS.text,
+              background: SUSHICOLORS.primary,
+              borderColor: '#ef4444',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(0, 0, 0, 0.4)',
+              color: '#ffffff',
             }
           : {}),
         ...style,
       }}
-      className={`transition-all duration-200 cursor-pointer ${className || ''}`}
+      className={`transition-all duration-150 cursor-pointer ${className || ''}`}
     >
       {children}
     </AntdButton>
@@ -224,7 +210,7 @@ export function SushiButton({ style, children, className, ...props }: ButtonProp
 }
 
 /**
- * Thẻ Card chuẩn phong cách tối giản màu đá than tre (Charcoal)
+ * Thẻ Card phẳng, viền mảnh 1px chuẩn kiến trúc Obsidian
  */
 export function SushiCard({ style, children, className, ...props }: CardProps) {
   return (
@@ -233,10 +219,10 @@ export function SushiCard({ style, children, className, ...props }: CardProps) {
       style={{
         background: SUSHICOLORS.card,
         borderColor: SUSHICOLORS.border,
-        borderRadius: 16,
+        borderRadius: 10,
         ...style,
       }}
-      className={`shadow-lg ${className || ''}`}
+      className={`${className || ''}`}
     >
       {children}
     </AntdCard>
@@ -244,7 +230,7 @@ export function SushiCard({ style, children, className, ...props }: CardProps) {
 }
 
 /**
- * Thẻ Item chuẩn cho danh sách Mobile
+ * Thẻ Item danh sách trên Mobile: Gọn gàng, viền mảnh, không bo tròn quá đà
  */
 export function SushiCardItem({
   children,
@@ -255,16 +241,13 @@ export function SushiCardItem({
 }) {
   return (
     <div
-      className={`p-3.5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm ${className}`}
+      className={`p-3.5 rounded-xl bg-sushi-card border border-sushi-border ${className}`}
     >
       {children}
     </div>
   );
 }
 
-/**
- * Cụm nút thao tác Sửa / Xóa chuẩn cho thẻ Card
- */
 export interface SushiCardActionsProps {
   onEdit?: () => void;
   onDelete?: () => void;
@@ -288,29 +271,26 @@ export function SushiCardActions({
         <button
           type="button"
           onClick={onEdit}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-card-hover transition-colors border border-sushi-border/60 cursor-pointer"
+          className="w-7 h-7 rounded-md flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface transition-colors border border-sushi-border cursor-pointer"
           aria-label={editLabel}
         >
-          <PencilSimple size={14} />
+          <PencilSimple size={13} />
         </button>
       )}
       {onDelete && (
         <button
           type="button"
           onClick={onDelete}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors border border-sushi-border/60 cursor-pointer"
+          className="w-7 h-7 rounded-md flex items-center justify-center text-sushi-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors border border-sushi-border cursor-pointer"
           aria-label={deleteLabel}
         >
-          <Trash size={14} />
+          <Trash size={13} />
         </button>
       )}
     </div>
   );
 }
 
-/**
- * Component hiển thị trạng thái rỗng dùng chung cho cả Table Desktop & Card Mobile
- */
 export interface SushiEmptyStateProps {
   icon?: React.ReactNode;
   title: string;
@@ -330,18 +310,18 @@ export function SushiEmptyState({
     <div
       className={`flex flex-col items-center justify-center text-center ${
         isCard
-          ? 'p-8 rounded-2xl bg-sushi-card border border-sushi-border'
-          : 'py-12 sm:py-14'
+          ? 'p-8 rounded-xl bg-sushi-card border border-sushi-border'
+          : 'py-10 sm:py-12'
       } ${className}`}
     >
       {icon && (
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-3 shadow-inner">
+        <div className="w-10 h-10 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-text-dim mb-2.5">
           {icon}
         </div>
       )}
-      <p className="text-sm font-semibold text-sushi-text">{title}</p>
+      <p className="text-xs font-semibold text-sushi-text">{title}</p>
       {description && (
-        <p className="text-xs text-sushi-text-dim mt-1 max-w-sm leading-relaxed">
+        <p className="text-2xs text-sushi-text-dim mt-1 max-w-xs leading-relaxed">
           {description}
         </p>
       )}
@@ -349,9 +329,6 @@ export function SushiEmptyState({
   );
 }
 
-/**
- * Danh sách dạng Card trên Mobile (< md) tự động quản lý Loading, Empty và Spacing
- */
 export interface SushiMobileCardListProps<T> {
   items: T[];
   loading?: boolean;
@@ -374,7 +351,6 @@ export function SushiMobileCardList<T>({
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
 
-  // Tự động điều chỉnh trang khi tổng số items thay đổi
   const totalPages = pageSize ? Math.max(1, Math.ceil(items.length / pageSize)) : 1;
   const activePage = Math.min(Math.max(1, currentPage), totalPages);
 
@@ -387,13 +363,13 @@ export function SushiMobileCardList<T>({
   return (
     <div className={`md:hidden ${className}`}>
       {loading ? (
-        <div className="py-12 text-center text-xs text-sushi-text-dim">
+        <div className="py-10 text-center text-xs text-sushi-text-dim font-mono">
           {t('common.loading')}
         </div>
       ) : items.length === 0 ? (
         emptyState || null
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {displayItems.map((item, index) => (
             <React.Fragment
               key={
@@ -407,10 +383,10 @@ export function SushiMobileCardList<T>({
           ))}
 
           {pageSize && items.length > 0 && (
-            <div className="flex items-center justify-between pt-3 pb-1 px-1 border-t border-sushi-border/40 mt-3">
+            <div className="flex items-center justify-between pt-2.5 pb-1 px-1 border-t border-sushi-border mt-2.5">
               <span className="text-2xs text-sushi-text-dim font-mono">
-                {t('ordersPage.pageLabel')} {activePage} / {totalPages} ({items.length}{' '}
-                {t('common.itemsCount')})
+                {t('ordersPage.pageLabel')} {activePage}/{totalPages} · {items.length}{' '}
+                {t('common.itemsCount')}
               </span>
               <AntdPagination
                 simple
@@ -429,7 +405,7 @@ export function SushiMobileCardList<T>({
 }
 
 /**
- * Header chuẩn cho các trang Quản trị (Title, Breadcrumbs, Action buttons)
+ * Header trang Quản trị: Tinh gọn, sắc sảo, không lặp tiêu đề rườm rà trên Mobile
  */
 export interface SushiPageHeaderProps {
   title: string;
@@ -439,20 +415,34 @@ export interface SushiPageHeaderProps {
   className?: string;
 }
 
-export function SushiPageHeader({ title, subtitle, extra, subtitleClassName, className }: SushiPageHeaderProps) {
+export function SushiPageHeader({
+  title,
+  subtitle,
+  extra,
+  subtitleClassName,
+  className,
+}: SushiPageHeaderProps) {
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 mb-3.5 sm:pb-6 sm:mb-6 border-b border-sushi-border gap-4 ${className || ''}`}>
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-sushi-text tracking-tight font-sans">
+    <div
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 ${className || ''}`}
+    >
+      <div className="min-w-0">
+        <h1 className="text-base sm:text-xl font-semibold text-sushi-text tracking-tight leading-snug">
           {title}
         </h1>
         {subtitle && (
-          <p className={`text-xs sm:text-sm text-sushi-text-muted mt-1 font-sans ${subtitleClassName || ''}`}>
+          <p
+            className={`hidden sm:block text-xs text-sushi-text-dim mt-0.5 truncate max-w-2xl ${subtitleClassName || ''}`}
+          >
             {subtitle}
           </p>
         )}
       </div>
-      {extra && <div className="flex items-center space-x-3 w-full sm:w-auto">{extra}</div>}
+      {extra && (
+        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          {extra}
+        </div>
+      )}
     </div>
   );
 }
@@ -461,5 +451,3 @@ export { ResponsiveModalDrawer } from './responsive-modal-drawer';
 export type { ResponsiveModalDrawerProps } from './responsive-modal-drawer';
 export { SushiFloatingButton } from './sushi-floating-button';
 export type { SushiFloatingButtonProps } from './sushi-floating-button';
-
-

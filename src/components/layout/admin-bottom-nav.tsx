@@ -20,15 +20,12 @@ export function AdminBottomNav() {
     });
   }, [user?.role]);
 
-  // Xác định active key tự động từ pathname thông qua navigation config
   const selectedKey = useMemo(() => getActiveNavKey(pathname), [pathname]);
 
-  // Trạng thái hiển thị khi cuộn trang (Facebook-style scroll-to-hide)
   const [isVisible, setIsVisible] = useState(true);
   const [prevPath, setPrevPath] = useState(pathname);
   const lastScrollY = useRef(0);
 
-  // Luôn reset thanh navigation về trạng thái hiển thị khi đổi trang theo chuẩn React 19
   if (prevPath !== pathname) {
     setPrevPath(pathname);
     setIsVisible(true);
@@ -45,7 +42,6 @@ export function AdminBottomNav() {
         const currentScrollY = window.scrollY;
         const diff = currentScrollY - lastScrollY.current;
 
-        // Luôn hiện khi ở gần đầu trang (< 30px)
         if (currentScrollY <= 30) {
           setIsVisible(true);
           lastScrollY.current = Math.max(0, currentScrollY);
@@ -53,19 +49,15 @@ export function AdminBottomNav() {
           return;
         }
 
-        // Bỏ qua overscroll âm trên iOS Safari
         if (currentScrollY < 0) {
           rafId = null;
           return;
         }
 
-        // Cuộn xuống qua ngưỡng 12px -> Ẩn thanh bottom nav
         if (diff > 12) {
           setIsVisible(false);
           lastScrollY.current = currentScrollY;
-        }
-        // Cuộn lên qua ngưỡng 8px -> Hiện lại thanh bottom nav
-        else if (diff < -8) {
+        } else if (diff < -8) {
           setIsVisible(true);
           lastScrollY.current = currentScrollY;
         }
@@ -86,22 +78,22 @@ export function AdminBottomNav() {
       aria-label="Mobile navigation"
       aria-hidden={!isVisible}
       inert={!isVisible}
-      className={`md:hidden fixed left-3 right-3 sm:left-6 sm:right-6 max-w-md mx-auto z-30 select-none ${
+      className={`md:hidden fixed left-0 right-0 bottom-0 z-30 select-none bg-[#101114]/95 backdrop-blur-lg border-t border-sushi-border ${
         isVisible
           ? 'opacity-100 pointer-events-auto'
           : 'opacity-0 pointer-events-none'
       }`}
       style={{
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         transform: isVisible
           ? 'translate3d(0, 0, 0)'
-          : 'translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 2rem), 0)',
+          : 'translate3d(0, 100%, 0)',
         visibility: isVisible ? 'visible' : 'hidden',
         transition:
-          'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out, visibility 0.3s',
+          'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-out, visibility 0.25s',
       }}
     >
-      <div className="flex items-center justify-around h-14 px-2 rounded-full bg-[#1c1c20]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.55)]">
+      <div className="flex items-center justify-around h-13 px-2 max-w-lg mx-auto">
         {visibleItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = selectedKey === item.key;
@@ -115,16 +107,18 @@ export function AdminBottomNav() {
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}
               tabIndex={isVisible ? 0 : -1}
-              className={`flex items-center justify-center h-10 w-12 rounded-full transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sushi-primary ${
+              className={`relative flex flex-col items-center justify-center h-11 px-3 rounded-lg transition-colors cursor-pointer focus-visible:outline-none ${
                 isActive
-                  ? 'bg-white/15 text-sushi-primary shadow-sm scale-105'
-                  : 'text-sushi-text-muted hover:text-white hover:bg-white/5 active:scale-95'
+                  ? 'text-white'
+                  : 'text-sushi-text-dim hover:text-sushi-text-muted'
               }`}
             >
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-sushi-primary" />
+              )}
               <IconComponent
-                size={22}
+                size={20}
                 weight={isActive ? 'fill' : 'regular'}
-                className="transition-transform"
                 aria-hidden="true"
               />
             </Link>

@@ -28,7 +28,6 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  // Xác định NavItem hiện tại để render Breadcrumb & Mobile Header Title (hỗ trợ cả các mục con)
   const currentNav = useMemo(() => {
     const activeKey = getActiveNavKey(pathname);
     for (const item of NAV_ITEMS) {
@@ -41,9 +40,6 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
     return NAV_ITEMS[0];
   }, [pathname]);
 
-  const CurrentNavIcon = currentNav?.icon;
-
-  // Chữ cái đại diện cho avatar
   const userInitial = useMemo(() => {
     if (user?.fullName) {
       return user.fullName.trim().charAt(0).toUpperCase();
@@ -54,14 +50,12 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
     return 'A';
   }, [user]);
 
-  // Tên hiển thị người dùng (fallback email hoặc danh xưng)
   const displayName = useMemo(() => {
     if (user?.fullName?.trim()) return user.fullName;
     if (user?.email) return user.email.split('@')[0];
     return t('common.admin');
   }, [user, t]);
 
-  // Menu Dropdown tài khoản quản trị
   const dropdownMenuItems: MenuProps['items'] = useMemo(() => {
     return [
       {
@@ -69,7 +63,7 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
         disabled: true,
         label: (
           <div className="py-1 px-0.5 cursor-default select-text">
-            <div className="font-semibold text-sushi-text text-sm truncate">
+            <div className="font-semibold text-sushi-text text-xs truncate">
               {displayName}
             </div>
             {user?.email && (
@@ -78,8 +72,8 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
               </div>
             )}
             {user?.role && (
-              <div className="mt-2">
-                <span className="inline-block px-2 py-0.5 rounded-md text-2xs font-semibold font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/25 text-amber-400">
+              <div className="mt-1.5">
+                <span className="inline-block px-1.5 py-0.5 rounded text-3xs font-mono uppercase tracking-wider bg-sushi-surface border border-sushi-border text-sushi-text-muted">
                   {user.role}
                 </span>
               </div>
@@ -90,8 +84,8 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
       { type: 'divider' },
       {
         key: 'logout',
-        icon: <SignOut size={16} />,
-        label: <span className="font-medium">{t('common.logout')}</span>,
+        icon: <SignOut size={15} />,
+        label: <span className="font-medium text-xs">{t('common.logout')}</span>,
         danger: true,
         onClick: () => logout(),
       },
@@ -100,82 +94,62 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
 
   return (
     <Header
-      className={`border-b border-white/[0.08] !px-3.5 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none !h-[52px] md:!h-16 bg-[#141417]/90 backdrop-blur-md ${className || ''}`}
+      className={`border-b border-sushi-border !px-3.5 sm:!px-6 flex items-center justify-between sticky top-0 z-10 select-none !h-12 md:!h-14 bg-[#0c0d0f]/95 backdrop-blur-md ${className || ''}`}
       style={{
         lineHeight: 'normal',
       }}
     >
-      {/* =========================================================================
-          1. Left: Mobile Page Title / Desktop Breadcrumbs
-         ========================================================================= */}
-      <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-        {/* Mobile: Hamburger Button (Ghost style, không viền hộp thô) */}
+      {/* Left: Mobile Menu & Active Section / Desktop Breadcrumb */}
+      <div className="flex items-center gap-2 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="md:hidden w-8 h-8 -ml-1 rounded-lg flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-white/5 active:scale-95 shrink-0 cursor-pointer transition-all focus:outline-none"
+          className="md:hidden w-8 h-8 -ml-1 rounded-md flex items-center justify-center text-sushi-text-muted hover:text-white hover:bg-sushi-surface active:scale-95 shrink-0 cursor-pointer transition-colors focus:outline-none"
           aria-label="Open mobile menu"
         >
-          <ListIcon size={20} />
+          <ListIcon size={18} />
         </button>
 
-        {/* Mobile: Page Icon & Current Page Title */}
-        <div className="flex md:hidden items-center space-x-2 min-w-0">
-          <div className="w-6 h-6 rounded-md bg-sushi-primary/10 border border-sushi-primary/25 flex items-center justify-center shrink-0 text-sushi-primary">
-            {CurrentNavIcon ? (
-              <CurrentNavIcon size={14} weight="fill" />
-            ) : (
-              <House size={14} weight="fill" />
-            )}
-          </div>
-          <span className="font-semibold text-white tracking-wide text-sm truncate font-sans">
+        {/* Mobile Section Label: Minimalist breadcrumb style */}
+        <div className="flex md:hidden items-center gap-1.5 min-w-0">
+          <span className="text-2xs font-mono uppercase tracking-wider text-sushi-text-dim">
+            HANBI
+          </span>
+          <span className="text-sushi-border text-xs">/</span>
+          <span className="font-medium text-sushi-text text-xs truncate">
             {currentNav ? t(currentNav.labelKey) : t('dashboard.overview')}
           </span>
         </div>
 
-        {/* Desktop: Breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="hidden md:flex items-center space-x-2 text-sm truncate">
+        {/* Desktop Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="hidden md:flex items-center gap-2 text-xs truncate">
           <Link
             href="/dashboard"
-            className="flex items-center text-sushi-text-dim hover:text-sushi-text transition-colors"
+            className="flex items-center gap-1.5 text-sushi-text-dim hover:text-sushi-text transition-colors font-mono uppercase tracking-wider text-2xs"
             title={t('dashboard.breadcrumbHome')}
           >
-            <House size={16} />
+            <House size={14} />
+            <span>HANBI POS</span>
           </Link>
 
-          {currentNav && currentNav.path !== '/dashboard' && (
-            <>
-              <span className="text-sushi-text-dim/40 text-xs">/</span>
-              <span className="font-semibold text-sushi-text truncate text-sm">
-                {t(currentNav.labelKey)}
-              </span>
-            </>
-          )}
+          <span className="text-sushi-border">/</span>
 
-          {(!currentNav || currentNav.path === '/dashboard') && (
-            <>
-              <span className="text-sushi-text-dim/40 text-xs">/</span>
-              <span className="font-semibold text-sushi-text truncate text-sm">
-                {t('dashboard.overview')}
-              </span>
-            </>
-          )}
+          <span className="font-medium text-sushi-text truncate">
+            {currentNav && currentNav.path !== '/dashboard'
+              ? t(currentNav.labelKey)
+              : t('dashboard.overview')}
+          </span>
         </nav>
       </div>
 
-      {/* =========================================================================
-          2. Right: Language & User Profile Dropdown
-         ========================================================================= */}
-      <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* Language Switcher 1-Click Toggle (Chỉ hiện trên Desktop, Mobile đưa vào Drawer) */}
+      {/* Right: Language & Account */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
         <div className="hidden md:inline-flex">
           <LanguageSwitcher />
         </div>
 
-        {/* Vertical Separator */}
-        <div className="hidden md:block h-5 w-[1px] bg-sushi-border" />
+        <div className="hidden md:block h-4 w-px bg-sushi-border" />
 
-        {/* User Profile Pill with Dropdown Menu */}
         <Dropdown
           menu={{ items: dropdownMenuItems }}
           trigger={['click']}
@@ -184,17 +158,11 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
         >
           <button
             type="button"
-            className="flex items-center space-x-0 md:space-x-2.5 p-0 md:px-3 md:py-1.5 rounded-full md:rounded-xl md:bg-sushi-surface/70 md:border md:border-sushi-border/70 hover:opacity-90 md:hover:bg-sushi-surface transition-all duration-200 cursor-pointer md:shadow-sm group focus:outline-none focus:ring-2 focus:ring-sushi-primary/40"
+            className="flex items-center gap-2 px-1.5 py-1 md:px-2.5 md:py-1 rounded-lg bg-sushi-card border border-sushi-border hover:border-zinc-700 transition-colors cursor-pointer group focus:outline-none"
             aria-label="User menu"
           >
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sushi-primary to-amber-500 p-[1.5px] shadow-sm flex items-center justify-center shrink-0">
-                <div className="w-full h-full rounded-full bg-[#18181b] flex items-center justify-center text-xs font-bold text-white">
-                  {userInitial}
-                </div>
-              </div>
-              {/* Online Indicator Dot */}
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#18181b]" />
+            <div className="w-6 h-6 rounded bg-sushi-surface border border-sushi-border flex items-center justify-center text-2xs font-mono font-semibold text-sushi-text shrink-0">
+              {userInitial}
             </div>
 
             <span className="text-xs font-medium text-sushi-text max-w-[120px] truncate hidden md:inline">
@@ -202,12 +170,12 @@ export function AdminHeader({ onOpenMobileMenu, className }: AdminHeaderProps) {
             </span>
 
             {user?.role && (
-              <span className="px-1.5 py-0.5 rounded-md text-2xs font-semibold font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/25 text-amber-400 hidden lg:inline">
+              <span className="px-1.5 py-0.5 rounded text-3xs font-mono uppercase tracking-wider bg-sushi-surface text-sushi-text-muted hidden lg:inline">
                 {user.role}
               </span>
             )}
 
-            <CaretDown size={13} className="text-sushi-text-dim group-hover:text-sushi-text transition-colors hidden sm:inline" />
+            <CaretDown size={11} className="text-sushi-text-dim group-hover:text-sushi-text transition-colors" />
           </button>
         </Dropdown>
       </div>

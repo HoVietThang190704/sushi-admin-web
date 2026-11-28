@@ -35,7 +35,6 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState('');
 
-  // Lọc danh mục theo từ khóa tìm kiếm
   const filteredCategories = useMemo(() => {
     if (!search.trim()) return categories;
     const lower = search.toLowerCase().trim();
@@ -76,59 +75,60 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="space-y-5">
-      <SushiPageHeader
-        title={t('dashboard.categoriesTitle')}
-        subtitle={t('dashboard.categoriesSubtitle')}
-        extra={
-          <div className="hidden md:block">
-            <SushiButton
-              type="primary"
-              icon={<Plus size={16} weight="bold" />}
-              onClick={handleOpenCreate}
-            >
-              {t('dashboard.addCategory')}
-            </SushiButton>
-          </div>
-        }
-      />
+    <div className="space-y-4">
+      <div className="pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('dashboard.categoriesTitle')}
+          subtitle={t('dashboard.categoriesSubtitle')}
+          extra={
+            <div className="hidden md:block">
+              <SushiButton
+                type="primary"
+                icon={<Plus size={15} weight="bold" />}
+                onClick={handleOpenCreate}
+                className="h-9 rounded-lg px-3.5 text-xs font-semibold"
+              >
+                {t('dashboard.addCategory')}
+              </SushiButton>
+            </div>
+          }
+        />
+      </div>
 
-      {/* Toolbar Tìm Kiếm & Hướng dẫn Kéo thả */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm">
-        <div className="w-full sm:w-80">
-          <Input
-            prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
-            placeholder={t('dashboard.searchCategoryPlaceholder')}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-xl"
-          />
+      <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+        <div className="p-3 sm:px-4 border-b border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="w-full sm:w-72">
+            <Input
+              prefix={<MagnifyingGlass size={15} className="text-sushi-text-dim mr-1" />}
+              placeholder={t('dashboard.searchCategoryPlaceholder')}
+              allowClear
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="rounded-lg h-9 text-xs"
+            />
+          </div>
+
+          <div className="text-2xs font-mono text-sushi-text-dim">
+            {filteredCategories.length}/{categories.length} {t('common.itemsCount')}
+          </div>
         </div>
 
-        <div className="text-xs font-mono text-sushi-text-dim flex items-center space-x-2">
-          <span>
-            {filteredCategories.length} / {categories.length} {t('common.itemsCount')}
-          </span>
+        <div className="p-3 md:p-0">
+          <CategoryTable
+            categories={filteredCategories}
+            loading={isLoading}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
+            onReorder={!search.trim() ? handleReorder : undefined}
+          />
         </div>
       </div>
 
-      {/* Bảng Dữ Liệu Danh Mục */}
-      <CategoryTable
-        categories={filteredCategories}
-        loading={isLoading}
-        onEdit={handleOpenEdit}
-        onDelete={handleDelete}
-        onReorder={!search.trim() ? handleReorder : undefined}
-      />
-
-      {/* Nút Floating Action Button trên Mobile */}
       <SushiFloatingButton
         onClick={handleOpenCreate}
         ariaLabel={t('dashboard.addCategory')}
       />
 
-      {/* Modal Tạo / Chỉnh Sửa Danh Mục */}
       <CreateCategoryModal
         open={isModalOpen}
         initialData={editingCategory}

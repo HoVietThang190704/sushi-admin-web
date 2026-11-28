@@ -392,211 +392,213 @@ export function StaffManagementView() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* 1. Header Trang */}
-      <SushiPageHeader
-        title={t('staffPage.title')}
-        subtitle={t('staffPage.subtitle')}
-        extra={
-          <SushiButton
-            type="primary"
-            icon={<Plus size={16} weight="bold" />}
-            onClick={handleOpenCreate}
-            className="sushi-button-primary shadow-sm"
-          >
-            {t('staffPage.addStaffBtn')}
-          </SushiButton>
-        }
-      />
+    <div className="space-y-4">
+      <div className="pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('staffPage.title')}
+          subtitle={t('staffPage.subtitle')}
+          extra={
+            <div className="hidden md:block">
+              <SushiButton
+                type="primary"
+                icon={<Plus size={15} weight="bold" />}
+                onClick={handleOpenCreate}
+                className="h-9 rounded-lg px-3.5 text-xs font-semibold"
+              >
+                {t('staffPage.addStaffBtn')}
+              </SushiButton>
+            </div>
+          }
+        />
+      </div>
 
-      {/* 2. Bộ Lọc Tìm Kiếm & Chi Nhánh */}
-      <div className="p-4 rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-xs space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Input
-            prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim" />}
-            placeholder={t('staffPage.searchPlaceholder')}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            allowClear
-            className="sushi-input text-xs"
-          />
-
-          <Select
-            placeholder={t('staffPage.filterRole')}
-            value={roleFilter}
-            onChange={(val) => {
-              setRoleFilter(val);
-              setPage(1);
-            }}
-            allowClear
-            className="w-full text-xs"
-            options={[
-              { label: 'SUPER_ADMIN', value: 'SUPER_ADMIN' },
-              { label: 'BRANCH_MANAGER', value: 'BRANCH_MANAGER' },
-              { label: 'CASHIER', value: 'CASHIER' },
-              { label: 'KITCHEN_STAFF', value: 'KITCHEN_STAFF' },
-            ]}
-          />
-
-          {isSuperAdmin && (
-            <Select
-              placeholder={t('staffPage.filterBranch')}
-              value={branchFilter}
-              onChange={(val) => {
-                setBranchFilter(val);
+      {/* Unified Panel: Filter Bar + Staff List / Table */}
+      <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+        <div className="p-3 sm:px-4 border-b border-sushi-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <Input
+              prefix={<MagnifyingGlass size={15} className="text-sushi-text-dim" />}
+              placeholder={t('staffPage.searchPlaceholder')}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
                 setPage(1);
               }}
               allowClear
-              className="w-full text-xs"
-              options={branches.map((b) => ({
-                label: b.name,
-                value: b.id,
-              }))}
+              className="h-9 rounded-lg text-xs"
             />
-          )}
 
-          <Select
-            placeholder={t('staffPage.filterStatus')}
-            value={statusFilter}
-            onChange={(val) => {
-              setStatusFilter(val);
-              setPage(1);
-            }}
-            allowClear
-            className="w-full text-xs"
-            options={[
-              { label: t('common.active'), value: true },
-              { label: t('common.inactive'), value: false },
-            ]}
-          />
+            <Select
+              placeholder={t('staffPage.filterRole')}
+              value={roleFilter}
+              onChange={(val) => {
+                setRoleFilter(val);
+                setPage(1);
+              }}
+              allowClear
+              className="w-full h-9 text-xs"
+              options={[
+                { label: 'SUPER_ADMIN', value: 'SUPER_ADMIN' },
+                { label: 'BRANCH_MANAGER', value: 'BRANCH_MANAGER' },
+                { label: 'CASHIER', value: 'CASHIER' },
+                { label: 'KITCHEN_STAFF', value: 'KITCHEN_STAFF' },
+              ]}
+            />
+
+            {isSuperAdmin && (
+              <Select
+                placeholder={t('staffPage.filterBranch')}
+                value={branchFilter}
+                onChange={(val) => {
+                  setBranchFilter(val);
+                  setPage(1);
+                }}
+                allowClear
+                className="w-full h-9 text-xs"
+                options={branches.map((b) => ({
+                  label: b.name,
+                  value: b.id,
+                }))}
+              />
+            )}
+
+            <Select
+              placeholder={t('staffPage.filterStatus')}
+              value={statusFilter}
+              onChange={(val) => {
+                setStatusFilter(val);
+                setPage(1);
+              }}
+              allowClear
+              className="w-full h-9 text-xs"
+              options={[
+                { label: t('common.active'), value: true },
+                { label: t('common.inactive'), value: false },
+              ]}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* 3. Danh Sách Nhân Viên */}
-      {/* 3.1 Mobile View */}
-      <div className="block lg:hidden">
-        <SushiMobileCardList
-          items={staffList}
-          pageSize={10}
-          loading={isLoading}
-          emptyState={
-            <SushiEmptyState
-              isCard
-              icon={<Users size={28} />}
-              title={t('staffPage.emptyTitle')}
-              description={t('staffPage.emptyDesc')}
-            />
-          }
-          renderItem={(item: StaffItem) => {
-            const isSelf = item.id === currentUser?.id;
-            const bName = item.branchId ? branchMap.get(item.branchId) : null;
+        {/* Mobile View */}
+        <div className="p-3 block lg:hidden">
+          <SushiMobileCardList
+            items={staffList}
+            pageSize={10}
+            loading={isLoading}
+            emptyState={
+              <SushiEmptyState
+                icon={<Users size={22} />}
+                title={t('staffPage.emptyTitle')}
+                description={t('staffPage.emptyDesc')}
+              />
+            }
+            renderItem={(item: StaffItem) => {
+              const isSelf = item.id === currentUser?.id;
+              const bName = item.branchId ? branchMap.get(item.branchId) : null;
 
-            return (
-              <SushiCardItem key={item.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Tag
-                        color={ROLE_COLORS[item.role] || 'default'}
-                        className="text-3xs font-semibold uppercase m-0"
-                      >
-                        {item.role}
-                      </Tag>
-                      <Tag
-                        color={item.isActive ? 'green' : 'default'}
-                        className="text-3xs m-0"
-                      >
-                        {item.isActive ? t('common.active') : t('common.inactive')}
-                      </Tag>
-                      {isSelf && (
-                        <Tag color="cyan" className="text-3xs font-mono m-0">
-                          Bạn
+              return (
+                <SushiCardItem key={item.id}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Tag
+                          color={ROLE_COLORS[item.role] || 'default'}
+                          className="text-3xs font-semibold uppercase m-0"
+                        >
+                          {item.role}
                         </Tag>
+                        <Tag
+                          color={item.isActive ? 'green' : 'default'}
+                          className="text-3xs m-0"
+                        >
+                          {item.isActive ? t('common.active') : t('common.inactive')}
+                        </Tag>
+                        {isSelf && (
+                          <Tag color="cyan" className="text-3xs font-mono m-0">
+                            Bạn
+                          </Tag>
+                        )}
+                      </div>
+                      <h4 className="text-sm font-semibold text-sushi-text mt-1.5 truncate">
+                        {item.fullName}
+                      </h4>
+                      <p className="text-xs text-sushi-text-muted mt-0.5 font-mono truncate">
+                        {item.email}
+                      </p>
+                      {item.phone && (
+                        <p className="text-2xs text-sushi-text-dim mt-0.5 font-mono">
+                          {item.phone}
+                        </p>
                       )}
                     </div>
-                    <h4 className="text-sm font-bold text-sushi-text mt-1.5 truncate">
-                      {item.fullName}
-                    </h4>
-                    <p className="text-xs text-sushi-text-muted mt-1 font-mono truncate">
-                      {item.email}
-                    </p>
-                    {item.phone && (
-                      <p className="text-2xs text-sushi-text-dim mt-0.5">
-                        📞 {item.phone}
-                      </p>
-                    )}
+
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<PencilSimple size={15} />}
+                        onClick={() => handleOpenEdit(item)}
+                        className="text-sushi-text-muted"
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<Key size={15} />}
+                        disabled={isSelf}
+                        onClick={() => handleResetPassword(item)}
+                        className="text-amber-400 disabled:opacity-30"
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={item.isActive ? <LockSimple size={15} /> : <LockSimpleOpen size={15} />}
+                        disabled={isSelf}
+                        onClick={() => handleToggleStatus(item)}
+                        className={item.isActive ? 'text-rose-400 disabled:opacity-30' : 'text-emerald-400 disabled:opacity-30'}
+                      />
+                    </div>
                   </div>
 
-                  <div className="flex items-center space-x-1 shrink-0">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<PencilSimple size={15} />}
-                      onClick={() => handleOpenEdit(item)}
-                      className="text-sushi-text-muted"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<Key size={15} />}
-                      disabled={isSelf}
-                      onClick={() => handleResetPassword(item)}
-                      className="text-amber-400 disabled:opacity-30"
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={item.isActive ? <LockSimple size={15} /> : <LockSimpleOpen size={15} />}
-                      disabled={isSelf}
-                      onClick={() => handleToggleStatus(item)}
-                      className={item.isActive ? 'text-rose-400 disabled:opacity-30' : 'text-emerald-400 disabled:opacity-30'}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
-                  <div className="truncate">
-                    <span className="text-sushi-text-muted">{t('staffPage.colBranch')}: </span>
-                    {bName ? (
-                      <strong className="text-sushi-gold">{bName}</strong>
-                    ) : (
-                      <span className="text-sushi-text-dim italic">
-                        {t('staffPage.formBranchSystemWide')}
+                  <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+                    <div className="truncate">
+                      <span className="text-sushi-text-muted">{t('staffPage.colBranch')}: </span>
+                      {bName ? (
+                        <strong className="text-sushi-text font-medium">{bName}</strong>
+                      ) : (
+                        <span className="text-sushi-text-dim">
+                          {t('staffPage.formBranchSystemWide')}
+                        </span>
+                      )}
+                    </div>
+                    {item.lastLoginAt && (
+                      <span className="text-sushi-text-dim font-mono shrink-0 ml-2">
+                        {new Date(item.lastLoginAt).toLocaleDateString('vi-VN')}
                       </span>
                     )}
                   </div>
-                  {item.lastLoginAt && (
-                    <span className="text-sushi-text-dim font-mono shrink-0 ml-2">
-                      {new Date(item.lastLoginAt).toLocaleDateString('vi-VN')}
-                    </span>
-                  )}
-                </div>
-              </SushiCardItem>
-            );
-          }}
-        />
-      </div>
+                </SushiCardItem>
+              );
+            }}
+          />
+        </div>
 
-      {/* 3.2 Desktop Table View */}
-      <div className="hidden lg:block bg-sushi-card rounded-2xl border border-sushi-border/80 shadow-xs overflow-hidden">
-        <Table
-          columns={columns}
-          dataSource={staffList}
-          rowKey="id"
-          loading={isLoading}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total: totalItems,
-            onChange: (p) => setPage(p),
-            showSizeChanger: false,
-            className: 'p-4',
-          }}
-          className="sushi-table"
-        />
+        {/* Desktop Table View */}
+        <div className="hidden lg:block">
+          <Table
+            columns={columns}
+            dataSource={staffList}
+            rowKey="id"
+            loading={isLoading}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total: totalItems,
+              onChange: (p) => setPage(p),
+              showSizeChanger: false,
+              className: 'p-4',
+            }}
+          />
+        </div>
       </div>
 
       {/* Mobile Floating Add Button */}

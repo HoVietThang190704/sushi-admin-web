@@ -1,37 +1,27 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import {
   SushiPageHeader,
-  Button,
   Select,
   Table,
-  Tag,
   Spin,
   Tooltip,
   SushiMobileCardList,
-  SushiCardItem,
   SushiEmptyState,
   Receipt,
-  ChartBar,
-  CookingPot,
   ForkKnife,
-  Storefront,
-  Truck,
-  WarningCircle,
-  CheckCircle,
   ArrowsClockwise,
-  Funnel,
 } from '@/components/ui';
 import {
   TrendUp,
   TrendDown,
   DownloadSimple,
   CalendarBlank,
-  Coins,
-  Wallet,
+  ArrowUpRight,
 } from '@phosphor-icons/react';
 import { useAnalyticsReport } from '../hooks/use-reports';
 import { AnalyticsDailyPoint } from '../types';
@@ -49,7 +39,6 @@ export function AccountingReportsView() {
   const { user } = useAuth();
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
-  // Mặc định: 7 ngày gần nhất
   const [preset, setPreset] = useState<QuickRangePreset>('7days');
   const [startDate, setStartDate] = useState<string>(() =>
     dayjs().subtract(6, 'day').format('YYYY-MM-DD'),
@@ -117,10 +106,9 @@ export function AccountingReportsView() {
 
   const foodCostPct = useMemo(() => {
     if (!summary || summary.revenue <= 0) return null;
-    return Math.round((summary.cogs / summary.revenue) * 10000) / 100;
+    return Math.round((summary.cogs / summary.revenue) * 1000) / 10;
   }, [summary]);
 
-  // Xuất file CSV Đối soát Kế toán (chuẩn UTF-8 BOM cho Excel tiếng Việt)
   const handleExportCsv = () => {
     if (!report) return;
     const headers = [
@@ -147,7 +135,6 @@ export function AccountingReportsView() {
       ];
     });
 
-    // Dòng tổng cộng cuối bảng
     if (summary) {
       rows.push([
         'TOTAL',
@@ -179,7 +166,7 @@ export function AccountingReportsView() {
       dataIndex: 'date',
       key: 'date',
       render: (date: string) => (
-        <span className="font-mono font-semibold text-sushi-text text-xs">
+        <span className="font-mono font-medium text-sushi-text text-xs">
           {dayjs(date).format('DD/MM/YYYY')}
         </span>
       ),
@@ -189,8 +176,8 @@ export function AccountingReportsView() {
       key: 'orders',
       align: 'center' as const,
       render: (_: unknown, row: AnalyticsDailyPoint) => (
-        <span className="font-mono text-xs text-sushi-text">
-          <strong className="text-emerald-400">{row.completedOrders}</strong> / {row.orders}
+        <span className="font-mono text-xs text-sushi-text-muted">
+          <strong className="text-sushi-text">{row.completedOrders}</strong>/{row.orders}
         </span>
       ),
     },
@@ -200,7 +187,7 @@ export function AccountingReportsView() {
       key: 'revenue',
       align: 'right' as const,
       render: (rev: number) => (
-        <span className="font-mono font-bold text-sushi-gold text-xs">
+        <span className="font-mono font-semibold text-sushi-text text-xs">
           {formatCurrency(rev)}
         </span>
       ),
@@ -211,7 +198,7 @@ export function AccountingReportsView() {
       key: 'cogs',
       align: 'right' as const,
       render: (cogs: number) => (
-        <span className="font-mono text-sky-400 text-xs">
+        <span className="font-mono text-sushi-text-muted text-xs">
           {formatCurrency(cogs)}
         </span>
       ),
@@ -224,8 +211,8 @@ export function AccountingReportsView() {
         const gp = row.revenue - row.cogs;
         return (
           <span
-            className={`font-mono font-bold text-xs ${
-              gp >= 0 ? 'text-emerald-400' : 'text-red-400'
+            className={`font-mono font-semibold text-xs ${
+              gp >= 0 ? 'text-emerald-400' : 'text-rose-400'
             }`}
           >
             {formatCurrency(gp)}
@@ -245,12 +232,12 @@ export function AccountingReportsView() {
         const pct = Math.round((gp / row.revenue) * 1000) / 10;
         return (
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-mono font-semibold border ${
+            className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium ${
               pct >= 50
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                ? 'bg-emerald-500/10 text-emerald-400'
                 : pct >= 30
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+                  ? 'bg-amber-500/10 text-amber-400'
+                  : 'bg-rose-500/10 text-rose-400'
             }`}
           >
             {pct}%
@@ -264,84 +251,91 @@ export function AccountingReportsView() {
     summary ? Math.max(0, summary.completedOrders - summary.completedOrdersWithCost) : 0;
 
   return (
-    <div className="space-y-5">
-      {/* =========================================================================
-          1. Header & Cụm Nút Xuất CSV / Làm Mới
-         ========================================================================= */}
-      <SushiPageHeader
-        title={t('accountingPage.title')}
-        subtitle={t('accountingPage.subtitle')}
-        extra={
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button
-              icon={<ArrowsClockwise size={15} className={isFetching ? 'animate-spin' : ''} />}
-              onClick={() => refetch()}
-              className="h-10 sm:h-9 rounded-xl px-3 text-xs font-medium flex-1 sm:flex-none"
-            >
-              {t('ordersPage.refresh')}
-            </Button>
-            <Button
-              type="primary"
-              icon={<DownloadSimple size={16} weight="bold" />}
-              onClick={handleExportCsv}
-              disabled={!report || report.daily.length === 0}
-              className="h-10 sm:h-9 rounded-xl px-3.5 text-xs font-semibold bg-sushi-gold hover:bg-sushi-gold/90 text-black border-none flex-1 sm:flex-none"
-            >
-              {t('accountingPage.exportCsvBtn')}
-            </Button>
+    <div className="space-y-4">
+      {/* 1. Header & Unified Filter Control Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('accountingPage.title')}
+          subtitle={t('accountingPage.subtitle')}
+        />
+
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+          {/* Segmented Time Presets */}
+          <div className="inline-flex items-center p-0.5 rounded-lg bg-sushi-surface border border-sushi-border">
+            {(
+              [
+                { key: 'today', label: t('ordersPage.quickToday') },
+                { key: '7days', label: '7D' },
+                { key: '30days', label: '30D' },
+                { key: 'thisMonth', label: t('accountingPage.presetThisMonth') },
+              ] as const
+            ).map((item) => {
+              const active = preset === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => handleSelectPreset(item.key)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-sushi-card text-white shadow-2xs border border-sushi-border'
+                      : 'text-sushi-text-dim hover:text-sushi-text border border-transparent'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
-        }
-      />
 
-      {/* =========================================================================
-          2. Thanh Bộ Lọc Kỳ Kế Toán & Chi Nhánh
-         ========================================================================= */}
-      <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          {(
-            [
-              { key: 'today', label: t('ordersPage.quickToday') },
-              { key: '7days', label: t('ordersPage.quick7Days') },
-              { key: '30days', label: t('ordersPage.quick30Days') },
-              { key: 'thisMonth', label: t('accountingPage.presetThisMonth') },
-            ] as const
-          ).map((item) => {
-            const active = preset === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => handleSelectPreset(item.key)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                  active
-                    ? 'bg-sushi-primary text-white border-sushi-primary shadow-sm'
-                    : 'bg-sushi-surface/60 text-sushi-text-muted border-sushi-border hover:text-white hover:bg-sushi-surface'
-                }`}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-
-          <Button
-            icon={<CalendarBlank size={15} className="text-sushi-gold" />}
+          {/* Date Picker Trigger */}
+          <button
+            type="button"
             onClick={() => setIsDateDrawerOpen(true)}
-            className={`h-8.5 rounded-xl text-xs font-mono ${
+            className={`h-8 px-2.5 rounded-lg border text-xs font-mono inline-flex items-center gap-1.5 transition-colors cursor-pointer ${
               preset === 'custom'
-                ? 'border-sushi-gold bg-sushi-gold/10 text-sushi-gold'
-                : 'border-sushi-border text-sushi-text'
+                ? 'border-sushi-text/40 bg-sushi-surface text-white'
+                : 'border-sushi-border bg-sushi-card text-sushi-text-muted hover:text-white'
             }`}
           >
-            {dayjs(startDate).format('DD/MM/YYYY')} → {dayjs(endDate).format('DD/MM/YYYY')}
-          </Button>
-        </div>
+            <CalendarBlank size={13} className="text-sushi-text-dim" />
+            <span>
+              {dayjs(startDate).format('DD/MM')} – {dayjs(endDate).format('DD/MM/YY')}
+            </span>
+          </button>
 
-        {/* Lọc theo chi nhánh (Dành cho SUPER_ADMIN) */}
-        <div className="flex items-center justify-between sm:justify-end gap-2.5">
-          {isSuperAdmin && (
-            <div className="w-full sm:w-56">
+          {/* Action Buttons: Refresh & CSV Export */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              title={t('ordersPage.refresh')}
+              className="w-8 h-8 rounded-lg border border-sushi-border bg-sushi-card text-sushi-text-muted hover:text-white hover:bg-sushi-surface inline-flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <ArrowsClockwise size={14} className={isFetching ? 'animate-spin' : ''} />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              disabled={!report || report.daily.length === 0}
+              className="h-8 px-3 rounded-lg bg-sushi-text text-zinc-950 hover:bg-zinc-200 disabled:opacity-40 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <DownloadSimple size={14} weight="bold" />
+              <span>CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Sub-toolbar: Branch Filter & BOM Coverage Status Strip */}
+      {(isSuperAdmin || missingBomOrdersCount > 0) && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {isSuperAdmin ? (
+            <div className="w-full sm:w-60">
               <Select
-                className="w-full h-9.5"
+                className="w-full h-8.5 text-xs"
                 placeholder={t('accountingPage.allBranches')}
                 allowClear
                 value={selectedBranchId || ''}
@@ -355,217 +349,190 @@ export function AccountingReportsView() {
                 ]}
               />
             </div>
+          ) : (
+            <div />
           )}
 
-          {report && (
-            <span className="hidden xl:inline-flex items-center gap-1 text-2xs font-mono text-sushi-text-dim shrink-0">
-              <Funnel size={12} />
+          {missingBomOrdersCount > 0 && (
+            <div className="px-3 py-1.5 rounded-lg bg-sushi-card border border-sushi-border border-l-2 border-l-amber-500 flex items-center justify-between gap-3 text-2xs text-sushi-text-muted">
               <span>
-                {report.range.days} {t('accountingPage.daysUnit')}
+                <strong className="text-amber-400 font-mono">
+                  {summary?.completedOrdersWithCost ?? 0}/{summary?.completedOrders ?? 0}
+                </strong>{' '}
+                đơn hoàn thành đã gắn định mức giá vốn (BOM).
               </span>
-            </span>
+              <Link
+                href="/dashboard/inventory"
+                className="text-sushi-text hover:underline font-medium inline-flex items-center gap-0.5 shrink-0"
+              >
+                <span>Cấu hình BOM</span>
+                <ArrowUpRight size={12} />
+              </Link>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* =========================================================================
-          3. Cảnh Báo Nếu Có Đơn Hoàn Thành Chưa Khấu Trừ Giá Vốn BOM
-         ========================================================================= */}
-      {missingBomOrdersCount > 0 && (
-        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-300">
-          <WarningCircle size={18} weight="fill" className="text-amber-400 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <strong className="font-semibold">
-              {t('accountingPage.bomCoverageNoticeTitle')}:
-            </strong>{' '}
-            {t('accountingPage.bomCoverageNoticeDesc')
-              .replace('{withCost}', String(summary?.completedOrdersWithCost ?? 0))
-              .replace('{total}', String(summary?.completedOrders ?? 0))}
-          </div>
         </div>
       )}
 
       {isLoading ? (
-        <div className="py-16 flex flex-col items-center justify-center gap-3">
-          <Spin size="large" />
-          <span className="text-xs text-sushi-text-dim font-mono">
+        <div className="py-16 flex flex-col items-center justify-center gap-2.5">
+          <Spin />
+          <span className="text-2xs text-sushi-text-dim font-mono">
             {t('common.loading')}
           </span>
         </div>
       ) : summary ? (
         <>
-          {/* =====================================================================
-              4. 4 Thẻ KPI Tài Chính & Kế Toán Cốt Lõi (Bento 2x2 Mobile / 4 Cột Desktop)
-             ===================================================================== */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* KPI 1: Doanh Thu Thuần Món Ăn */}
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-                  {t('accountingPage.kpiNetRevenue')}
+          {/* 3. Financial Ledger Strip (1px Divided Architectural Grid - No Skittles Icons) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-sushi-border border border-sushi-border rounded-xl overflow-hidden">
+            {/* Metric 1: Net Revenue */}
+            <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+                  {t('accountingPage.colNetRevenue')}
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-sushi-gold shrink-0">
-                  <Coins size={18} weight="fill" />
-                </div>
-              </div>
-
-              <div className="mt-2.5 sm:mt-4">
-                <div className="text-lg sm:text-2xl font-extrabold text-sushi-gold font-mono tracking-tight truncate">
-                  {formatCurrency(summary.revenue)}
-                </div>
-
-                <div className="mt-1.5 flex items-center justify-between gap-1 flex-wrap text-3xs sm:text-2xs font-mono">
-                  <span className="text-sushi-text-dim">
-                    {summary.completedOrders} {t('accountingPage.completedOrdersUnit')}
-                  </span>
-
-                  {previous?.revenueChangePct !== null &&
-                    previous?.revenueChangePct !== undefined && (
-                      <span
-                        className={`inline-flex items-center gap-0.5 font-semibold ${
-                          previous.revenueChangePct >= 0
-                            ? 'text-emerald-400'
-                            : 'text-rose-400'
-                        }`}
-                      >
-                        {previous.revenueChangePct >= 0 ? (
-                          <TrendUp size={12} weight="bold" />
-                        ) : (
-                          <TrendDown size={12} weight="bold" />
-                        )}
-                        <span>
-                          {previous.revenueChangePct > 0 ? '+' : ''}
-                          {previous.revenueChangePct}%
-                        </span>
+                {previous?.revenueChangePct !== null &&
+                  previous?.revenueChangePct !== undefined && (
+                    <span
+                      className={`inline-flex items-center gap-0.5 text-3xs font-mono font-semibold px-1.5 py-0.5 rounded ${
+                        previous.revenueChangePct >= 0
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : 'bg-rose-500/10 text-rose-400'
+                      }`}
+                    >
+                      {previous.revenueChangePct >= 0 ? (
+                        <TrendUp size={10} weight="bold" />
+                      ) : (
+                        <TrendDown size={10} weight="bold" />
+                      )}
+                      <span>
+                        {previous.revenueChangePct > 0 ? '+' : ''}
+                        {previous.revenueChangePct}%
                       </span>
-                    )}
-                </div>
+                    </span>
+                  )}
+              </div>
+
+              <div className="mt-2 text-lg sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
+                {formatCurrency(summary.revenue)}
+              </div>
+
+              <div className="mt-1.5 text-[11px] font-mono text-sushi-text-dim">
+                {summary.completedOrders} {t('accountingPage.completedOrdersUnit')}
               </div>
             </div>
 
-            {/* KPI 2: Giá Vốn Nguyên Liệu (COGS) */}
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-                  {t('accountingPage.kpiCogs')}
+            {/* Metric 2: COGS */}
+            <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+                  {t('accountingPage.colCogs')}
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-center text-sky-400 shrink-0">
-                  <CookingPot size={18} weight="fill" />
-                </div>
+                <span className="text-3xs font-mono text-sushi-text-dim">
+                  BOM
+                </span>
               </div>
 
-              <div className="mt-2.5 sm:mt-4">
-                <div className="text-lg sm:text-2xl font-extrabold text-sky-400 font-mono tracking-tight truncate">
-                  {formatCurrency(summary.cogs)}
-                </div>
-                <div className="mt-1.5 flex items-center justify-between gap-1 text-3xs sm:text-2xs font-mono text-sushi-text-dim">
-                  <span>Food Cost:</span>
-                  <span className="font-semibold text-sushi-text">
-                    {foodCostPct !== null ? `${foodCostPct}%` : '—'}
-                  </span>
-                </div>
+              <div className="mt-2 text-lg sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
+                {formatCurrency(summary.cogs)}
+              </div>
+
+              <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-sushi-text-dim">
+                <span>Food Cost</span>
+                <span className="text-sushi-text-muted font-medium">
+                  {foodCostPct !== null ? `${foodCostPct}%` : '0%'}
+                </span>
               </div>
             </div>
 
-            {/* KPI 3: Lợi Nhuận Gộp & Biên Lợi Nhuận */}
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
+            {/* Metric 3: Gross Profit */}
+            <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
                   {t('accountingPage.kpiGrossProfit')}
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0">
-                  <Wallet size={18} weight="fill" />
-                </div>
+                {summary.marginPct !== null && (
+                  <span className="text-3xs font-mono font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+                    {summary.marginPct}%
+                  </span>
+                )}
               </div>
 
-              <div className="mt-2.5 sm:mt-4">
-                <div
-                  className={`text-lg sm:text-2xl font-extrabold font-mono tracking-tight truncate ${
-                    summary.grossProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                  }`}
-                >
-                  {formatCurrency(summary.grossProfit)}
-                </div>
-                <div className="mt-1.5 flex items-center justify-between gap-1 text-3xs sm:text-2xs font-mono text-sushi-text-dim">
-                  <span>{t('accountingPage.grossMarginLabel')}:</span>
-                  <span className="font-bold text-emerald-400">
-                    {summary.marginPct !== null ? `${summary.marginPct}%` : '—'}
-                  </span>
-                </div>
+              <div
+                className={`mt-2 text-lg sm:text-2xl font-semibold font-mono tracking-tight ${
+                  summary.grossProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                }`}
+              >
+                {formatCurrency(summary.grossProfit)}
+              </div>
+
+              <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-sushi-text-dim">
+                <span>{t('accountingPage.grossMarginLabel')}</span>
+                <span className="text-sushi-text-muted">
+                  {summary.marginPct !== null ? `${summary.marginPct}%` : '—'}
+                </span>
               </div>
             </div>
 
-            {/* KPI 4: Phí Giao Hàng Thu Hộ, AOV & Hao Hụt Đơn Hủy */}
-            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-md flex flex-col justify-between">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-                  {t('accountingPage.kpiShippingAndAov')}
+            {/* Metric 4: Shipping & AOV */}
+            <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+                  PHÍ SHIP & AOV
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 shrink-0">
-                  <Truck size={18} weight="fill" />
-                </div>
               </div>
 
-              <div className="mt-2.5 sm:mt-4">
-                <div className="text-lg sm:text-2xl font-extrabold text-sushi-text font-mono tracking-tight truncate">
-                  {formatCurrency(summary.shippingRevenue)}
-                </div>
-                <div className="mt-1.5 flex items-center justify-between gap-1 text-3xs sm:text-2xs font-mono text-sushi-text-dim">
-                  <span>AOV: {formatCurrency(summary.avgOrderValue)}</span>
-                  {summary.cancelledAfterPrepCost > 0 && (
-                    <Tooltip title={t('accountingPage.cancelledWasteTooltip')}>
-                      <span className="text-rose-400 font-semibold">
-                        -{formatCurrency(summary.cancelledAfterPrepCost)}
-                      </span>
-                    </Tooltip>
-                  )}
-                </div>
+              <div className="mt-2 text-lg sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
+                {formatCurrency(summary.shippingRevenue)}
+              </div>
+
+              <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-sushi-text-dim">
+                <span>AOV: {formatCurrency(summary.avgOrderValue)}</span>
+                {summary.cancelledAfterPrepCost > 0 && (
+                  <Tooltip title={t('accountingPage.cancelledWasteTooltip')}>
+                    <span className="text-rose-400">
+                      -{formatCurrency(summary.cancelledAfterPrepCost)}
+                    </span>
+                  </Tooltip>
+                )}
               </div>
             </div>
           </div>
 
-          {/* =====================================================================
-              5. Biểu Đồ Trực Quan Doanh Thu Thuần vs Giá Vốn Theo Ngày
-             ===================================================================== */}
+          {/* 4. Daily Revenue vs COGS Chart */}
           {report && report.daily.length > 0 && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-sushi-border/70">
+            <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+              <div className="px-4 py-3 border-b border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-sushi-text flex items-center gap-2">
-                    <ChartBar size={18} className="text-sushi-gold" weight="fill" />
-                    <span>{t('accountingPage.dailyChartTitle')}</span>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+                    {t('accountingPage.dailyChartTitle')}
                   </h3>
-                  <p className="text-2xs text-sushi-text-dim mt-0.5">
-                    {t('accountingPage.dailyChartSubtitle')}
-                  </p>
                 </div>
 
-                <div className="flex items-center gap-4 text-2xs font-mono">
-                  <span className="inline-flex items-center gap-1.5 text-sushi-gold">
-                    <span className="w-2.5 h-2.5 rounded-xs bg-sushi-gold inline-block" />
+                <div className="flex items-center gap-4 text-2xs font-mono text-sushi-text-muted">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-xs bg-sushi-text inline-block" />
                     <span>{t('accountingPage.colNetRevenue')}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-sky-400">
-                    <span className="w-2.5 h-2.5 rounded-xs bg-sky-400 inline-block" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-xs bg-zinc-600 inline-block" />
                     <span>{t('accountingPage.colCogs')}</span>
                   </span>
                 </div>
               </div>
 
-              {/* Thanh biểu đồ cuộn ngang mượt mà */}
-              <div className="overflow-x-auto pb-2">
+              <div className="p-4 overflow-x-auto">
                 <div
-                  className="flex items-end gap-2.5 sm:gap-4 h-44 pt-6 px-2"
-                  style={{ minWidth: Math.max(report.daily.length * 52, 300) }}
+                  className="flex items-end gap-2 sm:gap-3 h-40 pt-4 px-1"
+                  style={{ minWidth: Math.max(report.daily.length * 46, 280) }}
                 >
                   {report.daily.map((d) => {
                     const revHeight = Math.max(
-                      d.revenue > 0 ? 8 : 2,
-                      Math.round((d.revenue / maxDailyRevenue) * 128),
+                      d.revenue > 0 ? 6 : 2,
+                      Math.round((d.revenue / maxDailyRevenue) * 116),
                     );
                     const cogsHeight = Math.max(
-                      d.cogs > 0 ? 6 : 2,
-                      Math.round((d.cogs / maxDailyRevenue) * 128),
+                      d.cogs > 0 ? 4 : 2,
+                      Math.round((d.cogs / maxDailyRevenue) * 116),
                     );
                     const gp = d.revenue - d.cogs;
 
@@ -574,33 +541,33 @@ export function AccountingReportsView() {
                         key={d.date}
                         title={
                           <div className="text-2xs font-mono space-y-1 p-0.5">
-                            <div className="font-bold text-white border-b border-zinc-700 pb-1">
+                            <div className="font-semibold text-white border-b border-zinc-700 pb-1">
                               {dayjs(d.date).format('DD/MM/YYYY')} ({d.completedOrders} đơn)
                             </div>
-                            <div className="text-amber-300">
+                            <div className="text-zinc-200">
                               {t('accountingPage.colNetRevenue')}: {formatCurrency(d.revenue)}
                             </div>
-                            <div className="text-sky-300">
+                            <div className="text-zinc-400">
                               {t('accountingPage.colCogs')}: {formatCurrency(d.cogs)}
                             </div>
-                            <div className="text-emerald-300 font-semibold">
+                            <div className="text-emerald-400 font-semibold">
                               {t('accountingPage.colGrossProfit')}: {formatCurrency(gp)}
                             </div>
                           </div>
                         }
                       >
-                        <div className="flex-1 min-w-[38px] flex flex-col items-center group cursor-pointer">
-                          <div className="w-full flex items-end justify-center gap-1 h-32 border-b border-sushi-border/70 px-1 group-hover:bg-sushi-surface/40 rounded-t-lg transition-colors">
+                        <div className="flex-1 min-w-[34px] flex flex-col items-center group cursor-pointer">
+                          <div className="w-full flex items-end justify-center gap-1 h-29 border-b border-sushi-border px-1 group-hover:bg-sushi-surface/60 transition-colors">
                             <div
                               style={{ height: `${revHeight}px` }}
-                              className="w-3 sm:w-4 rounded-t-md bg-gradient-to-t from-amber-600 to-sushi-gold transition-all duration-300 group-hover:brightness-110"
+                              className="w-2.5 sm:w-3 rounded-t-xs bg-sushi-text group-hover:bg-white transition-all"
                             />
                             <div
                               style={{ height: `${cogsHeight}px` }}
-                              className="w-3 sm:w-4 rounded-t-md bg-gradient-to-t from-sky-600 to-sky-400 transition-all duration-300 group-hover:brightness-110"
+                              className="w-2.5 sm:w-3 rounded-t-xs bg-zinc-600 group-hover:bg-zinc-500 transition-all"
                             />
                           </div>
-                          <span className="mt-2 text-3xs sm:text-2xs font-mono text-sushi-text-muted group-hover:text-white">
+                          <span className="mt-2 text-3xs font-mono text-sushi-text-dim group-hover:text-sushi-text">
                             {dayjs(d.date).format('DD/MM')}
                           </span>
                         </div>
@@ -612,74 +579,60 @@ export function AccountingReportsView() {
             </div>
           )}
 
-          {/* =====================================================================
-              6. Lưới 2 Cột: Top Món Mang Lại Doanh Thu & Đối Soát Theo Chi Nhánh
-             ===================================================================== */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Cột Trái (7 phần): Top 10 Món Ăn Doanh Thu Cao Nhất */}
-            <div className="lg:col-span-7 p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-sushi-border/70">
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-sushi-text flex items-center gap-2">
-                    <ForkKnife size={18} className="text-sushi-gold" weight="fill" />
-                    <span>{t('accountingPage.topProductsTitle')}</span>
-                  </h3>
-                  <p className="text-2xs text-sushi-text-dim mt-0.5">
-                    {t('accountingPage.topProductsSubtitle')}
-                  </p>
-                </div>
+          {/* 5. Two-Column Split: Top Products & Branch / Order Reconciliation */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Left (7 cols): Top Products by Revenue (Flush Editorial List) */}
+            <div className="lg:col-span-7 rounded-xl bg-sushi-card border border-sushi-border overflow-hidden flex flex-col">
+              <div className="px-4 py-3 border-b border-sushi-border flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+                  {t('accountingPage.topProductsTitle')}
+                </h3>
                 <span className="text-2xs font-mono text-sushi-text-dim">
-                  Top {report?.topProducts.length ?? 0}
+                  TOP {report?.topProducts.length ?? 0}
                 </span>
               </div>
 
               {!report?.topProducts || report.topProducts.length === 0 ? (
                 <SushiEmptyState
-                  icon={<ForkKnife size={24} />}
+                  icon={<ForkKnife size={20} />}
                   title={t('dashboard.noDataTitle')}
                   description={t('accountingPage.emptyPeriodDesc')}
                 />
               ) : (
-                <div className="space-y-3">
+                <div className="divide-y divide-sushi-border/60">
                   {report.topProducts.map((prod, idx) => {
                     const widthPct = Math.max(
-                      4,
+                      3,
                       Math.round((prod.revenue / maxProductRevenue) * 100),
                     );
                     return (
                       <div
                         key={prod.productId}
-                        className="p-3 rounded-xl bg-sushi-surface/40 border border-sushi-border/60 space-y-1.5"
+                        className="px-4 py-2.5 hover:bg-sushi-surface/40 transition-colors"
                       >
-                        <div className="flex items-center justify-between gap-2 text-xs">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span
-                              className={`w-5 h-5 rounded-md font-mono font-bold text-3xs flex items-center justify-center shrink-0 ${
-                                idx < 3
-                                  ? 'bg-sushi-gold/20 text-sushi-gold border border-sushi-gold/40'
-                                  : 'bg-sushi-card text-sushi-text-dim border border-sushi-border'
-                              }`}
-                            >
-                              #{idx + 1}
+                        <div className="flex items-center justify-between gap-3 text-xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="w-5 text-2xs font-mono text-sushi-text-dim shrink-0">
+                              {String(idx + 1).padStart(2, '0')}
                             </span>
-                            <span className="font-semibold text-sushi-text truncate">
+                            <span className="font-medium text-sushi-text truncate">
                               {prod.name}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2.5 shrink-0 font-mono">
-                            <span className="text-2xs text-sushi-text-muted">
-                              {prod.quantity} {t('common.itemsCount')}
+                          <div className="flex items-center gap-3 shrink-0 font-mono text-xs">
+                            <span className="text-2xs text-sushi-text-dim">
+                              ×{prod.quantity}
                             </span>
-                            <span className="font-bold text-sushi-gold">
+                            <span className="font-semibold text-sushi-text w-24 text-right">
                               {formatCurrency(prod.revenue)}
                             </span>
                           </div>
                         </div>
 
-                        <div className="w-full h-1.5 rounded-full bg-sushi-card overflow-hidden">
+                        <div className="mt-1.5 ml-7.5 w-[calc(100%-1.875rem)] h-1 rounded-full bg-sushi-surface overflow-hidden">
                           <div
                             style={{ width: `${widthPct}%` }}
-                            className="h-full rounded-full bg-gradient-to-r from-sushi-primary to-sushi-gold"
+                            className="h-full bg-zinc-400"
                           />
                         </div>
                       </div>
@@ -689,62 +642,54 @@ export function AccountingReportsView() {
               )}
             </div>
 
-            {/* Cột Phải (5 phần): Đối Soát Theo Chi Nhánh & Thống Kê Đơn */}
-            <div className="lg:col-span-5 space-y-5">
-              {/* Khối 1: Đối soát theo chi nhánh (Nếu xem toàn chuỗi) */}
+            {/* Right (5 cols): Branch P&L & Order Status Reconciliation */}
+            <div className="lg:col-span-5 space-y-4">
               {report && report.byBranch.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm space-y-3.5">
-                  <div className="pb-3 border-b border-sushi-border/70">
-                    <h3 className="text-sm sm:text-base font-bold text-sushi-text flex items-center gap-2">
-                      <Storefront size={18} className="text-sushi-gold" weight="fill" />
-                      <span>{t('accountingPage.byBranchTitle')}</span>
+                <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+                  <div className="px-4 py-3 border-b border-sushi-border">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+                      {t('accountingPage.byBranchTitle')}
                     </h3>
-                    <p className="text-2xs text-sushi-text-dim mt-0.5">
-                      {t('accountingPage.byBranchSubtitle')}
-                    </p>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="divide-y divide-sushi-border/60">
                     {report.byBranch.map((b) => {
                       const gp = b.revenue - b.cogs;
                       const margin =
                         b.revenue > 0 ? Math.round((gp / b.revenue) * 1000) / 10 : 0;
                       return (
-                        <div
-                          key={b.branchId}
-                          className="p-3 rounded-xl bg-sushi-surface/50 border border-sushi-border/70 space-y-2"
-                        >
+                        <div key={b.branchId} className="px-4 py-3 space-y-2">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs font-bold text-sushi-text truncate">
+                            <span className="text-xs font-semibold text-sushi-text truncate">
                               {b.name}
                             </span>
-                            <Tag color="gold" className="font-mono text-3xs mr-0">
+                            <span className="text-2xs font-mono text-sushi-text-dim">
                               {b.completedOrders} {t('dashboard.ordersCountUnit')}
-                            </Tag>
+                            </span>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-sushi-border/50 text-2xs font-mono">
+                          <div className="grid grid-cols-3 gap-2 text-2xs font-mono">
                             <div>
-                              <span className="text-3xs text-sushi-text-dim block">
+                              <span className="text-3xs text-sushi-text-dim block uppercase">
                                 {t('accountingPage.colNetRevenue')}
                               </span>
-                              <span className="font-bold text-sushi-gold">
+                              <span className="font-semibold text-sushi-text">
                                 {formatCurrency(b.revenue)}
                               </span>
                             </div>
                             <div>
-                              <span className="text-3xs text-sushi-text-dim block">
+                              <span className="text-3xs text-sushi-text-dim block uppercase">
                                 {t('accountingPage.colCogs')}
                               </span>
-                              <span className="text-sky-400">
+                              <span className="text-sushi-text-muted">
                                 {formatCurrency(b.cogs)}
                               </span>
                             </div>
                             <div className="text-right">
-                              <span className="text-3xs text-sushi-text-dim block">
+                              <span className="text-3xs text-sushi-text-dim block uppercase">
                                 {t('accountingPage.colGrossProfit')}
                               </span>
-                              <span className="font-bold text-emerald-400">
+                              <span className="font-semibold text-emerald-400">
                                 {formatCurrency(gp)} ({margin}%)
                               </span>
                             </div>
@@ -756,35 +701,30 @@ export function AccountingReportsView() {
                 </div>
               )}
 
-              {/* Khối 2: Bảng Cân Đối Trạng Thái Đơn Hàng & Kỳ Trước */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm space-y-3.5">
-                <div className="pb-3 border-b border-sushi-border/70">
-                  <h3 className="text-sm sm:text-base font-bold text-sushi-text flex items-center gap-2">
-                    <Receipt size={18} className="text-sushi-gold" weight="fill" />
-                    <span>{t('accountingPage.reconciliationSummaryTitle')}</span>
+              {/* Reconciliation Summary */}
+              <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+                <div className="px-4 py-3 border-b border-sushi-border">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+                    {t('accountingPage.reconciliationSummaryTitle')}
                   </h3>
-                  <p className="text-2xs text-sushi-text-dim mt-0.5">
-                    {t('accountingPage.reconciliationSummarySubtitle')}
-                  </p>
                 </div>
 
-                <div className="divide-y divide-sushi-border/50 text-xs">
+                <div className="divide-y divide-sushi-border/60 text-xs px-4">
                   <div className="py-2.5 flex items-center justify-between">
                     <span className="text-sushi-text-muted">
                       {t('accountingPage.totalOrdersInPeriod')}
                     </span>
-                    <span className="font-mono font-bold text-sushi-text">
-                      {summary.totalOrders} {t('dashboard.ordersCountUnit')}
+                    <span className="font-mono font-semibold text-sushi-text">
+                      {summary.totalOrders}
                     </span>
                   </div>
 
                   <div className="py-2.5 flex items-center justify-between">
-                    <span className="text-sushi-text-muted flex items-center gap-1.5">
-                      <CheckCircle size={14} weight="fill" className="text-emerald-400" />
-                      <span>{t('ordersPage.statusCompleted')}</span>
+                    <span className="text-sushi-text-muted">
+                      {t('ordersPage.statusCompleted')}
                     </span>
-                    <span className="font-mono font-bold text-emerald-400">
-                      {summary.completedOrders} {t('dashboard.ordersCountUnit')}
+                    <span className="font-mono font-semibold text-emerald-400">
+                      {summary.completedOrders}
                     </span>
                   </div>
 
@@ -792,8 +732,8 @@ export function AccountingReportsView() {
                     <span className="text-sushi-text-muted">
                       {t('accountingPage.inProgressOrdersLabel')}
                     </span>
-                    <span className="font-mono font-semibold text-amber-400">
-                      {summary.inProgressOrders} {t('dashboard.ordersCountUnit')}
+                    <span className="font-mono text-sushi-text">
+                      {summary.inProgressOrders}
                     </span>
                   </div>
 
@@ -801,8 +741,8 @@ export function AccountingReportsView() {
                     <span className="text-sushi-text-muted">
                       {t('ordersPage.statusCancelled')}
                     </span>
-                    <span className="font-mono font-semibold text-rose-400">
-                      {summary.cancelledOrders} {t('dashboard.ordersCountUnit')}
+                    <span className="font-mono text-rose-400">
+                      {summary.cancelledOrders}
                     </span>
                   </div>
 
@@ -810,7 +750,7 @@ export function AccountingReportsView() {
                     <span className="text-sushi-text-muted">
                       {t('accountingPage.cancelledWasteCostLabel')}
                     </span>
-                    <span className="font-mono font-bold text-rose-400">
+                    <span className="font-mono font-semibold text-rose-400">
                       {formatCurrency(summary.cancelledAfterPrepCost)}
                     </span>
                   </div>
@@ -819,10 +759,10 @@ export function AccountingReportsView() {
                     <div className="py-2.5 flex items-center justify-between">
                       <span className="text-sushi-text-muted">
                         {t('accountingPage.previousPeriodRevenueLabel')} (
-                        {dayjs(previous.startDate).format('DD/MM')} -{' '}
+                        {dayjs(previous.startDate).format('DD/MM')}–
                         {dayjs(previous.endDate).format('DD/MM')})
                       </span>
-                      <span className="font-mono font-semibold text-sushi-text">
+                      <span className="font-mono text-sushi-text-muted">
                         {formatCurrency(previous.revenue)}
                       </span>
                     </div>
@@ -832,77 +772,76 @@ export function AccountingReportsView() {
             </div>
           </div>
 
-          {/* =====================================================================
-              7. Bảng Sổ Cái Đối Soát Doanh Thu - Giá Vốn - Lợi Nhuận Theo Ngày
-             ===================================================================== */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-sushi-border/70">
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-sushi-text">
-                  {t('accountingPage.dailyLedgerTitle')}
-                </h3>
-                <p className="text-2xs text-sushi-text-dim mt-0.5">
-                  {t('accountingPage.dailyLedgerSubtitle')}
-                </p>
-              </div>
+          {/* 6. Daily P&L Ledger Table */}
+          <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+            <div className="px-4 py-3 border-b border-sushi-border flex items-center justify-between">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+                {t('accountingPage.dailyLedgerTitle')}
+              </h3>
+              <span className="text-2xs font-mono text-sushi-text-dim">
+                {dailyList.length} {t('accountingPage.daysUnit')}
+              </span>
             </div>
 
-            {/* Mobile Card List (< md) */}
-            <SushiMobileCardList
-              items={dailyList}
-              pageSize={7}
-              keyExtractor={(item) => item.date}
-              emptyState={
-                <SushiEmptyState
-                  icon={<Receipt size={24} />}
-                  title={t('dashboard.noDataTitle')}
-                  description={t('accountingPage.emptyPeriodDesc')}
-                />
-              }
-              renderItem={(row) => {
-                const gp = row.revenue - row.cogs;
-                const pct =
-                  row.revenue > 0 ? Math.round((gp / row.revenue) * 1000) / 10 : null;
-                return (
-                  <SushiCardItem>
-                    <div className="flex items-center justify-between pb-2 border-b border-sushi-border/60">
-                      <span className="font-mono font-bold text-xs text-sushi-text">
-                        {dayjs(row.date).format('DD/MM/YYYY')}
-                      </span>
-                      <span className="text-2xs font-mono text-sushi-text-muted">
-                        {row.completedOrders}/{row.orders} {t('dashboard.ordersCountUnit')}
-                      </span>
+            {/* Mobile Flush List (< md) */}
+            <div className="md:hidden">
+              <SushiMobileCardList
+                items={dailyList}
+                pageSize={7}
+                keyExtractor={(item) => item.date}
+                className="p-3"
+                emptyState={
+                  <SushiEmptyState
+                    icon={<Receipt size={20} />}
+                    title={t('dashboard.noDataTitle')}
+                    description={t('accountingPage.emptyPeriodDesc')}
+                  />
+                }
+                renderItem={(row) => {
+                  const gp = row.revenue - row.cogs;
+                  const pct =
+                    row.revenue > 0 ? Math.round((gp / row.revenue) * 1000) / 10 : null;
+                  return (
+                    <div className="p-3 rounded-lg bg-sushi-surface/50 border border-sushi-border">
+                      <div className="flex items-center justify-between pb-2 border-b border-sushi-border/60">
+                        <span className="font-mono font-semibold text-xs text-sushi-text">
+                          {dayjs(row.date).format('DD/MM/YYYY')}
+                        </span>
+                        <span className="text-2xs font-mono text-sushi-text-dim">
+                          {row.completedOrders}/{row.orders} {t('dashboard.ordersCountUnit')}
+                        </span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-2xs font-mono">
+                        <div>
+                          <span className="text-3xs text-sushi-text-dim block uppercase">
+                            {t('accountingPage.colNetRevenue')}
+                          </span>
+                          <span className="font-semibold text-sushi-text">
+                            {formatCurrency(row.revenue)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-3xs text-sushi-text-dim block uppercase">
+                            {t('accountingPage.colCogs')}
+                          </span>
+                          <span className="text-sushi-text-muted">
+                            {formatCurrency(row.cogs)}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-3xs text-sushi-text-dim block uppercase">
+                            {t('accountingPage.colGrossProfit')}
+                          </span>
+                          <span className="font-semibold text-emerald-400">
+                            {formatCurrency(gp)} {pct !== null ? `(${pct}%)` : ''}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-2.5 grid grid-cols-3 gap-2 text-2xs font-mono">
-                      <div>
-                        <span className="text-3xs text-sushi-text-dim block">
-                          {t('accountingPage.colNetRevenue')}
-                        </span>
-                        <span className="font-bold text-sushi-gold">
-                          {formatCurrency(row.revenue)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-3xs text-sushi-text-dim block">
-                          {t('accountingPage.colCogs')}
-                        </span>
-                        <span className="text-sky-400">
-                          {formatCurrency(row.cogs)}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-3xs text-sushi-text-dim block">
-                          {t('accountingPage.colGrossProfit')}
-                        </span>
-                        <span className="font-bold text-emerald-400">
-                          {formatCurrency(gp)} {pct !== null ? `(${pct}%)` : ''}
-                        </span>
-                      </div>
-                    </div>
-                  </SushiCardItem>
-                );
-              }}
-            />
+                  );
+                }}
+              />
+            </div>
 
             {/* Desktop Table (>= md) */}
             <div className="hidden md:block">
@@ -912,14 +851,12 @@ export function AccountingReportsView() {
                 rowKey="date"
                 pagination={{ pageSize: 10, showSizeChanger: true }}
                 scroll={{ x: 'max-content' }}
-                className="border border-sushi-border rounded-xl overflow-hidden"
               />
             </div>
           </div>
         </>
       ) : null}
 
-      {/* Modal / Bottom Sheet Chọn Khoảng Ngày Tùy Chỉnh */}
       <OrderDateFilterDrawer
         open={isDateDrawerOpen}
         onClose={() => setIsDateDrawerOpen(false)}

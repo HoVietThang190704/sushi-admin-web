@@ -6,14 +6,12 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   SushiPageHeader,
-  Tag,
   SquaresFour,
   ForkKnife,
   Package,
   CookingPot,
-  WarningCircle,
-  ShieldCheck,
   ArrowRight,
+  ChartBar,
 } from '@/components/ui';
 import { useCategories, useProducts } from '@/features/catalog';
 import { useIngredients, useInventoryAlerts } from '@/features/inventory';
@@ -36,531 +34,290 @@ export default function DashboardOverviewPage() {
     ordersData?.items?.filter((o) => o.status === 'PENDING').length ?? 0;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* =========================================================================
-          1. Header Trang
-         ========================================================================= */}
-      <SushiPageHeader
-        title={t('dashboard.overviewTitle')}
-        subtitle={t('dashboard.overviewSubtitle')}
-        subtitleClassName="hidden md:block"
-      />
+    <div className="space-y-4 sm:space-y-5">
+      {/* 1. Header */}
+      <div className="pb-3 border-b border-sushi-border flex items-center justify-between gap-3">
+        <SushiPageHeader
+          title={t('dashboard.overviewTitle')}
+          subtitle={t('dashboard.overviewSubtitle')}
+        />
+        <Link
+          href="/dashboard/reports"
+          className="h-8 px-3 rounded-lg bg-sushi-surface border border-sushi-border hover:border-zinc-600 text-xs font-medium text-sushi-text inline-flex items-center gap-1.5 shrink-0 transition-colors"
+        >
+          <ChartBar size={14} className="text-sushi-text-muted" />
+          <span>{t('dashboard.accountingReports')}</span>
+        </Link>
+      </div>
 
-      {/* =========================================================================
-          2. KPI Metric Cards (Mobile: 2 thẻ quan trọng gọn gàng; Desktop: Grid 4 cột Bento)
-         ========================================================================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Metric 1: Danh Mục Thực Đơn (Ẩn trên mobile, hiện từ sm trở lên) */}
-        <div className="hidden sm:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-sushi-primary/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.totalCategories')}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-sushi-primary group-hover:scale-105 transition-transform">
-              <SquaresFour size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+      {/* 2. Architectural Metric Ledger Grid (1px Divided - No Rainbow Icon Boxes) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-sushi-border border border-sushi-border rounded-xl overflow-hidden">
+        {/* Metric 1: Categories */}
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('dashboard.totalCategories')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
               {categories.length}
             </span>
             <span className="text-2xs text-sushi-text-dim font-mono">
-              {categories.length} {t('common.itemsCount')}
+              {t('dashboard.groupsCountUnit')}
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Tổng Số Món Ăn & Combo (Ẩn trên mobile, hiện từ sm trở lên) */}
-        <div className="hidden sm:block p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-amber-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted">
-              {t('dashboard.totalProducts')}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
-              <ForkKnife size={20} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-bold text-sushi-text tracking-tight font-sans">
+        {/* Metric 2: Menu Products */}
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('dashboard.totalProducts')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
               {products.length}
             </span>
-            <span className="text-2xs text-amber-400 font-mono">
-              Active Catalog
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              SKU
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Tổng Số Nguyên Liệu Kho (Hiện trên cả mobile và desktop) */}
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-blue-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted truncate">
-              {t('dashboard.totalIngredients')}
-            </span>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform shrink-0 ml-1">
-              <CookingPot size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2.5 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-sushi-text tracking-tight font-sans">
+        {/* Metric 3: Ingredients */}
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('dashboard.totalIngredients')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text tracking-tight">
               {ingredients.length}
             </span>
-            <span className="hidden sm:inline text-2xs text-blue-400 font-mono">
+            <span className="text-2xs text-sushi-text-dim font-mono">
               {t('dashboard.menuInventory')}
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Cảnh Báo Tồn Kho (Hiện trên cả mobile và desktop) */}
-        <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 hover:border-emerald-500/40 transition-all duration-300 shadow-md group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-sushi-text-muted truncate">
+        {/* Metric 4: Stock Alerts */}
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
               {t('dashboard.alertItemsCount')}
             </span>
-            <div
-              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 shrink-0 ml-1 ${
-                alerts.length > 0
-                  ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
-                  : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-              }`}
-            >
-              {alerts.length > 0 ? (
-                <WarningCircle size={18} weight="fill" />
-              ) : (
-                <ShieldCheck size={18} weight="fill" />
-              )}
-            </div>
-          </div>
-          <div className="mt-2.5 sm:mt-4 flex items-baseline justify-between">
             <span
-              className={`text-2xl sm:text-3xl font-bold tracking-tight font-sans ${
+              className={`w-1.5 h-1.5 rounded-full ${
+                alerts.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'
+              }`}
+            />
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span
+              className={`text-xl sm:text-2xl font-semibold font-mono tracking-tight ${
                 alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
               }`}
             >
               {alerts.length}
             </span>
-            <span
-              className={`inline-flex items-center space-x-1 text-3xs sm:text-2xs font-mono ${
-                alerts.length > 0 ? 'text-rose-400' : 'text-emerald-400'
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  alerts.length > 0 ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'
-                }`}
-              ></span>
-              <span>{alerts.length > 0 ? t('dashboard.alertLow') : t('dashboard.alertSafe')}</span>
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              {alerts.length > 0 ? t('dashboard.alertLow') : t('dashboard.alertSafe')}
             </span>
           </div>
         </div>
       </div>
 
-      {/* =========================================================================
-          3. Lối Tắt Vận Hành (Action Hub: Danh sách gọn trên Mobile, Bento Card trên Desktop)
-         ========================================================================= */}
-      <div>
-        <div className="mb-3">
-          <h2 className="text-base font-bold text-sushi-text">
+      {/* 3. Operations Quick-Access Strip */}
+      <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+        <div className="px-4 py-2.5 border-b border-sushi-border flex items-center justify-between">
+          <h2 className="text-2xs font-mono font-semibold uppercase tracking-wider text-sushi-text-muted">
             {t('dashboard.actionHubTitle')}
           </h2>
-          <p className="text-xs text-sushi-text-dim">
+          <span className="text-2xs font-mono text-sushi-text-dim hidden sm:inline">
             {t('dashboard.actionHubSubtitle')}
-          </p>
+          </span>
         </div>
 
-        {/* 3.1 Giao diện dạng thẻ/chip theo chiều ngang trên Mobile (< md) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:hidden">
-          {/* Action 1: Danh Mục Món */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/categories')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/25 flex items-center justify-center text-sushi-primary mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <SquaresFour size={17} weight="fill" />
-            </div>
-            <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.categoriesTitle')}
-            </span>
-            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              {categories.length} {t('dashboard.groupsCountUnit')}
-            </span>
-          </button>
-
-          {/* Action 2: Món Ăn & Combo */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/products')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-500 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <ForkKnife size={17} weight="fill" />
-            </div>
-            <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.productsTitle')}
-            </span>
-            <span className="text-3xs text-sushi-text-dim mt-0.5 truncate w-full">
-              {products.length} {t('common.itemsCount')}
-            </span>
-          </button>
-
-          {/* Action 3: Kho Nguyên Liệu */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/inventory')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <CookingPot size={17} weight="fill" />
-            </div>
-            <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.menuInventory')}
-            </span>
-            <span className="text-3xs text-blue-400/90 font-mono mt-0.5 truncate w-full">
-              {ingredients.length} {t('common.itemsCount')}
-            </span>
-          </button>
-
-          {/* Action 4: Đơn Hàng & Bếp */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/orders')}
-            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-sushi-card border border-sushi-border/80 active:bg-sushi-card-hover transition-colors text-center group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 mb-1.5 shrink-0 group-active:scale-95 transition-transform">
-              <Package size={17} weight="fill" />
-            </div>
-            <span className="text-xs font-semibold text-sushi-text truncate w-full">
-              {t('dashboard.ordersTitle')}
-            </span>
-            <span className="text-3xs text-cyan-400/90 font-mono mt-0.5 truncate w-full">
-              {pendingOrdersCount > 0
-                ? `${pendingOrdersCount} ${t('dashboard.pendingApprovalCount')}`
-                : `${totalOrders} ${t('dashboard.ordersCountUnit')}`}
-            </span>
-          </button>
-        </div>
-
-        {/* 3.2 Giao diện dạng Bento Cards lớn trên Desktop (>= md) */}
-        <div className="hidden md:grid md:grid-cols-4 gap-4">
-          {/* Action 1: Danh Mục Món */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/categories')}
-            className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-sushi-primary/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-sushi-primary mb-3 shadow-inner">
-                <SquaresFour size={20} />
-              </div>
-              <h3 className="text-sm font-bold text-sushi-text group-hover:text-sushi-primary transition-colors">
-                {t('dashboard.manageCategoriesBtn')}
-              </h3>
-              <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
-                {t('dashboard.actionCategoriesDesc')}
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
-              <span>{t('dashboard.categoriesTitle')}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-sushi-primary" />
-            </div>
-          </button>
-
-          {/* Action 2: Món Ăn & Combo */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/products')}
-            className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-amber-500/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-amber-500 mb-3 shadow-inner">
-                <ForkKnife size={20} />
-              </div>
-              <h3 className="text-sm font-bold text-sushi-text group-hover:text-amber-400 transition-colors">
-                {t('dashboard.productsTitle')}
-              </h3>
-              <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
-                {t('dashboard.actionProductsDesc')}
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
-              <span>{t('dashboard.menuProducts')}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-amber-400" />
-            </div>
-          </button>
-
-          {/* Action 3: Kho Nguyên Liệu */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/inventory')}
-            className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-blue-500/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-blue-400 mb-3 shadow-inner">
-                <CookingPot size={20} />
-              </div>
-              <h3 className="text-sm font-bold text-sushi-text group-hover:text-blue-400 transition-colors">
-                {t('dashboard.inventoryTitle')}
-              </h3>
-              <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
-                {t('dashboard.inventorySubtitle')}
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
-              <span>{t('dashboard.menuInventory')}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-blue-400" />
-            </div>
-          </button>
-
-          {/* Action 4: Đơn Hàng & Bếp */}
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/orders')}
-            className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/80 hover:border-cyan-500/50 hover:bg-sushi-card-hover/90 transition-all duration-200 text-left cursor-pointer group shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-sushi-surface border border-sushi-border flex items-center justify-center text-cyan-400 shadow-inner">
-                  <Package size={20} />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-sushi-border">
+          {[
+            {
+              path: '/dashboard/orders',
+              icon: Package,
+              title: t('dashboard.ordersTitle'),
+              meta:
+                pendingOrdersCount > 0
+                  ? `${pendingOrdersCount} ${t('dashboard.pendingApprovalCount')}`
+                  : `${totalOrders} ${t('dashboard.ordersCountUnit')}`,
+              highlight: pendingOrdersCount > 0,
+            },
+            {
+              path: '/dashboard/products',
+              icon: ForkKnife,
+              title: t('dashboard.productsTitle'),
+              meta: `${products.length} ${t('common.itemsCount')}`,
+              highlight: false,
+            },
+            {
+              path: '/dashboard/inventory',
+              icon: CookingPot,
+              title: t('dashboard.menuInventory'),
+              meta: `${ingredients.length} ${t('common.itemsCount')}`,
+              highlight: alerts.length > 0,
+            },
+            {
+              path: '/dashboard/categories',
+              icon: SquaresFour,
+              title: t('dashboard.categoriesTitle'),
+              meta: `${categories.length} ${t('dashboard.groupsCountUnit')}`,
+              highlight: false,
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => router.push(item.path)}
+                className="bg-sushi-card hover:bg-sushi-surface/80 p-3.5 sm:p-4 text-left transition-colors cursor-pointer group flex flex-col justify-between gap-2.5"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <Icon
+                    size={16}
+                    className="text-sushi-text-dim group-hover:text-sushi-text transition-colors"
+                  />
+                  <ArrowRight
+                    size={13}
+                    className="text-sushi-text-dim group-hover:text-white group-hover:translate-x-0.5 transition-all"
+                  />
                 </div>
-                <Tag
-                  color={pendingOrdersCount > 0 ? 'gold' : 'cyan'}
-                  className="font-mono text-2xs mr-0"
-                >
-                  {pendingOrdersCount > 0
-                    ? `${pendingOrdersCount} ${t('dashboard.pendingApprovalCount')}`
-                    : `${totalOrders} ${t('dashboard.ordersCountUnit')}`}
-                </Tag>
-              </div>
-              <h3 className="text-sm font-bold text-sushi-text group-hover:text-cyan-400 transition-colors">
-                {t('dashboard.ordersTitle')}
-              </h3>
-              <p className="text-xs text-sushi-text-dim mt-1.5 leading-relaxed">
-                {t('dashboard.actionOrdersDesc')}
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-sushi-border/50 flex items-center justify-between text-xs font-semibold text-sushi-text-muted group-hover:text-white transition-colors">
-              <span>{t('dashboard.orders')}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-cyan-400" />
-            </div>
-          </button>
+                <div>
+                  <div className="text-xs sm:text-sm font-semibold text-sushi-text truncate">
+                    {item.title}
+                  </div>
+                  <div
+                    className={`text-2xs font-mono mt-0.5 truncate ${
+                      item.highlight ? 'text-amber-400 font-medium' : 'text-sushi-text-dim'
+                    }`}
+                  >
+                    {item.meta}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* =========================================================================
-          4. Chi Tiết Danh Mục & Món Ăn Mới Nhất (Lưới 2 Cột Cân Đối)
-         ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Cột 1: Danh Mục Thực Đơn Hiện Có */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-sushi-border/70 mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-sushi-text">
-                  {t('dashboard.recentCategoriesTitle')}
-                </h3>
-                <p className="text-2xs text-sushi-text-dim mt-0.5">
-                  {t('dashboard.recentCategoriesSubtitle')}
-                </p>
-              </div>
-
-              <Link
-                href="/dashboard/categories"
-                className="text-xs text-sushi-primary hover:text-sushi-primary-hover font-semibold flex items-center space-x-1 transition-colors"
-              >
-                <span>{t('dashboard.viewAllCategories')}</span>
-                <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            {categories.length === 0 ? (
-              <div className="py-12 text-center text-xs text-sushi-text-dim">
-                {t('common.uncategorized')}
-              </div>
-            ) : (
-              <>
-                {/* Mobile (< md): Dạng thẻ/card độc lập từng danh mục */}
-                <div className="flex flex-col space-y-2 md:hidden">
-                  {categories.slice(0, 5).map((category, idx) => (
-                    <div
-                      key={category.id}
-                      className="p-3 rounded-xl bg-sushi-surface/70 border border-sushi-border/80 flex items-center justify-between shadow-2xs"
-                    >
-                      <div className="flex items-center space-x-2.5 min-w-0">
-                        <span className="w-6 h-6 rounded-md bg-sushi-card border border-sushi-border flex items-center justify-center text-2xs font-mono font-bold text-sushi-text-dim shrink-0">
-                          0{idx + 1}
-                        </span>
-                        <span className="text-sm font-semibold text-sushi-text truncate">
-                          {category.name}
-                        </span>
-                      </div>
-                      <Tag color="success" className="font-semibold text-2xs mr-0 shrink-0">
-                        {t('common.active')}
-                      </Tag>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop (>= md): Dạng danh sách phân cách thanh mảnh */}
-                <div className="hidden md:block divide-y divide-sushi-border/50">
-                  {categories.slice(0, 5).map((category, idx) => (
-                    <div
-                      key={category.id}
-                      className="py-3 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
-                    >
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-sushi-surface border border-sushi-border flex items-center justify-center text-xs font-mono font-bold text-sushi-text-dim shrink-0">
-                          0{idx + 1}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-sushi-text truncate">
-                            {category.name}
-                          </div>
-                          <div className="text-2xs text-sushi-text-dim font-mono truncate">
-                            ID: {category.id.slice(0, 8)}...
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3 shrink-0">
-                        <Tag color="success" className="font-semibold text-2xs mr-0">
-                          {t('common.active')}
-                        </Tag>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+      {/* 4. Two-Column Catalog Snapshot (Flush Editorial Lists) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Recent Categories */}
+        <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-sushi-border flex items-center justify-between">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+              {t('dashboard.recentCategoriesTitle')}
+            </h3>
+            <Link
+              href="/dashboard/categories"
+              className="text-2xs font-mono text-sushi-text-muted hover:text-white flex items-center gap-1 transition-colors"
+            >
+              <span>{t('dashboard.viewAllCategories')}</span>
+              <ArrowRight size={11} />
+            </Link>
           </div>
+
+          {categories.length === 0 ? (
+            <div className="py-10 text-center text-xs text-sushi-text-dim">
+              {t('common.uncategorized')}
+            </div>
+          ) : (
+            <div className="divide-y divide-sushi-border/60">
+              {categories.slice(0, 6).map((category, idx) => (
+                <div
+                  key={category.id}
+                  className="px-4 py-2.5 flex items-center justify-between hover:bg-sushi-surface/40 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-2xs font-mono text-sushi-text-dim w-5 shrink-0">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-xs sm:text-sm font-medium text-sushi-text truncate">
+                      {category.name}
+                    </span>
+                  </div>
+
+                  <span className="text-2xs font-mono text-sushi-text-dim shrink-0">
+                    {category._count?.products ?? 0} {t('common.itemsCount')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Cột 2: Món Ăn & Combo Mới Cập Nhật */}
-        <div className="p-5 rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-sushi-border/70 mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-sushi-text">
-                  {t('dashboard.recentProductsTitle')}
-                </h3>
-                <p className="text-2xs text-sushi-text-dim mt-0.5">
-                  {t('dashboard.recentProductsSubtitle')}
-                </p>
-              </div>
-
-              <Link
-                href="/dashboard/products"
-                className="text-xs text-amber-500 hover:text-amber-400 font-semibold flex items-center space-x-1 transition-colors"
-              >
-                <span>{t('dashboard.viewAllProducts')}</span>
-                <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            {products.length === 0 ? (
-              <div className="py-12 text-center text-xs text-sushi-text-dim">
-                {t('dashboard.noProductsYet')}
-              </div>
-            ) : (
-              <>
-                {/* Mobile (< md): Dạng thẻ/card độc lập từng món ăn */}
-                <div className="flex flex-col space-y-2 md:hidden">
-                  {products.slice(0, 5).map((product) => (
-                    <div
-                      key={product.id}
-                      className="p-3 rounded-xl bg-sushi-surface/70 border border-sushi-border/80 flex items-center justify-between shadow-2xs"
-                    >
-                      <div className="flex items-center space-x-2.5 min-w-0">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-sushi-card border border-sushi-border flex items-center justify-center shrink-0">
-                          {product.imageUrl ? (
-                            <Image
-                              src={product.imageUrl}
-                              alt={product.name}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                              unoptimized
-                            />
-                          ) : (
-                            <ForkKnife size={18} className="text-sushi-text-dim" />
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-sushi-text truncate">
-                            {product.name}
-                          </div>
-                          <div className="flex items-center space-x-1.5 text-2xs text-sushi-text-dim mt-0.5">
-                            <span className="font-mono">{product.sku}</span>
-                            {product.category?.name && (
-                              <span className="text-sushi-text-muted truncate">
-                                · {product.category.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0 ml-2">
-                        <span className="text-xs font-bold text-sushi-text font-sans">
-                          {formatCurrency(product.sellingPrice)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop (>= md): Dạng danh sách phân cách thanh mảnh */}
-                <div className="hidden md:block divide-y divide-sushi-border/50">
-                  {products.slice(0, 5).map((product) => (
-                    <div
-                      key={product.id}
-                      className="py-2.5 flex items-center justify-between hover:bg-sushi-surface/40 px-2 rounded-xl transition-colors"
-                    >
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-sushi-surface border border-sushi-border flex items-center justify-center shrink-0">
-                          {product.imageUrl ? (
-                            <Image
-                              src={product.imageUrl}
-                              alt={product.name}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                              unoptimized
-                            />
-                          ) : (
-                            <ForkKnife size={18} className="text-sushi-text-dim" />
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-sushi-text truncate">
-                            {product.name}
-                          </div>
-                          <div className="flex items-center space-x-2 text-2xs text-sushi-text-dim font-mono">
-                            <span>{product.sku}</span>
-                            {product.category?.name && (
-                              <>
-                                <span>·</span>
-                                <span className="text-sushi-text-muted truncate max-w-[100px]">
-                                  {product.category.name}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3 shrink-0 ml-3">
-                        <span className="text-xs font-bold text-sushi-text font-sans">
-                          {formatCurrency(product.sellingPrice)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+        {/* Recent Products */}
+        <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-sushi-border flex items-center justify-between">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-sushi-text font-mono">
+              {t('dashboard.recentProductsTitle')}
+            </h3>
+            <Link
+              href="/dashboard/products"
+              className="text-2xs font-mono text-sushi-text-muted hover:text-white flex items-center gap-1 transition-colors"
+            >
+              <span>{t('dashboard.viewAllProducts')}</span>
+              <ArrowRight size={11} />
+            </Link>
           </div>
+
+          {products.length === 0 ? (
+            <div className="py-10 text-center text-xs text-sushi-text-dim">
+              {t('dashboard.noProductsYet')}
+            </div>
+          ) : (
+            <div className="divide-y divide-sushi-border/60">
+              {products.slice(0, 6).map((product) => (
+                <div
+                  key={product.id}
+                  className="px-4 py-2.5 flex items-center justify-between hover:bg-sushi-surface/40 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-md overflow-hidden bg-sushi-surface border border-sushi-border flex items-center justify-center shrink-0">
+                      {product.imageUrl ? (
+                        <Image
+                          src={product.imageUrl}
+                          alt={product.name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <ForkKnife size={14} className="text-sushi-text-dim" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm font-medium text-sushi-text truncate">
+                        {product.name}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-2xs text-sushi-text-dim font-mono">
+                        <span>{product.sku}</span>
+                        {product.category?.name && (
+                          <>
+                            <span>·</span>
+                            <span className="truncate max-w-[110px]">
+                              {product.category.name}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className="text-xs font-mono font-semibold text-sushi-text shrink-0 ml-3">
+                    {formatCurrency(product.sellingPrice)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

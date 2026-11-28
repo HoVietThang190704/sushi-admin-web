@@ -308,227 +308,208 @@ export function BranchManagementView() {
   ];
 
   return (
-    <div className="space-y-6 pb-8">
-      <SushiPageHeader
-        title={t('branchesPage.title')}
-        subtitle={t('branchesPage.subtitle')}
-        extra={
-          <div className="flex items-center gap-2.5">
-            <Link href="/dashboard/shipping">
-              <Button
-                icon={<Truck size={16} />}
-                className="rounded-xl h-10 px-3.5 text-xs sm:text-sm font-medium"
-              >
-                {t('branchesPage.shippingRulesBtn')}
-              </Button>
-            </Link>
-            <div className="hidden md:block">
-              <SushiButton
-                type="primary"
-                icon={<Plus size={16} weight="bold" />}
-                onClick={handleOpenCreate}
-                className="h-10 rounded-xl px-4 font-semibold"
-              >
-                {t('branchesPage.addBtn')}
-              </SushiButton>
+    <div className="space-y-4 pb-8">
+      <div className="pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('branchesPage.title')}
+          subtitle={t('branchesPage.subtitle')}
+          extra={
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/shipping">
+                <Button
+                  icon={<Truck size={15} />}
+                  className="rounded-lg h-9 px-3 text-xs font-medium"
+                >
+                  {t('branchesPage.shippingRulesBtn')}
+                </Button>
+              </Link>
+              <div className="hidden md:block">
+                <SushiButton
+                  type="primary"
+                  icon={<Plus size={15} weight="bold" />}
+                  onClick={handleOpenCreate}
+                  className="h-9 rounded-lg px-3.5 text-xs font-semibold"
+                >
+                  {t('branchesPage.addBtn')}
+                </SushiButton>
+              </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      </div>
 
-      {/* KPI Bento Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('branchesPage.kpiTotal')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <Storefront size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-sushi-text font-sans">
+      {/* Architectural Metric Ledger Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-sushi-border border border-sushi-border rounded-xl overflow-hidden">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('branchesPage.kpiTotal')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text">
               {branches.length}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
-              branches
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              {t('branchesPage.branchesUnit')}
             </span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('branchesPage.kpiActive')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <CheckCircle size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-emerald-400 font-sans">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('branchesPage.kpiActive')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-emerald-400">
               {branches.filter((b) => b.isActive).length}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
+            <span className="text-2xs text-sushi-text-dim font-mono">
               {t('common.active')}
             </span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('branchesPage.kpiLinkedWarehouse')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-              <Database size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-sushi-text font-sans">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('branchesPage.kpiLinkedWarehouse')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text">
               {branches.filter((b) => Boolean(b.warehouseId)).length}
             </span>
             <Link
               href="/dashboard/warehouses"
-              className="text-3xs sm:text-2xs text-sushi-gold hover:underline font-mono"
+              className="text-2xs text-sushi-text-muted hover:text-white hover:underline font-mono"
             >
               {t('warehousesPage.manageBtn')} →
             </Link>
           </div>
         </div>
 
-        <div
-          className={`p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border shadow-sm ${unlinkedCount > 0
-              ? 'border-amber-500/50 bg-gradient-to-br from-sushi-card to-amber-500/5'
-              : 'border-sushi-border/90'
-            }`}
-        >
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
               {t('branchesPage.kpiUnlinkedWarehouse')}
             </span>
-            <div
-              className={`w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 ${unlinkedCount > 0
-                  ? 'bg-amber-500/15 border-amber-500/35 text-amber-400'
-                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                }`}
-            >
-              <WarningCircle size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
             <span
-              className={`text-xl sm:text-3xl font-bold font-sans ${unlinkedCount > 0 ? 'text-amber-400' : 'text-emerald-400'
-                }`}
+              className={`w-1.5 h-1.5 rounded-full ${
+                unlinkedCount > 0 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'
+              }`}
+            />
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span
+              className={`text-xl sm:text-2xl font-semibold font-mono ${
+                unlinkedCount > 0 ? 'text-amber-400' : 'text-emerald-400'
+              }`}
             >
               {unlinkedCount}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
+            <span className="text-2xs text-sushi-text-dim font-mono">
               {unlinkedCount > 0 ? t('branchesPage.needWarehouse') : t('dashboard.alertSafe')}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Search Toolbar */}
-      <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="w-full sm:w-96">
-          <Input
-            prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
-            placeholder={t('branchesPage.searchPlaceholder')}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-xl h-10"
-          />
+      {/* Unified Panel: Search + List / Table */}
+      <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+        <div className="p-3 sm:px-4 border-b border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="w-full sm:w-80">
+            <Input
+              prefix={<MagnifyingGlass size={15} className="text-sushi-text-dim mr-1" />}
+              placeholder={t('branchesPage.searchPlaceholder')}
+              allowClear
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="rounded-lg h-9 text-xs"
+            />
+          </div>
+          <div className="text-2xs font-mono text-sushi-text-dim">
+            {filteredBranches.length}/{branches.length} {t('branchesPage.branchesUnit')}
+          </div>
         </div>
-        <div className="text-2xs sm:text-xs font-mono text-sushi-text-dim">
-          {filteredBranches.length} / {branches.length} {t('branchesPage.branchesUnit')}
-        </div>
-      </div>
 
-      {/* Mobile Card List (< md) */}
-      <SushiMobileCardList
-        items={filteredBranches}
-        pageSize={8}
-        loading={loadingBranches}
-        emptyState={
-          <SushiEmptyState
-            isCard
-            icon={<Storefront size={28} />}
-            title={t('branchesPage.emptyTitle')}
-            description={t('branchesPage.emptyDesc')}
-          />
-        }
-        renderItem={(item) => (
-          <SushiCardItem>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Tag color="gold" className="font-mono font-bold text-2xs m-0">
-                    {item.code}
-                  </Tag>
-                  <Tag
-                    color={item.isActive ? 'green' : 'default'}
-                    className="text-3xs m-0"
-                  >
-                    {item.isActive ? t('common.active') : t('common.inactive')}
-                  </Tag>
-                </div>
-                <h4 className="text-sm font-bold text-sushi-text mt-1.5 truncate">
-                  {item.name}
-                </h4>
-                <p className="text-xs text-sushi-text-muted mt-1 flex items-start gap-1">
-                  <MapPin size={14} className="shrink-0 mt-0.5 text-sushi-text-dim" />
-                  <span>{item.address}</span>
-                </p>
-                <p className="text-2xs text-sushi-text-dim font-mono mt-1">
-                  SĐT: {item.phone}
-                </p>
-              </div>
-              <SushiCardActions
-                onEdit={() => handleOpenEdit(item)}
-                onDelete={() => handleDelete(item)}
+        <div className="p-3 md:hidden">
+          <SushiMobileCardList
+            items={filteredBranches}
+            pageSize={8}
+            loading={loadingBranches}
+            emptyState={
+              <SushiEmptyState
+                icon={<Storefront size={22} />}
+                title={t('branchesPage.emptyTitle')}
+                description={t('branchesPage.emptyDesc')}
               />
-            </div>
+            }
+            renderItem={(item) => (
+              <SushiCardItem>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-1.5 py-0.5 rounded bg-sushi-surface border border-sushi-border font-mono font-semibold text-2xs text-sushi-text">
+                        {item.code}
+                      </span>
+                      <Tag
+                        color={item.isActive ? 'green' : 'default'}
+                        className="text-3xs m-0"
+                      >
+                        {item.isActive ? t('common.active') : t('common.inactive')}
+                      </Tag>
+                    </div>
+                    <h4 className="text-sm font-semibold text-sushi-text mt-1.5 truncate">
+                      {item.name}
+                    </h4>
+                    <p className="text-xs text-sushi-text-muted mt-1 flex items-start gap-1">
+                      <MapPin size={13} className="shrink-0 mt-0.5 text-sushi-text-dim" />
+                      <span>{item.address}</span>
+                    </p>
+                    <p className="text-2xs text-sushi-text-dim font-mono mt-1">
+                      SĐT: {item.phone}
+                    </p>
+                  </div>
+                  <SushiCardActions
+                    onEdit={() => handleOpenEdit(item)}
+                    onDelete={() => handleDelete(item)}
+                  />
+                </div>
 
-            <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
-              <div className="truncate">
-                <span className="text-sushi-text-muted">{t('branchesPage.colWarehouse')}: </span>
-                {item.warehouse ? (
-                  <strong className="text-sushi-gold">
-                    {item.warehouse.name} ({item.warehouse.code})
-                  </strong>
-                ) : (
-                  <span className="text-amber-400 font-semibold">
-                    {t('branchesPage.noWarehouseWarning')}
+                <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs">
+                  <div className="truncate">
+                    <span className="text-sushi-text-muted">{t('branchesPage.colWarehouse')}: </span>
+                    {item.warehouse ? (
+                      <strong className="text-sushi-text font-medium">
+                        {item.warehouse.name} ({item.warehouse.code})
+                      </strong>
+                    ) : (
+                      <span className="text-amber-400 font-semibold">
+                        {t('branchesPage.noWarehouseWarning')}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sushi-text-dim font-mono shrink-0 ml-2">
+                    {item._count?.orders ?? 0} đơn
                   </span>
-                )}
-              </div>
-              <span className="text-sushi-text-dim font-mono shrink-0 ml-2">
-                {item._count?.orders ?? 0} đơn
-              </span>
-            </div>
-          </SushiCardItem>
-        )}
-      />
+                </div>
+              </SushiCardItem>
+            )}
+          />
+        </div>
 
-      {/* Desktop Table (>= md) */}
-      <div className="hidden md:block rounded-2xl bg-sushi-card border border-sushi-border/80 p-4 shadow-sm">
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={filteredBranches}
-          loading={loadingBranches}
-          pagination={{ pageSize: 10, showSizeChanger: false }}
-        />
+        <div className="hidden md:block">
+          <Table
+            rowKey="id"
+            columns={columns}
+            dataSource={filteredBranches}
+            loading={loadingBranches}
+            pagination={{ pageSize: 10, showSizeChanger: false }}
+          />
+        </div>
       </div>
 
       {/* Mobile FAB */}
       <SushiFloatingButton
         onClick={handleOpenCreate}
-        // label={t('branchesPage.addBtn')}
+        label={t('branchesPage.addBtn')}
       />
 
       {/* Modal Tạo / Sửa Chi Nhánh */}

@@ -27,7 +27,6 @@ import {
   Storefront,
   MagnifyingGlass,
   Database,
-  CheckCircle,
 } from '@/components/ui';
 import {
   Warehouse,
@@ -143,11 +142,11 @@ export function WarehouseManagementView() {
       title: t('warehousesPage.colCode'),
       dataIndex: 'code',
       key: 'code',
-      width: 170,
+      width: 150,
       render: (code: string) => (
-        <Tag color="gold" className="font-mono font-bold text-xs px-2.5 py-0.5">
+        <span className="px-2 py-0.5 rounded bg-sushi-surface border border-sushi-border font-mono font-semibold text-xs text-sushi-text">
           {code}
-        </Tag>
+        </span>
       ),
     },
     {
@@ -157,8 +156,8 @@ export function WarehouseManagementView() {
       render: (name: string, record: Warehouse) => (
         <div>
           <div className="font-semibold text-sushi-text text-sm">{name}</div>
-          <div className="text-xs text-sushi-text-muted flex items-center gap-1 mt-0.5">
-            <MapPin size={13} className="text-sushi-text-dim shrink-0" />
+          <div className="text-xs text-sushi-text-dim flex items-center gap-1 mt-0.5">
+            <MapPin size={12} className="shrink-0" />
             <span>{record.address || t('warehousesPage.noAddress')}</span>
           </div>
         </div>
@@ -173,7 +172,7 @@ export function WarehouseManagementView() {
         const count = record._count?.branches ?? list.length;
         if (count === 0) {
           return (
-            <span className="text-xs text-sushi-text-dim italic">
+            <span className="text-xs text-sushi-text-dim">
               {t('warehousesPage.noLinkedBranches')}
             </span>
           );
@@ -182,18 +181,17 @@ export function WarehouseManagementView() {
           <div className="flex flex-wrap gap-1">
             {list.length > 0 ? (
               list.map((b) => (
-                <Tag
+                <span
                   key={b.id}
-                  color="blue"
-                  className="text-2xs font-medium m-0"
+                  className="px-2 py-0.5 rounded bg-sushi-surface border border-sushi-border text-2xs font-mono text-sushi-text-muted"
                 >
                   {b.name} ({b.code})
-                </Tag>
+                </span>
               ))
             ) : (
-              <Tag color="blue" className="text-xs font-mono">
+              <span className="px-2 py-0.5 rounded bg-sushi-surface border border-sushi-border text-xs font-mono text-sushi-text-muted">
                 {count} {t('warehousesPage.branchesUnit')}
-              </Tag>
+              </span>
             )}
           </div>
         );
@@ -205,7 +203,7 @@ export function WarehouseManagementView() {
       width: 150,
       align: 'center' as const,
       render: (_: unknown, record: Warehouse) => (
-        <span className="font-mono font-semibold text-sushi-text">
+        <span className="font-mono font-medium text-xs text-sushi-text">
           {record._count?.stocks ?? 0} {t('warehousesPage.ingredientsUnit')}
         </span>
       ),
@@ -214,32 +212,45 @@ export function WarehouseManagementView() {
       title: t('warehousesPage.colStatus'),
       dataIndex: 'isActive',
       key: 'isActive',
-      width: 140,
+      width: 130,
       align: 'center' as const,
       render: (isActive: boolean) => (
-        <Tag color={isActive ? 'green' : 'default'}>
-          {isActive ? t('common.active') : t('common.inactive')}
-        </Tag>
+        <span
+          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-medium ${
+            isActive
+              ? 'bg-emerald-500/10 text-emerald-400'
+              : 'bg-zinc-500/10 text-zinc-400'
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isActive ? 'bg-emerald-500' : 'bg-zinc-500'
+            }`}
+          />
+          <span>{isActive ? t('common.active') : t('common.inactive')}</span>
+        </span>
       ),
     },
     {
       title: t('warehousesPage.colActions'),
       key: 'actions',
-      width: 130,
-      align: 'center' as const,
+      width: 110,
+      align: 'right' as const,
       render: (_: unknown, record: Warehouse) => (
         <Space size="small">
           <Button
             type="text"
-            icon={<PencilSimple size={16} />}
+            size="small"
+            icon={<PencilSimple size={15} />}
             onClick={() => handleOpenEdit(record)}
-            className="text-sushi-gold hover:text-sushi-gold"
+            className="text-sushi-text-muted hover:text-white"
             title={t('dashboard.edit')}
           />
           <Button
             type="text"
+            size="small"
             danger
-            icon={<Trash size={16} />}
+            icon={<Trash size={15} />}
             onClick={() => handleDelete(record)}
             title={t('dashboard.delete')}
           />
@@ -249,228 +260,214 @@ export function WarehouseManagementView() {
   ];
 
   return (
-    <div className="space-y-6 pb-8">
-      <SushiPageHeader
-        title={t('warehousesPage.title')}
-        subtitle={t('warehousesPage.subtitle')}
-        extra={
-          <div className="flex items-center gap-2.5">
-            <Link href="/dashboard/inventory">
-              <Button
-                icon={<Package size={16} />}
-                className="rounded-xl h-10 px-3.5 text-xs sm:text-sm font-medium"
-              >
-                {t('warehousesPage.viewStockBtn')}
-              </Button>
-            </Link>
-            <div className="hidden md:block">
-              <SushiButton
-                type="primary"
-                icon={<Plus size={16} weight="bold" />}
-                onClick={handleOpenCreate}
-                className="h-10 rounded-xl px-4 font-semibold"
-              >
-                {t('warehousesPage.addBtn')}
-              </SushiButton>
+    <div className="space-y-4 pb-8">
+      <div className="pb-3 border-b border-sushi-border">
+        <SushiPageHeader
+          title={t('warehousesPage.title')}
+          subtitle={t('warehousesPage.subtitle')}
+          extra={
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/inventory">
+                <Button
+                  icon={<Package size={15} />}
+                  className="rounded-lg h-9 px-3 text-xs font-medium"
+                >
+                  {t('warehousesPage.viewStockBtn')}
+                </Button>
+              </Link>
+              <div className="hidden md:block">
+                <SushiButton
+                  type="primary"
+                  icon={<Plus size={15} weight="bold" />}
+                  onClick={handleOpenCreate}
+                  className="h-9 rounded-lg px-3.5 text-xs font-semibold"
+                >
+                  {t('warehousesPage.addBtn')}
+                </SushiButton>
+              </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      </div>
 
-      {/* KPI Bento Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('warehousesPage.kpiTotal')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-              <Database size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-sushi-text font-sans">
+      {/* Architectural Metric Ledger Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-sushi-border border border-sushi-border rounded-xl overflow-hidden">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('warehousesPage.kpiTotal')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text">
               {warehouses.length}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
-              warehouses
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              {t('warehousesPage.warehousesUnit')}
             </span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('warehousesPage.kpiActive')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <CheckCircle size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-emerald-400 font-sans">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('warehousesPage.kpiActive')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-emerald-400">
               {warehouses.filter((w) => w.isActive).length}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
+            <span className="text-2xs text-sushi-text-dim font-mono">
               {t('common.active')}
             </span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('warehousesPage.kpiLinkedBranches')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <Storefront size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-sushi-text font-sans">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('warehousesPage.kpiLinkedBranches')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text">
               {totalLinkedBranches}
             </span>
             <Link
               href="/dashboard/branches"
-              className="text-3xs sm:text-2xs text-sushi-gold hover:underline font-mono"
+              className="text-2xs text-sushi-text-muted hover:text-white hover:underline font-mono"
             >
               {t('warehousesPage.manageBranchesLink')} →
             </Link>
           </div>
         </div>
 
-        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/90 shadow-sm">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-2xs sm:text-xs font-medium text-sushi-text-muted truncate">
-              {t('warehousesPage.kpiTrackedStocks')}
-            </span>
-            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
-              <Package size={18} weight="fill" />
-            </div>
-          </div>
-          <div className="mt-2 sm:mt-4 flex items-baseline justify-between">
-            <span className="text-xl sm:text-3xl font-bold text-sushi-text font-sans">
+        <div className="bg-sushi-card p-3.5 sm:p-4 flex flex-col justify-between">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-sushi-text-muted">
+            {t('warehousesPage.kpiTrackedStocks')}
+          </span>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="text-xl sm:text-2xl font-semibold font-mono text-sushi-text">
               {totalStockItems}
             </span>
-            <span className="text-3xs sm:text-2xs text-sushi-text-dim font-mono">
-              SKU records
+            <span className="text-2xs text-sushi-text-dim font-mono">
+              SKU
             </span>
           </div>
         </div>
       </div>
 
-      {/* Search Toolbar */}
-      <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-sushi-card border border-sushi-border/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="w-full sm:w-96">
-          <Input
-            prefix={<MagnifyingGlass size={16} className="text-sushi-text-dim mr-1.5" />}
-            placeholder={t('warehousesPage.searchPlaceholder')}
-            allowClear
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-xl h-10"
-          />
+      {/* Unified Panel: Search + List / Table */}
+      <div className="rounded-xl bg-sushi-card border border-sushi-border overflow-hidden">
+        <div className="p-3 sm:px-4 border-b border-sushi-border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="w-full sm:w-80">
+            <Input
+              prefix={<MagnifyingGlass size={15} className="text-sushi-text-dim mr-1" />}
+              placeholder={t('warehousesPage.searchPlaceholder')}
+              allowClear
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="rounded-lg h-9 text-xs"
+            />
+          </div>
+          <div className="text-2xs font-mono text-sushi-text-dim">
+            {filteredWarehouses.length}/{warehouses.length} {t('warehousesPage.warehousesUnit')}
+          </div>
         </div>
-        <div className="text-2xs sm:text-xs font-mono text-sushi-text-dim">
-          {filteredWarehouses.length} / {warehouses.length} {t('warehousesPage.warehousesUnit')}
-        </div>
-      </div>
 
-      {/* Mobile Card List (< md) */}
-      <SushiMobileCardList
-        items={filteredWarehouses}
-        pageSize={8}
-        loading={isLoading}
-        emptyState={
-          <SushiEmptyState
-            isCard
-            icon={<Database size={28} />}
-            title={t('warehousesPage.emptyTitle')}
-            description={t('warehousesPage.emptyDesc')}
-          />
-        }
-        renderItem={(item) => (
-          <SushiCardItem>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Tag color="gold" className="font-mono font-bold text-2xs m-0">
-                    {item.code}
-                  </Tag>
-                  <Tag
-                    color={item.isActive ? 'green' : 'default'}
-                    className="text-3xs m-0"
-                  >
-                    {item.isActive ? t('common.active') : t('common.inactive')}
-                  </Tag>
-                </div>
-                <h4 className="text-sm font-bold text-sushi-text mt-1.5 truncate">
-                  {item.name}
-                </h4>
-                <p className="text-xs text-sushi-text-muted mt-1 flex items-start gap-1">
-                  <MapPin size={14} className="shrink-0 mt-0.5 text-sushi-text-dim" />
-                  <span>{item.address || t('warehousesPage.noAddress')}</span>
-                </p>
-              </div>
-              <SushiCardActions
-                onEdit={() => handleOpenEdit(item)}
-                onDelete={() => handleDelete(item)}
+        <div className="p-3 md:hidden">
+          <SushiMobileCardList
+            items={filteredWarehouses}
+            pageSize={8}
+            loading={isLoading}
+            emptyState={
+              <SushiEmptyState
+                icon={<Database size={22} />}
+                title={t('warehousesPage.emptyTitle')}
+                description={t('warehousesPage.emptyDesc')}
               />
-            </div>
+            }
+            renderItem={(item) => (
+              <SushiCardItem>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-1.5 py-0.5 rounded bg-sushi-surface border border-sushi-border font-mono font-semibold text-2xs text-sushi-text">
+                        {item.code}
+                      </span>
+                      <Tag
+                        color={item.isActive ? 'green' : 'default'}
+                        className="text-3xs m-0"
+                      >
+                        {item.isActive ? t('common.active') : t('common.inactive')}
+                      </Tag>
+                    </div>
+                    <h4 className="text-sm font-semibold text-sushi-text mt-1.5 truncate">
+                      {item.name}
+                    </h4>
+                    <div className="text-xs text-sushi-text-dim flex items-center gap-1 mt-1">
+                      <MapPin size={12} className="shrink-0" />
+                      <span className="truncate">
+                        {item.address || t('warehousesPage.noAddress')}
+                      </span>
+                    </div>
+                  </div>
 
-            <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs text-sushi-text-muted">
-              <span>
-                {t('warehousesPage.colBranches')}:{' '}
-                <strong className="text-sushi-text">
-                  {item._count?.branches ?? item.branches?.length ?? 0}
-                </strong>
-              </span>
-              <span>
-                {t('warehousesPage.colStocksCount')}:{' '}
-                <strong className="text-sushi-text font-mono">
-                  {item._count?.stocks ?? 0}
-                </strong>
-              </span>
-            </div>
-          </SushiCardItem>
-        )}
-      />
+                  <SushiCardActions
+                    onEdit={() => handleOpenEdit(item)}
+                    onDelete={() => handleDelete(item)}
+                    editLabel={t('dashboard.edit')}
+                    deleteLabel={t('dashboard.delete')}
+                  />
+                </div>
 
-      {/* Desktop Table (>= md) */}
-      <div className="hidden md:block rounded-2xl bg-sushi-card border border-sushi-border/80 p-4 shadow-sm">
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={filteredWarehouses}
-          loading={isLoading}
-          pagination={{ pageSize: 10, showSizeChanger: false }}
-        />
+                <div className="mt-3 pt-2.5 border-t border-sushi-border/60 flex items-center justify-between text-2xs font-mono text-sushi-text-dim">
+                  <span className="flex items-center gap-1">
+                    <Storefront size={13} />
+                    <span>
+                      {item._count?.branches ?? item.branches?.length ?? 0}{' '}
+                      {t('warehousesPage.branchesUnit')}
+                    </span>
+                  </span>
+                  <span className="text-sushi-text font-medium">
+                    {item._count?.stocks ?? 0} {t('warehousesPage.ingredientsUnit')}
+                  </span>
+                </div>
+              </SushiCardItem>
+            )}
+          />
+        </div>
+
+        <div className="hidden md:block">
+          <Table
+            rowKey="id"
+            columns={columns}
+            dataSource={filteredWarehouses}
+            loading={isLoading}
+            pagination={{ pageSize: 10 }}
+          />
+        </div>
       </div>
 
-      {/* Mobile FAB */}
       <SushiFloatingButton
         onClick={handleOpenCreate}
-        // label={t('warehousesPage.addBtn')}
+        ariaLabel={t('warehousesPage.addBtn')}
       />
 
-      {/* Modal Tạo / Sửa Kho */}
       <ResponsiveModalDrawer
-        open={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingWarehouse(null);
-        }}
         title={
           editingWarehouse
             ? t('warehousesPage.modalEditTitle')
             : t('warehousesPage.modalCreateTitle')
         }
+        open={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingWarehouse(null);
+          form.resetFields();
+        }}
         footer={
           <div className="flex justify-end gap-2">
             <Button
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingWarehouse(null);
+                form.resetFields();
               }}
             >
               {t('common.cancel')}
@@ -491,12 +488,11 @@ export function WarehouseManagementView() {
             label={t('warehousesPage.formCodeLabel')}
             rules={[
               { required: true, message: t('warehousesPage.formCodeRequired') },
-              { max: 50, message: t('warehousesPage.formCodeMax') },
             ]}
           >
             <Input
               placeholder={t('warehousesPage.formCodePlaceholder')}
-              className="uppercase font-mono"
+              className="font-mono uppercase"
             />
           </Form.Item>
 
@@ -505,7 +501,6 @@ export function WarehouseManagementView() {
             label={t('warehousesPage.formNameLabel')}
             rules={[
               { required: true, message: t('warehousesPage.formNameRequired') },
-              { max: 160, message: t('warehousesPage.formNameMax') },
             ]}
           >
             <Input placeholder={t('warehousesPage.formNamePlaceholder')} />
@@ -515,10 +510,7 @@ export function WarehouseManagementView() {
             name="address"
             label={t('warehousesPage.formAddressLabel')}
           >
-            <Input.TextArea
-              rows={3}
-              placeholder={t('warehousesPage.formAddressPlaceholder')}
-            />
+            <Input placeholder={t('warehousesPage.formAddressPlaceholder')} />
           </Form.Item>
 
           {editingWarehouse && (
